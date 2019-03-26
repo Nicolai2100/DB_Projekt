@@ -1,16 +1,15 @@
 package dal;
 
-import dto.UserDTO;
+import dal.dto.IUserDTO;
+import dal.dto.UserDTO;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class UserDAOImpl implements IUserDAO {
-
-    public UserDAOImpl() {
-    }
-    public Connection createConnection() throws DALException {
+    private Connection createConnection() throws DALException {
         try {
             return DriverManager.getConnection("jdbc:mysql://ec2-52-30-211-3.eu-west-1.compute.amazonaws.com/s185020",
                     "s185020", "iEFSqK2BFP60YWMPlw77I");
@@ -20,7 +19,41 @@ public class UserDAOImpl implements IUserDAO {
     }
 
     @Override
-    public UserDTO getUser(int userId) throws DALException, SQLException {
+    public void createUser(IUserDTO user) throws DALException {
+        Connection conn = null;
+        if (user.getUserId() < 1) {
+            System.out.println("Error in userID!");
+            return;
+        }
+
+        try {
+            conn = createConnection();
+            PreparedStatement pSmtInsertUser = conn.prepareStatement(
+                    "INSERT INTO user_table " +
+                            "VALUES(?,?,?)");
+            pSmtInsertUser.setInt(1, user.getUserId());
+            pSmtInsertUser.setString(2, user.getUserName());
+            pSmtInsertUser.setString(3, user.getIni());
+
+            // Bør gøres atomic - da bruger ellers oprettes uden roller!
+            pSmtInsertUser.executeUpdate();
+            //Først oprettes brugeren - så indsættes rollerne.
+            setUserRoles(conn, user);
+            System.out.println("The user was successfully created in the database system");
+
+        } catch (SQLException e) {
+            System.out.println("Error! " + e.getMessage());
+        } finally {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public IUserDTO getUser(int userId) throws DALException {
         boolean empty = true;
         UserDTO returnUser = new UserDTO();
         Connection conn = null;
@@ -44,51 +77,22 @@ public class UserDAOImpl implements IUserDAO {
                 System.out.println("No such user in the database!");
                 return null;
             }
-            rs.close();
-            pSmtSelectUser.close();
-
         } catch (SQLException e) {
             System.out.println("Error! " + e.getMessage());
-        }finally {
-            conn.close();
+        } finally {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
         }
         return returnUser;
     }
 
     @Override
-    public void createUser(UserDTO user) throws DALException {
+    public List<IUserDTO> getUserList() throws DALException {
+        List<IUserDTO> userList = new ArrayList<>();
         Connection conn = null;
-        PreparedStatement pSmtInsertUser = null;
-        try {
-            conn = createConnection();
-            pSmtInsertUser = conn.prepareStatement(
-                    "INSERT INTO user_table " +
-                            "VALUES(?,?,?)");
-
-            pSmtInsertUser.setInt(1, user.getUserId());
-        } catch (Exception e) {
-            System.out.println("The user cannot be created without a valid ID");
-        }
-        try {
-            pSmtInsertUser.setString(2, user.getUserName());
-            pSmtInsertUser.setString(3, user.getIni());
-
-            // Bør gøres atomic - da bruger ellers oprettes uden roller!!!
-            pSmtInsertUser.executeUpdate();
-            //Først oprettes brugeren - så indsættes rollerne.
-            setUserRoles(conn, user);
-            System.out.println("The user was successfully created in the database system");
-
-        } catch (SQLException e) {
-            System.out.println("Error! " + e.getMessage());
-        }
-    }
-
-    @Override
-    public List<UserDTO> getUserList() throws DALException {
-        List<UserDTO> userList = new ArrayList<>();
-        Connection conn = null;
-
         try {
             conn = createConnection();
             PreparedStatement pSmtSelectAllTable = conn.prepareStatement(
@@ -105,19 +109,27 @@ public class UserDAOImpl implements IUserDAO {
                 returnUser.setIni(rs.getString("ini"));
                 userList.add(returnUser);
             }
+
+            pSmtSelectAllTable.close();
         } catch (SQLException e) {
             System.out.println("Error " + e.getMessage());
         } finally {
-            //Først hentes brugerne ned, så hentes deres roller og tilføjes hver bruger.
             getAllUsersRoles(conn, userList);
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
         }
         return userList;
     }
 
     @Override
-    public void updateUser(UserDTO user) throws DALException {
+    public void updateUser(IUserDTO user) throws DALException {
+        Connection conn = null;
         try {
-            Connection conn = createConnection();
+            conn = createConnection();
+
             if (!peekUser(conn, user.getUserId())) {
                 System.out.println("No such user in the database!");
             } else {
@@ -132,23 +144,31 @@ public class UserDAOImpl implements IUserDAO {
                 pSmtUpdateUser.setInt(3, user.getUserId());
                 pSmtUpdateUser.executeUpdate();
                 //Hvis brugeren har fået nye roller oprettes de - men sletter ikke, hvis han har fået dem fjernet!
+                deleteAllRoles(conn, user.getUserId());
                 setUserRoles(conn, user);
                 System.out.println("The user was successfully updated!");
+                pSmtUpdateUser.close();
             }
         } catch (SQLException e) {
             System.out.println("Error! " + e.getMessage());
+        } finally {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
         }
     }
 
     @Override
     public void deleteUser(int userId) throws DALException {
-        int result = 0;
+        int result;
+        Connection conn = null;
         try {
-            Connection conn = createConnection();
+            conn = createConnection();
             PreparedStatement pSmtDeleteUser = conn.prepareStatement(
                     "DELETE FROM user_table " +
                             "WHERE userid = ?");
-
             pSmtDeleteUser.setInt(1, userId);
             result = pSmtDeleteUser.executeUpdate();
             if (result == 1) {
@@ -156,12 +176,22 @@ public class UserDAOImpl implements IUserDAO {
             } else {
                 System.out.println("Error no such user exists in the database!");
             }
+            pSmtDeleteUser.close();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+        } finally {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
         }
     }
 
-    public List<String> getUserRoleList(Connection conn, int userID) throws DALException {
+    /**
+     * Metoden henter en specifik brugers roller og returnerer dem i en liste.
+     */
+    public List<String> getUserRoleList(Connection conn, int userID) {
         List<String> userRoleList = new ArrayList<>();
         try {
             PreparedStatement pSmtSelectUserRoles = conn.prepareStatement(
@@ -175,30 +205,34 @@ public class UserDAOImpl implements IUserDAO {
             while (rs.next()) {
                 userRoleList.add(rs.getString("role"));
             }
-
-            pSmtSelectUserRoles.close();
+            Collections.reverse(userRoleList);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
         return userRoleList;
     }
 
-    public void getAllUsersRoles(Connection conn, List<UserDTO> userDTOList) throws DALException {
+    /**
+     * Metoden henter og gemmer roller for alle brugere i en liste.
+     */
+    public void getAllUsersRoles(Connection conn, List<IUserDTO> userDTOList) {
 
-        for (UserDTO user : userDTOList) {
+        for (IUserDTO user : userDTOList) {
             List<String> userRoleList = getUserRoleList(conn, user.getUserId());
             user.setRoles(userRoleList);
         }
     }
 
-    public void setUserRoles(Connection conn, UserDTO user) throws DALException {
+    /**
+     * Metoden opretter og gemmer roller for en brugere i user_roles.
+     */
+    public void setUserRoles(Connection conn, IUserDTO user) throws DALException {
         try {
             PreparedStatement pSmtInsertUserRole = conn.prepareStatement(
                     "INSERT INTO user_roles " +
                             "VALUES(?,?)");
 
             pSmtInsertUserRole.setInt(1, user.getUserId());
-
             for (int i = 0; i < user.getRoles().size(); i++) {
                 String role = user.getRoles().get(i);
                 int roleInt = getRoleID(conn, role);
@@ -210,10 +244,12 @@ public class UserDAOImpl implements IUserDAO {
         }
     }
 
+    /**
+     * Metoden henter en specifik rolles roleid fra role_table og returnerer den.
+     */
     public int getRoleID(Connection conn, String role) throws DALException {
         int returnInt = 0;
         try {
-            conn = createConnection();
             PreparedStatement pStmtSelectRoleId = conn.prepareStatement(
                     "SELECT  roleid  " +
                             "FROM role_table " +
@@ -234,6 +270,9 @@ public class UserDAOImpl implements IUserDAO {
         return returnInt;
     }
 
+    /**
+     * Metoden opretter nye roller i role_table og returnerer rollens roleid.
+     */
     public int createNewRole(Connection conn, String userRole) {
         int newRoleID = 0;
         try {
@@ -250,6 +289,10 @@ public class UserDAOImpl implements IUserDAO {
         return newRoleID;
     }
 
+    /**
+     * Metoden henter den maksimale roleid fra role_table og returnere denne inkrementeret med 1.
+     * Dette bruges, når der skal oprettes nye roller i role_table
+     */
     public int getMaxFromRoleTable(Connection conn) {
         int resultInt = 0;
         try {
@@ -265,6 +308,10 @@ public class UserDAOImpl implements IUserDAO {
         return resultInt + 1;
     }
 
+    /**
+     * Metoden bruges til at undersøge om der eksisterer en bruger med et
+     * specifikt userid i user_table. Den returnerer false, hvis der ikke gør.
+     */
     public boolean peekUser(Connection conn, int userID) throws DALException {
         int returnInt = 0;
         try {
@@ -288,42 +335,21 @@ public class UserDAOImpl implements IUserDAO {
             return true;
         }
     }
-    public void deleteAllRoles(Connection conn, UserDTO user){
+
+    /**
+     * Metoden sletter alle roller for en specifik bruger.
+     * Dette bruges når brugeren bliver opdateret, for at undgå at
+     * brugeren får flere roller end denne bør have.
+     */
+    public void deleteAllRoles(Connection conn, int userid) {
         try {
-          /*  List<String> rolesDB =getUserRoleList(conn, user.getUserId());
-
-            for (String role:
-                 ) {
-
-            }*/
             PreparedStatement prep = conn.prepareStatement(
                     "DELETE FROM user_roles " +
-                            "WHERE userid = ?" );
-            prep.setInt(1, user.getUserId());
+                            "WHERE userid = ?");
+            prep.setInt(1, userid);
             prep.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
 }
-
-
-/* public int getNumOfUserRoles(int userId) {
-        int numOfUserRoles = 0;
-        try {
-            Connection conn = createConnection();
-            PreparedStatement pSmtSelectNumOfUserRoles = conn.prepareStatement(
-                    "SELECT count(userRole)" +
-                            "AS numOfRoles" +
-                            "FROM user_roles " +
-                            "WHERE userID = ?");
-            pSmtSelectNumOfUserRoles.setInt(1, userId);
-
-            ResultSet rs = pSmtSelectNumOfUserRoles.executeQuery();
-            rs.next();
-            numOfUserRoles = rs.getInt("numOfRoles");
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-        return numOfUserRoles;
-    }*/
