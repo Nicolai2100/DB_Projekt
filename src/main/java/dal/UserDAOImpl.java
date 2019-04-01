@@ -341,17 +341,7 @@ public class UserDAOImpl implements IUserDAO {
      * Dette bruges når brugeren bliver opdateret, for at undgå at
      * brugeren får flere roller end denne bør have.
      */
-    public void deleteAllRoles(Connection conn, int userid) {
-        try {
-            PreparedStatement prep = conn.prepareStatement(
-                    "DELETE FROM user_roles " +
-                            "WHERE userid = ?");
-            prep.setInt(1, userid);
-            prep.executeUpdate();
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-    }
+
     public void roleTransAct(Connection conn, IUserDTO user) {
         List<String> newUserRoles = user.getRoles();
         List<String> DBUserRoles = getUserRoleList(conn, user.getUserId());
