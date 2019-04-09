@@ -34,25 +34,24 @@ public class UserDAOImpl implements IUserDAO {
 
     @Override
     public void createUser(IUserDTO user) throws DALException {
-        Connection conn = null;
         if (user.getUserId() < 1) {
             System.out.println("Error in userID!");
             return;
         }
-
         try {
-            conn = createConnection();
+            conn.setAutoCommit(false);
             PreparedStatement pSmtInsertUser = conn.prepareStatement(
                     "INSERT INTO user_table " +
-                            "VALUES(?,?,?)");
+                            "VALUES(?,?,?,?)");
             pSmtInsertUser.setInt(1, user.getUserId());
             pSmtInsertUser.setString(2, user.getUserName());
             pSmtInsertUser.setString(3, user.getIni());
+            pSmtInsertUser.setInt(4, user.getAdmin().getUserId());
 
-            // Bør gøres atomic - da bruger ellers oprettes uden roller!
             pSmtInsertUser.executeUpdate();
-            //Først oprettes brugeren - så indsættes rollerne.
             setUserRoles(conn, user);
+
+            conn.commit();
             System.out.println("The user was successfully created in the database system");
 
         } catch (SQLException e) {
@@ -209,9 +208,8 @@ public class UserDAOImpl implements IUserDAO {
         List<String> userRoleList = new ArrayList<>();
         try {
             PreparedStatement pSmtSelectUserRoles = conn.prepareStatement(
-                    "SELECT role_table.role " +
-                            "FROM (user_roles " +
-                            "JOIN role_table ON user_roles.roleid = role_table.roleid)" +
+                    "SELECT role " +
+                            "FROM userrole " +
                             "WHERE userid = ?");
 
             pSmtSelectUserRoles.setInt(1, userID);
@@ -238,90 +236,60 @@ public class UserDAOImpl implements IUserDAO {
     }
 
     /**
-     * Metoden opretter og gemmer roller for en brugere i user_roles.
+     * Metoden opretter og gemmer roller for en bruger i userrole.
      */
     public void setUserRoles(Connection conn, IUserDTO user) throws DALException {
         try {
+            conn.setAutoCommit(false);
             PreparedStatement pSmtInsertUserRole = conn.prepareStatement(
-                    "INSERT INTO user_roles " +
+                    "INSERT INTO userrole " +
                             "VALUES(?,?)");
-
             pSmtInsertUserRole.setInt(1, user.getUserId());
             for (int i = 0; i < user.getRoles().size(); i++) {
                 String role = user.getRoles().get(i);
-                int roleInt = getRoleID(conn, role);
-                pSmtInsertUserRole.setInt(2, roleInt);
+                pSmtInsertUserRole.setString(2, role);
                 pSmtInsertUserRole.executeUpdate();
             }
+            conn.commit();
         } catch (SQLException e) {
-            System.out.println("Error in user_roles " + e.getMessage());
+            System.out.println("Error in creating userrole " + e.getMessage());
         }
     }
 
     /**
-     * Metoden henter en specifik rolles roleid fra role_table og returnerer den.
+     * Metoden sletter alle roller for en specifik bruger.
+     * Dette bruges når brugeren bliver opdateret, for at undgå at
+     * brugeren får flere roller end denne bør have.
      */
-    public int getRoleID(Connection conn, String role) throws DALException {
-        int returnInt = 0;
-        try {
-            PreparedStatement pStmtSelectRoleId = conn.prepareStatement(
-                    "SELECT  roleid  " +
-                            "FROM role_table " +
-                            "WHERE role = ?");
-            pStmtSelectRoleId.setString(1, role);
 
-            ResultSet rs = pStmtSelectRoleId.executeQuery();
-            if (rs.next()) {
-                returnInt = rs.getInt("roleid");
-            }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        if (returnInt == 0) {
-            // Hvis den returnerer 0 betyder det at rollen ikke findes, og derfor skal den oprettes.
-            returnInt = createNewRole(conn, role);
-        }
-        return returnInt;
-    }
-
-    /**
-     * Metoden opretter nye roller i role_table og returnerer rollens roleid.
-     */
-    public int createNewRole(Connection conn, String userRole) {
-        int newRoleID = 0;
+    public void roleTransAct(Connection conn, IUserDTO user) {
+        List<String> newUserRoles = user.getRoles();
         try {
-            PreparedStatement pSmtInsertUserRole = conn.prepareStatement(
-                    "INSERT INTO role_table " +
+            PreparedStatement deleteRolesFromDB = conn.prepareStatement(
+                    "DELETE FROM userrole " +
+                            "WHERE userid = ?;");
+            deleteRolesFromDB.setInt(1, user.getUserId());
+
+            PreparedStatement insertRolesInDB = conn.prepareStatement(
+                    "INSERT INTO userrole " +
                             "VALUES(?,?)");
-            newRoleID = getMaxFromRoleTable(conn);
-            pSmtInsertUserRole.setInt(1, newRoleID);
-            pSmtInsertUserRole.setString(2, userRole);
-            pSmtInsertUserRole.execute();
+            insertRolesInDB.setInt(1, user.getUserId());
+
+            conn.setAutoCommit(false);
+            deleteRolesFromDB.setInt(1, user.getUserId());
+
+            for (String role : newUserRoles) {
+                insertRolesInDB.setString(2, role);
+                int success = insertRolesInDB.executeUpdate();
+                if (success < 1) {
+                    conn.rollback();
+                }
+            }
+            conn.commit();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-        return newRoleID;
     }
-
-    /**
-     * Metoden henter den maksimale roleid fra role_table og returnere denne inkrementeret med 1.
-     * Dette bruges, når der skal oprettes nye roller i role_table
-     */
-    public int getMaxFromRoleTable(Connection conn) {
-        int resultInt = 0;
-        try {
-            PreparedStatement prep = conn.prepareStatement(
-                    "SELECT MAX(roleid) AS maxid " +
-                            "FROM role_table ");
-            ResultSet rs = prep.executeQuery();
-            if (rs.next())
-                resultInt = rs.getInt("maxid");
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        return resultInt + 1;
-    }
-
     /**
      * Metoden bruges til at undersøge om der eksisterer en bruger med et
      * specifikt userid i user_table. Den returnerer false, hvis der ikke gør.
@@ -331,7 +299,7 @@ public class UserDAOImpl implements IUserDAO {
         try {
             PreparedStatement prep = conn.prepareStatement(
                     "SELECT COUNT(*) AS uservalidity " +
-                            "FROM user_table " +
+                            "FROM user " +
                             "WHERE userid = ?");
             prep.setInt(1, userID);
 
@@ -350,62 +318,13 @@ public class UserDAOImpl implements IUserDAO {
         }
     }
 
-    /**
-     * Metoden sletter alle roller for en specifik bruger.
-     * Dette bruges når brugeren bliver opdateret, for at undgå at
-     * brugeren får flere roller end denne bør have.
-     */
-
-    public void roleTransAct(Connection conn, IUserDTO user) {
-        List<String> newUserRoles = user.getRoles();
-        List<String> DBUserRoles = getUserRoleList(conn, user.getUserId());
-        try {
-            PreparedStatement prepDelete = conn.prepareStatement(
-                    "DELETE FROM user_roles " +
-                            "WHERE userid = ? " +
-                            "AND roleid = ?"
-            );
-            prepDelete.setInt(1, user.getUserId());
-
-            PreparedStatement prepInsert = conn.prepareStatement(
-                    "INSERT INTO user_roles " +
-                            "VALUES(?,?)"
-            );
-            prepInsert.setInt(1, user.getUserId());
-            //Transaction begynder
-            conn.setAutoCommit(false);
-            //De gamle roller der ikke indgår i det opdaterede rollesæt skal slettes fra DB.
-            for (String role : DBUserRoles) {
-                if (!newUserRoles.contains(role)) {
-                    int roleid = getRoleID(conn, role);
-                    prepDelete.setInt(2, roleid);
-                    int success = prepDelete.executeUpdate();
-                    if (success < 1) {
-                        conn.rollback();
-                    }
-                }
-            }
-            //De nye roller der ikke indgår i det rollesæt der ligger i DB skal indsættes.
-            for (String role : newUserRoles) {
-                if (!DBUserRoles.contains(role)) {
-                    int roleid = getRoleID(conn, role);
-                    prepInsert.setInt(2, roleid);
-                    int success = prepInsert.executeUpdate();
-                    if (success < 1) {
-                        conn.rollback();
-                    }
-                }
-            }
-            conn.commit();
-        } catch (SQLException | DALException e) {
-            System.out.println(e.getMessage());
-        }
-    }
 
 
     public void initializeDataBase() {
         try {
+/*
             conn.setAutoCommit(false);
+*/
             PreparedStatement createTableUser = conn.prepareStatement(
                     "CREATE TABLE if NOT EXISTS user " +
                             "(userid int NOT NULL AUTO_INCREMENT, " +
@@ -431,78 +350,99 @@ public class UserDAOImpl implements IUserDAO {
                             "type varchar(50), " +
                             "primary key (ingredientid));");
 
-            PreparedStatement createTableingredientslist = conn.prepareStatement(
-                    "CREATE TABLE if NOT EXISTS ingredientslist " +
-                            "(ingredientslistid int, " +
+            PreparedStatement createTableingredientlist = conn.prepareStatement(
+                    "CREATE TABLE if NOT EXISTS ingredientlist " +
+                            "(ingredientlistid int, " +
                             "ingredient int, " +
-                            "ingredientslist int, " +
-                            "primary key (ingredientslistid), " +
+                            "ingredientlist int, " +
+                            "primary key (ingredientlistid), " +
                             "FOREIGN KEY (ingredient) REFERENCES ingredient (ingredientid) " +
-                            "ON DELETE CASCADE);");
+                            "ON update CASCADE);");
 
             PreparedStatement createTableRecipe = conn.prepareStatement(
                     "CREATE TABLE if NOT EXISTS recipe " +
-                            "(recipeid int, " +
+                            "(recipeid int," +
+                            "name varchar(50), " +
                             "madeby int, " +
-                            "ingredientslist int, " +
+                            "ingredientlist int, " +
                             "primary key (recipeid), " +
                             "FOREIGN KEY (madeby) REFERENCES user (userid) " +
-                            "ON DELETE CASCADE, " +
-                            "foreign key (ingredientslist) references ingredientslist(ingredientslistid));");
+                            "ON update CASCADE, " +
+                            "foreign key (ingredientlist) " +
+                            "references ingredientlist(ingredientlistid));");
 
             //pas på med cascade her - skal ikke slettes når bruger slettes
 
             PreparedStatement createTableCommodityBatch = conn.prepareStatement(
                     "CREATE TABLE if NOT EXISTS commoditybatch " +
                             "(commoditybatchid int, " +
+                            "ingredientid int, " +
                             "orderedby int, " +
                             "amountinkg int, " +
                             "primary key (commoditybatchid), " +
-                            "FOREIGN KEY (orderedby) REFERENCES user (userid) " +
+                            "FOREIGN KEY (orderedby) " +
+                            "REFERENCES user (userid) " +
                             "ON DELETE CASCADE, " +
-                            "foreign key (ingredient) references ingredient(ingredientid));");
+                            "foreign key (ingredientid) " +
+                            " references ingredient(ingredientid));");
 
             //Nødvendig?????
-            PreparedStatement createTableCommodityStock = conn.prepareStatement(
+           /* PreparedStatement createTableCommodityStock = conn.prepareStatement(
                     "CREATE TABLE if NOT EXISTS commoditystock " +
                             "(commodity int, " +
                             "amountinkg int, " +
                             "primary key (commoditybatchid), " +
                             "FOREIGN KEY (commodity) REFERENCES commoditybatch (commoditybatchid) " +
                             "ON DELETE CASCADE);");
-
-
-
-
-/*
-
-            PreparedStatement createTableProperty = conn.prepareStatement(
-                    "CREATE TABLE if NOT EXISTS property " +
-                            "(posonboard int, " +
-                            "numofhouses int, " +
-                            "superowned bit, " +
-                            "playerid int, " +
-                            "gameid int, " +
-                            "type varchar(20), " +
-                            "primary key (posonboard, gameid), " +
-                            "FOREIGN KEY (gameid) REFERENCES game (gameid) " +
-                            "ON DELETE CASCADE);");
 */
+            PreparedStatement createTableProduct = conn.prepareStatement(
+                    "CREATE TABLE if NOT EXISTS product " +
+                            "(productid int, " +
+                            "name varchar(50) not null, " +
+                            "madeby int, " +
+                            "recipe int, " +
+                            "primary key (productid), " +
+                            "FOREIGN KEY (madeby) " +
+                            "REFERENCES user (userid), " +
+                            "FOREIGN KEY (recipe) " +
+                            "REFERENCES recipe(recipeid));");
+
+            PreparedStatement createTableOldRecipe = conn.prepareStatement(
+                    "CREATE TABLE if NOT EXISTS oldrecipe " +
+                            "(recipeid int, " +
+                            "name varchar(50) not null, " +
+                            "madeby int, " +
+                            "ingredientlist int, " +
+                            "outdated varchar(50) not null, " +
+                            "primary key (recipeid), " +
+                            "FOREIGN KEY (madeby) " +
+                            "REFERENCES user (userid), " +
+                            "foreign key (recipeid) " +
+                            "references ingredientlist(ingredientlistid));");
 
             //rækkefølgen er vigtig!
             createTableUser.execute();
             createTableUserRole.execute();
             createTableingredient.execute();
-            createTableingredientslist.execute();
+            createTableingredientlist.execute();
+
             createTableRecipe.execute();
 
             createTableCommodityBatch.execute();
+
+            createTableProduct.execute();
+            createTableOldRecipe.execute();
+
+/*
             createTableCommodityStock.execute();
+*/
 
 /*
             createTableProperty.execute();
 */
+/*
             conn.commit();
+*/
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -516,15 +456,29 @@ public class UserDAOImpl implements IUserDAO {
                     "drop table user;");
             PreparedStatement dropTableUserRole = conn.prepareStatement(
                     "drop table userrole;");
-            PreparedStatement dropTableProperty = conn.prepareStatement(
-                    "DROP TABLE property;");
-            if (deleteTable == 1) {
-                dropTableUser.execute();
-            } else if (deleteTable == 2) {
-                dropTableUserRole.execute();
-            } else if (deleteTable == 3) {
-                dropTableProperty.execute();
-            } else if (deleteTable == 0) {
+            PreparedStatement dropTableIngredientList = conn.prepareStatement(
+                    "DROP TABLE ingredientList;");
+            PreparedStatement dropTableIngredient = conn.prepareStatement(
+                    "DROP TABLE ingredient;");
+            PreparedStatement dropTableRecipe = conn.prepareStatement(
+                    "DROP TABLE recipe;");
+            PreparedStatement dropTableOldRecipe = conn.prepareStatement(
+                    "DROP TABLE oldrecipe;");
+            PreparedStatement dropTableProduct = conn.prepareStatement(
+                    "DROP TABLE product;");
+            PreparedStatement dropTableCommodityBatch = conn.prepareStatement(
+                    "DROP TABLE commoditybatch;");
+
+            if (deleteTable == 0) {
+
+                dropTableOldRecipe.execute();
+                dropTableProduct.execute();
+                dropTableCommodityBatch.execute();
+
+                dropTableRecipe.execute();
+                dropTableIngredientList.execute();
+
+                dropTableIngredient.execute();
                 dropTableUserRole.execute();
                 dropTableUser.execute();
             }

@@ -13,6 +13,7 @@ public class UserDTO implements Serializable, IUserDTO {
     private String userName;
     private String ini;
     private List<String> roles;
+    private UserDTO admin;
     //Constructor
     public UserDTO() {
         this.roles = new ArrayList<>();
@@ -72,5 +73,11 @@ public class UserDTO implements Serializable, IUserDTO {
     }
 
 
+    public UserDTO getAdmin() {
+        return admin;
+    }
 
+    public void setAdmin(UserDTO admin) {
+        this.admin = admin;
+    }
 }

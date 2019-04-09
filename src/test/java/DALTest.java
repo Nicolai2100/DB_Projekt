@@ -19,10 +19,10 @@ public class DALTest {
     }
 
 
-    @Test
+/*    @Test
     public void deleteUser() throws IUserDAO.DALException {
         userDAO.deleteUser(13);
-    }
+    }*/
 
     @Test
     public void dropAllTables() throws IUserDAO.DALException {
@@ -31,12 +31,9 @@ public class DALTest {
 
     @Test
     public void initializeDataBase() throws IUserDAO.DALException {
-
         userDAO.initializeDataBase();
-
-
     }
-
+/*
     @Test
     public void test() {
         try {
@@ -96,7 +93,7 @@ public class DALTest {
             fail();
         }
 
-    }
+    }*/
 
 
 }
