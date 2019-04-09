@@ -9,14 +9,28 @@ import java.util.Collections;
 import java.util.List;
 
 public class UserDAOImpl implements IUserDAO {
-    private Connection createConnection() throws DALException {
+    private Connection conn;
+
+    public UserDAOImpl() {
         try {
-            return DriverManager.getConnection("jdbc:mysql://ec2-52-30-211-3.eu-west-1.compute.amazonaws.com/s185020",
-                    "s185020", "iEFSqK2BFP60YWMPlw77I");
+            conn = createConnection();
+        } catch (DALException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Connection createConnection() throws DALException {
+        String dataBase = "jdbc:mysql://ec2-52-30-211-3.eu-west-1.compute.amazonaws.com/jekala";
+        String user = "jekala";
+        String password = "d0czCtqcu5015NhwwP5zl";
+        try {
+            return DriverManager.getConnection(dataBase, user, password);
         } catch (SQLException e) {
             throw new DALException(e.getMessage());
         }
     }
+    /*return DriverManager.getConnection(
+    "jdbc:mysql://ec2-52-30-211-3.eu-west-1.compute.amazonaws.com?user=jekala&password=d0czCtqcu5015NhwwP5zl");*/
 
     @Override
     public void createUser(IUserDTO user) throws DALException {
@@ -385,6 +399,137 @@ public class UserDAOImpl implements IUserDAO {
             conn.commit();
         } catch (SQLException | DALException e) {
             System.out.println(e.getMessage());
+        }
+    }
+
+
+    public void initializeDataBase() {
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement createTableUser = conn.prepareStatement(
+                    "CREATE TABLE if NOT EXISTS user " +
+                            "(userid int NOT NULL AUTO_INCREMENT, " +
+                            "name varchar(30) NOT NULL, " +
+                            "ini varchar(5), " +
+                            "admin int NULL, " +
+                            "primary key (userid), " +
+                            "FOREIGN KEY (admin) " +
+                            "references user (userid));");
+
+            PreparedStatement createTableUserRole = conn.prepareStatement(
+                    "CREATE TABLE if NOT EXISTS userrole " +
+                            "(userid int, " +
+                            "role varchar(30), " +
+                            "primary key (userid, role), " +
+                            "FOREIGN KEY (userid) REFERENCES user (userid) " +
+                            "ON DELETE CASCADE " +
+                            "ON UPDATE CASCADE);");
+
+            PreparedStatement createTableingredient = conn.prepareStatement(
+                    "CREATE TABLE if NOT EXISTS ingredient " +
+                            "(ingredientid int, " +
+                            "type varchar(50), " +
+                            "primary key (ingredientid));");
+
+            PreparedStatement createTableingredientslist = conn.prepareStatement(
+                    "CREATE TABLE if NOT EXISTS ingredientslist " +
+                            "(ingredientslistid int, " +
+                            "ingredient int, " +
+                            "ingredientslist int, " +
+                            "primary key (ingredientslistid), " +
+                            "FOREIGN KEY (ingredient) REFERENCES ingredient (ingredientid) " +
+                            "ON DELETE CASCADE);");
+
+            PreparedStatement createTableRecipe = conn.prepareStatement(
+                    "CREATE TABLE if NOT EXISTS recipe " +
+                            "(recipeid int, " +
+                            "madeby int, " +
+                            "ingredientslist int, " +
+                            "primary key (recipeid), " +
+                            "FOREIGN KEY (madeby) REFERENCES user (userid) " +
+                            "ON DELETE CASCADE, " +
+                            "foreign key (ingredientslist) references ingredientslist(ingredientslistid));");
+
+            //pas på med cascade her - skal ikke slettes når bruger slettes
+
+            PreparedStatement createTableCommodityBatch = conn.prepareStatement(
+                    "CREATE TABLE if NOT EXISTS commoditybatch " +
+                            "(commoditybatchid int, " +
+                            "orderedby int, " +
+                            "amountinkg int, " +
+                            "primary key (commoditybatchid), " +
+                            "FOREIGN KEY (orderedby) REFERENCES user (userid) " +
+                            "ON DELETE CASCADE, " +
+                            "foreign key (ingredient) references ingredient(ingredientid));");
+
+            //Nødvendig?????
+            PreparedStatement createTableCommodityStock = conn.prepareStatement(
+                    "CREATE TABLE if NOT EXISTS commoditystock " +
+                            "(commodity int, " +
+                            "amountinkg int, " +
+                            "primary key (commoditybatchid), " +
+                            "FOREIGN KEY (commodity) REFERENCES commoditybatch (commoditybatchid) " +
+                            "ON DELETE CASCADE);");
+
+
+
+
+/*
+
+            PreparedStatement createTableProperty = conn.prepareStatement(
+                    "CREATE TABLE if NOT EXISTS property " +
+                            "(posonboard int, " +
+                            "numofhouses int, " +
+                            "superowned bit, " +
+                            "playerid int, " +
+                            "gameid int, " +
+                            "type varchar(20), " +
+                            "primary key (posonboard, gameid), " +
+                            "FOREIGN KEY (gameid) REFERENCES game (gameid) " +
+                            "ON DELETE CASCADE);");
+*/
+
+            //rækkefølgen er vigtig!
+            createTableUser.execute();
+            createTableUserRole.execute();
+            createTableingredient.execute();
+            createTableingredientslist.execute();
+            createTableRecipe.execute();
+
+            createTableCommodityBatch.execute();
+            createTableCommodityStock.execute();
+
+/*
+            createTableProperty.execute();
+*/
+            conn.commit();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void dropAllTables(int deleteTable) {
+        try {
+
+            PreparedStatement dropTableUser = conn.prepareStatement(
+                    "drop table user;");
+            PreparedStatement dropTableUserRole = conn.prepareStatement(
+                    "drop table userrole;");
+            PreparedStatement dropTableProperty = conn.prepareStatement(
+                    "DROP TABLE property;");
+            if (deleteTable == 1) {
+                dropTableUser.execute();
+            } else if (deleteTable == 2) {
+                dropTableUserRole.execute();
+            } else if (deleteTable == 3) {
+                dropTableProperty.execute();
+            } else if (deleteTable == 0) {
+                dropTableUserRole.execute();
+                dropTableUser.execute();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }

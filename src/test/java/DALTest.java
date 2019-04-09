@@ -11,11 +11,30 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 public class DALTest {
-    IUserDAO userDAO = new UserDAOImpl();
+    UserDAOImpl userDAO = new UserDAOImpl();
+
+    @Test
+    public void testConn() throws IUserDAO.DALException {
+        userDAO.createConnection();
+    }
+
 
     @Test
     public void deleteUser() throws IUserDAO.DALException {
         userDAO.deleteUser(13);
+    }
+
+    @Test
+    public void dropAllTables() throws IUserDAO.DALException {
+        userDAO.dropAllTables(0);
+    }
+
+    @Test
+    public void initializeDataBase() throws IUserDAO.DALException {
+
+        userDAO.initializeDataBase();
+
+
     }
 
     @Test
@@ -31,22 +50,24 @@ public class DALTest {
 
             userDAO.createUser(testUser);
             IUserDTO receivedUser = userDAO.getUser(13);
-            assertEquals(testUser.getUserName(),receivedUser.getUserName());
+            assertEquals(testUser.getUserName(), receivedUser.getUserName());
             assertEquals(testUser.getIni(), receivedUser.getIni());
-            assertEquals(testUser.getRoles().get(0),receivedUser.getRoles().get(0));
-            assertEquals(testUser.getRoles().size(),receivedUser.getRoles().size());
+            assertEquals(testUser.getRoles().get(0), receivedUser.getRoles().get(0));
+            assertEquals(testUser.getRoles().size(), receivedUser.getRoles().size());
             List<IUserDTO> allUsers = userDAO.getUserList();
             boolean found = false;
-            for (IUserDTO user: allUsers) {
-                if(user.getUserId() == testUser.getUserId()){
-                    assertEquals(testUser.getUserName(),user.getUserName());
+            for (IUserDTO user : allUsers) {
+                if (user.getUserId() == testUser.getUserId()) {
+                    assertEquals(testUser.getUserName(), user.getUserName());
                     assertEquals(testUser.getIni(), user.getIni());
-                    assertEquals(testUser.getRoles().get(0),user.getRoles().get(0));
-                    assertEquals(testUser.getRoles().size(),user.getRoles().size());
+                    assertEquals(testUser.getRoles().get(0), user.getRoles().get(0));
+                    assertEquals(testUser.getRoles().size(), user.getRoles().size());
                     found = true;
                 }
             }
-            if(!found){fail();}
+            if (!found) {
+                fail();
+            }
 
             testUser.setUserName("Per petersen");
             testUser.setIni("PP");
@@ -56,16 +77,16 @@ public class DALTest {
             userDAO.updateUser(testUser);
 
             receivedUser = userDAO.getUser(13);
-            assertEquals(testUser.getUserName(),receivedUser.getUserName());
+            assertEquals(testUser.getUserName(), receivedUser.getUserName());
             assertEquals(testUser.getIni(), receivedUser.getIni());
-            assertEquals(testUser.getRoles().get(0),receivedUser.getRoles().get(0));
-            assertEquals(testUser.getRoles().size(),receivedUser.getRoles().size());
+            assertEquals(testUser.getRoles().get(0), receivedUser.getRoles().get(0));
+            assertEquals(testUser.getRoles().size(), receivedUser.getRoles().size());
 
             userDAO.deleteUser(testUser.getUserId());
             allUsers = userDAO.getUserList();
 
-            for (IUserDTO user: allUsers) {
-                if(user.getUserId() == testUser.getUserId()){
+            for (IUserDTO user : allUsers) {
+                if (user.getUserId() == testUser.getUserId()) {
                     fail();
                 }
             }
