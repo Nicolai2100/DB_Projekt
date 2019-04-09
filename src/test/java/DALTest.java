@@ -2,8 +2,11 @@ import dal.IUserDAO;
 import dal.UserDAOImpl;
 import dal.dto.IUserDTO;
 import dal.dto.UserDTO;
+import org.junit.Before;
 import org.junit.jupiter.api.Test;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,16 +16,20 @@ import static org.junit.Assert.fail;
 public class DALTest {
     UserDAOImpl userDAO = new UserDAOImpl();
 
+    @Before
+    public void ini() throws IUserDAO.DALException {
+    }
+
     @Test
     public void testConn() throws IUserDAO.DALException {
         userDAO.createConnection();
     }
 
 
-/*    @Test
+    @Test
     public void deleteUser() throws IUserDAO.DALException {
         userDAO.deleteUser(13);
-    }*/
+    }
 
     @Test
     public void dropAllTables() throws IUserDAO.DALException {
@@ -33,7 +40,7 @@ public class DALTest {
     public void initializeDataBase() throws IUserDAO.DALException {
         userDAO.initializeDataBase();
     }
-/*
+
     @Test
     public void test() {
         try {
@@ -87,13 +94,9 @@ public class DALTest {
                     fail();
                 }
             }
-
         } catch (IUserDAO.DALException e) {
             e.printStackTrace();
             fail();
         }
-
-    }*/
-
-
+    }
 }

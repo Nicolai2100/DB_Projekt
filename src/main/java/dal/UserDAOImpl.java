@@ -29,8 +29,6 @@ public class UserDAOImpl implements IUserDAO {
             throw new DALException(e.getMessage());
         }
     }
-    /*return DriverManager.getConnection(
-    "jdbc:mysql://ec2-52-30-211-3.eu-west-1.compute.amazonaws.com?user=jekala&password=d0czCtqcu5015NhwwP5zl");*/
 
     @Override
     public void createUser(IUserDTO user) throws DALException {
@@ -41,13 +39,20 @@ public class UserDAOImpl implements IUserDAO {
         try {
             conn.setAutoCommit(false);
             PreparedStatement pSmtInsertUser = conn.prepareStatement(
-                    "INSERT INTO user_table " +
+                    "INSERT INTO user " +
                             "VALUES(?,?,?,?)");
             pSmtInsertUser.setInt(1, user.getUserId());
             pSmtInsertUser.setString(2, user.getUserName());
             pSmtInsertUser.setString(3, user.getIni());
-            pSmtInsertUser.setInt(4, user.getAdmin().getUserId());
+            Integer adminId;
+            if (user.getAdmin() != null) {
+                adminId = user.getAdmin().getUserId();
+                pSmtInsertUser.setInt(4, adminId);
+            }
+            else {
+                pSmtInsertUser.setNull(4, Types.INTEGER);
 
+            }
             pSmtInsertUser.executeUpdate();
             setUserRoles(conn, user);
 
@@ -74,7 +79,7 @@ public class UserDAOImpl implements IUserDAO {
             conn = createConnection();
             PreparedStatement pSmtSelectUser = conn.prepareStatement(
                     "SELECT * " +
-                            "FROM user_table " +
+                            "FROM user " +
                             "WHERE userid = ?");
 
             pSmtSelectUser.setInt(1, userId);
@@ -110,15 +115,15 @@ public class UserDAOImpl implements IUserDAO {
             conn = createConnection();
             PreparedStatement pSmtSelectAllTable = conn.prepareStatement(
                     "SELECT * " +
-                            "FROM user_table");
+                            "FROM user");
             UserDTO returnUser;
             ResultSet rs = pSmtSelectAllTable.executeQuery();
 
             while (rs.next()) {
                 returnUser = new UserDTO();
-                int userIDReturn = rs.getInt("userID");
+                int userIDReturn = rs.getInt("userid");
                 returnUser.setUserId(userIDReturn);
-                returnUser.setUserName(rs.getString("username"));
+                returnUser.setUserName(rs.getString("name"));
                 returnUser.setIni(rs.getString("ini"));
                 userList.add(returnUser);
             }
@@ -146,10 +151,11 @@ public class UserDAOImpl implements IUserDAO {
             if (!peekUser(conn, user.getUserId())) {
                 System.out.println("No such user in the database!");
             } else {
+                conn.setAutoCommit(false);
                 PreparedStatement pSmtUpdateUser = conn.prepareStatement(
-                        "UPDATE user_table " +
+                        "UPDATE user " +
                                 "SET " +
-                                "username = ?, " +
+                                "name = ?, " +
                                 "ini = ? " +
                                 "WHERE userid = ? ");
                 pSmtUpdateUser.setString(1, user.getUserName());
@@ -160,7 +166,7 @@ public class UserDAOImpl implements IUserDAO {
 
                 roleTransAct(conn, user);
                 System.out.println("The user was successfully updated!");
-                pSmtUpdateUser.close();
+                conn.commit();
             }
         } catch (SQLException e) {
             System.out.println("Error! " + e.getMessage());
@@ -180,7 +186,7 @@ public class UserDAOImpl implements IUserDAO {
         try {
             conn = createConnection();
             PreparedStatement pSmtDeleteUser = conn.prepareStatement(
-                    "DELETE FROM user_table " +
+                    "DELETE FROM user " +
                             "WHERE userid = ?");
             pSmtDeleteUser.setInt(1, userId);
             result = pSmtDeleteUser.executeUpdate();
@@ -277,6 +283,7 @@ public class UserDAOImpl implements IUserDAO {
 
             conn.setAutoCommit(false);
             deleteRolesFromDB.setInt(1, user.getUserId());
+            deleteRolesFromDB.executeUpdate();
 
             for (String role : newUserRoles) {
                 insertRolesInDB.setString(2, role);
@@ -290,6 +297,7 @@ public class UserDAOImpl implements IUserDAO {
             System.out.println(e.getMessage());
         }
     }
+
     /**
      * Metoden bruges til at undersøge om der eksisterer en bruger med et
      * specifikt userid i user_table. Den returnerer false, hvis der ikke gør.
@@ -317,7 +325,6 @@ public class UserDAOImpl implements IUserDAO {
             return true;
         }
     }
-
 
 
     public void initializeDataBase() {
@@ -457,7 +464,7 @@ public class UserDAOImpl implements IUserDAO {
             PreparedStatement dropTableUserRole = conn.prepareStatement(
                     "drop table userrole;");
             PreparedStatement dropTableIngredientList = conn.prepareStatement(
-                    "DROP TABLE ingredientList;");
+                    "DROP TABLE ingredientlist;");
             PreparedStatement dropTableIngredient = conn.prepareStatement(
                     "DROP TABLE ingredient;");
             PreparedStatement dropTableRecipe = conn.prepareStatement(

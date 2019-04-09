@@ -72,12 +72,13 @@ public class UserDTO implements Serializable, IUserDTO {
         return "UserDTO [userId=" + userId + ", userName=" + userName + ", ini=" + ini + ", roles=" + roles + "]";
     }
 
-
-    public UserDTO getAdmin() {
+    @Override
+    public IUserDTO getAdmin() {
         return admin;
     }
 
-    public void setAdmin(UserDTO admin) {
-        this.admin = admin;
+    @Override
+    public void setAdmin(IUserDTO iUserDTO) {
+
     }
 }
