@@ -48,8 +48,7 @@ public class UserDAOImpl implements IUserDAO {
             if (user.getAdmin() != null) {
                 adminId = user.getAdmin().getUserId();
                 pSmtInsertUser.setInt(4, adminId);
-            }
-            else {
+            } else {
                 pSmtInsertUser.setNull(4, Types.INTEGER);
 
             }
@@ -326,12 +325,9 @@ public class UserDAOImpl implements IUserDAO {
         }
     }
 
-
     public void initializeDataBase() {
         try {
-/*
             conn.setAutoCommit(false);
-*/
             PreparedStatement createTableUser = conn.prepareStatement(
                     "CREATE TABLE if NOT EXISTS user " +
                             "(userid int NOT NULL AUTO_INCREMENT, " +
