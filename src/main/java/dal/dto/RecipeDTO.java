@@ -1,26 +1,27 @@
 package dal.dto;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class RecipeDTO {
-    private int	recipeId;
+    private int recipeId;
     private String name;
-    private int recipe;
     private int madeBy;
-    private List<String> ingredients;
+    private HashMap<String, IngredientDTO> ingredients;
 
-    public RecipeDTO(){
-        ingredients = new ArrayList<>();
+    public RecipeDTO() {
+        ingredients = new HashMap<>();
     }
 
     @Override
     public String toString() {
-        String returnString = "Recipe " + recipeId + "of type " + name + "made by " + madeBy +
-        "\nIngredients: ";
+        String returnString = "RecipeID " + recipeId + " of type " + name + " made by userID: " + madeBy +
+                "\nIngredients: \n";
 
-        for (String ingredient: ingredients) {
-            returnString += "["+ingredient+"]";
+        Iterator it = ingredients.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry) it.next();
+            returnString += "[" + pair.getValue() + "]\n";
+            it.remove(); // avoids a ConcurrentModificationException
         }
         return returnString;
     }
@@ -41,14 +42,6 @@ public class RecipeDTO {
         this.name = name;
     }
 
-    public int getRecipe() {
-        return recipe;
-    }
-
-    public void setRecipe(int recipe) {
-        this.recipe = recipe;
-    }
-
     public int getMadeBy() {
         return madeBy;
     }
@@ -57,11 +50,11 @@ public class RecipeDTO {
         this.madeBy = madeBy;
     }
 
-    public List<String> getIngredients() {
+    public HashMap<String, IngredientDTO> getIngredients() {
         return ingredients;
     }
 
-    public void setIngredients(List<String> ingredients) {
+    public void setIngredients(HashMap<String, IngredientDTO> ingredients) {
         this.ingredients = ingredients;
     }
 }

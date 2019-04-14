@@ -6,6 +6,10 @@ public interface IIngredientDTO {
 
     void setIngredientId(int ingredientId);
 
+    String getName();
+
+    void setName(String name);
+
     String getType();
 
     void setType(String type);

@@ -19,6 +19,10 @@ public class UserDAOImpl implements IUserDAO {
         }
     }
 
+    public Connection getConn() {
+        return conn;
+    }
+
     public Connection createConnection() throws DALException {
         String dataBase = "jdbc:mysql://ec2-52-30-211-3.eu-west-1.compute.amazonaws.com/jekala";
         String user = "jekala";
@@ -350,16 +354,16 @@ public class UserDAOImpl implements IUserDAO {
             PreparedStatement createTableingredient = conn.prepareStatement(
                     "CREATE TABLE if NOT EXISTS ingredient " +
                             "(ingredientid int, " +
-                            "type varchar(50), " +
+                            "name varchar(50), " +
+                            "type varchar(15), " +
                             "primary key (ingredientid));");
 
             PreparedStatement createTableingredientlist = conn.prepareStatement(
                     "CREATE TABLE if NOT EXISTS ingredientlist " +
                             "(ingredientlistid int, " +
                             "ingredient int, " +
-                            "primary key (ingredientlistid), " +
-                            "FOREIGN KEY (ingredient) REFERENCES ingredient (ingredientid) " +
-                            "ON update CASCADE);");
+                            "amountmg float, " +
+                            "primary key (ingredientlistid, ingredient));");
 
             PreparedStatement createTableRecipe = conn.prepareStatement(
                     "CREATE TABLE if NOT EXISTS recipe " +
@@ -368,10 +372,7 @@ public class UserDAOImpl implements IUserDAO {
                             "madeby int, " +
                             "ingredientlist int, " +
                             "primary key (recipeid), " +
-                            "FOREIGN KEY (madeby) REFERENCES user (userid) " +
-                            "ON update CASCADE, " +
-                            "foreign key (ingredientlist) " +
-                            "references ingredientlist(ingredientlistid));");
+                            "FOREIGN KEY (madeby) REFERENCES user (userid));");
 
             //pas på med cascade her - skal ikke slettes når bruger slettes
 
