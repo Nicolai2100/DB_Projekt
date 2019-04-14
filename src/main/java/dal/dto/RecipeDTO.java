@@ -7,9 +7,11 @@ public class RecipeDTO {
     private String name;
     private int madeBy;
     private HashMap<String, IngredientDTO> ingredients;
+    private List<IngredientDTO> ingredientsList;
 
     public RecipeDTO() {
         ingredients = new HashMap<>();
+        ingredientsList = new ArrayList<>();
     }
 
     @Override
@@ -56,5 +58,13 @@ public class RecipeDTO {
 
     public void setIngredients(HashMap<String, IngredientDTO> ingredients) {
         this.ingredients = ingredients;
+    }
+
+    public List<IngredientDTO> getIngredientsList() {
+        return ingredientsList;
+    }
+
+    public void setIngredientsList(List<IngredientDTO> ingredientsList) {
+        this.ingredientsList = ingredientsList;
     }
 }

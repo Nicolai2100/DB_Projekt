@@ -137,8 +137,8 @@ public class ProductDAO {
     }
 
     public void createIngredientList(RecipeDTO recipeDTO) {
-        HashMap<String, IngredientDTO> ingredients = new HashMap<>();
-        ingredients = recipeDTO.getIngredients();
+    /*    HashMap<String, IngredientDTO> ingredients = new HashMap<>();
+        ingredients = recipeDTO.getIngredients();*/
         try {
             conn.setAutoCommit(false);
             PreparedStatement insertIngredientList = conn.prepareStatement(
@@ -147,7 +147,13 @@ public class ProductDAO {
 
             insertIngredientList.setInt(1, recipeDTO.getRecipeId());
 
-            Iterator it = ingredients.entrySet().iterator();
+            for (IngredientDTO ingredient: recipeDTO.getIngredientsList()) {
+                insertIngredientList.setInt(2, ingredient.getIngredientId());
+                insertIngredientList.setDouble(3,ingredient.getAmountInMG());
+                insertIngredientList.executeUpdate();
+            }
+
+           /* Iterator it = ingredients.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry pair = (Map.Entry) it.next();
                 IngredientDTO ingredientDTO = (IngredientDTO) pair.getValue();
@@ -155,7 +161,8 @@ public class ProductDAO {
                 insertIngredientList.setDouble(3, ingredientDTO.getAmountInMG());
                 insertIngredientList.executeUpdate();
                 it.remove(); // avoids a ConcurrentModificationException
-            }
+                }*/
+
             conn.commit();
             System.out.println("The ingredient list was successfully created.");
 

@@ -98,55 +98,56 @@ public class ProductDAOTest {
     @Test
     public void createIngredientList() {
         RecipeDTO recipeDTO = new RecipeDTO();
-/*
+        recipeDTO.setName("norethisteron/estrogen");
+        recipeDTO.setRecipeId(2);
+        recipeDTO.setMadeBy(10);
+        List<IngredientDTO> ingredients = new ArrayList<>();
 
         IngredientDTO ingredientDTO = new IngredientDTO();
-        ingredientDTO.setName("estradiol");
-        ingredientDTO.setType("active");
         ingredientDTO.setIngredientId(1);
         ingredientDTO.setAmountInMG(1);
-        ingredients.put(ingredientDTO.getName(), ingredientDTO);
+        ingredients.add(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setName("norethisteronacetat");
         ingredientDTO.setType("active");
         ingredientDTO.setIngredientId(2);
         ingredientDTO.setAmountInMG(0.5);
-        ingredients.put(ingredientDTO.getName(), ingredientDTO);
+        ingredients.add(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setName("opovidon");
         ingredientDTO.setType("helper");
         ingredientDTO.setIngredientId(3);
         ingredientDTO.setAmountInMG(50);
-        ingredients.put(ingredientDTO.getName(), ingredientDTO);
+        ingredients.add(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setName("laktosemonohydrat");
         ingredientDTO.setType("helper");
         ingredientDTO.setIngredientId(4);
         ingredientDTO.setAmountInMG(10);
-        ingredients.put(ingredientDTO.getName(), ingredientDTO);
+        ingredients.add(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setName("magnesiumstearat");
         ingredientDTO.setType("helper");
         ingredientDTO.setIngredientId(5);
         ingredientDTO.setAmountInMG(15);
-        ingredients.put(ingredientDTO.getName(), ingredientDTO);
+        ingredients.add(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setName("majsstivelse");
         ingredientDTO.setType("helper");
         ingredientDTO.setIngredientId(6);
         ingredientDTO.setAmountInMG(120);
-        ingredients.put(ingredientDTO.getName(), ingredientDTO);
+        ingredients.add(ingredientDTO);
 
-        recipeDTO.setIngredients(ingredients);
-        recipeDTO.setName("norethisteron/estrogen");
-        recipeDTO.setRecipeId(2);
-        recipeDTO.setMadeBy(10);
-*/
+//        recipeDTO.setIngredients(ingredients);
+        recipeDTO.setIngredientsList(ingredients);
+
+        productDAO.createIngredientList(recipeDTO);
+
 
 
     }
