@@ -21,42 +21,42 @@ public class RecipeDTOTest {
         ingredientDTO.setName("estradiol");
         ingredientDTO.setType("active");
         ingredientDTO.setIngredientId(1);
-        ingredientDTO.setAmountInMG(1);
+        ingredientDTO.setAmount(1);
         inlist.put(ingredientDTO.getName(), ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setName("norethisteronacetat");
         ingredientDTO.setType("active");
         ingredientDTO.setIngredientId(2);
-        ingredientDTO.setAmountInMG(0.5);
+        ingredientDTO.setAmount(0.5);
         inlist.put(ingredientDTO.getName(), ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setName("opovidon");
         ingredientDTO.setType("helper");
         ingredientDTO.setIngredientId(3);
-        ingredientDTO.setAmountInMG(50);
+        ingredientDTO.setAmount(50);
         inlist.put(ingredientDTO.getName(), ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setName("laktosemonohydrat");
         ingredientDTO.setType("helper");
         ingredientDTO.setIngredientId(4);
-        ingredientDTO.setAmountInMG(10);
+        ingredientDTO.setAmount(10);
         inlist.put(ingredientDTO.getName(), ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setName("magnesiumstearat");
         ingredientDTO.setType("helper");
         ingredientDTO.setIngredientId(5);
-        ingredientDTO.setAmountInMG(15);
+        ingredientDTO.setAmount(15);
         inlist.put(ingredientDTO.getName(), ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setName("majsstivelse");
         ingredientDTO.setType("helper");
         ingredientDTO.setIngredientId(6);
-        ingredientDTO.setAmountInMG(120);
+        ingredientDTO.setAmount(120);
         inlist.put(ingredientDTO.getName(), ingredientDTO);
 
         recipeDTO.setIngredients(inlist);

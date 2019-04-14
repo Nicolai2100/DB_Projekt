@@ -44,7 +44,14 @@ public class ProductDAOTest {
         userDAO.createUser(testUser);
     }
 
+
     @Test
+    public void getIngredient() throws IUserDAO.DALException {
+            IIngredientDTO ingredientDTO = productDAO.getIngredient(1);
+            assertEquals(ingredientDTO.getType(),"active");
+        System.out.println(ingredientDTO);
+    }
+        @Test
     public void createIngredient() throws IUserDAO.DALException {
         List<IngredientDTO> ingredients = new ArrayList<>();
 
@@ -52,42 +59,42 @@ public class ProductDAOTest {
         ingredientDTO.setName("estradiol");
         ingredientDTO.setType("active");
         ingredientDTO.setIngredientId(1);
-        ingredientDTO.setAmountInMG(1);
+        ingredientDTO.setAmount(1);
         ingredients.add(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setName("norethisteronacetat");
         ingredientDTO.setType("active");
         ingredientDTO.setIngredientId(2);
-        ingredientDTO.setAmountInMG(0.5);
+        ingredientDTO.setAmount(0.5);
         ingredients.add(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setName("opovidon");
         ingredientDTO.setType("helper");
         ingredientDTO.setIngredientId(3);
-        ingredientDTO.setAmountInMG(50);
+        ingredientDTO.setAmount(50);
         ingredients.add(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setName("laktosemonohydrat");
         ingredientDTO.setType("helper");
         ingredientDTO.setIngredientId(4);
-        ingredientDTO.setAmountInMG(10);
+        ingredientDTO.setAmount(10);
         ingredients.add(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setName("magnesiumstearat");
         ingredientDTO.setType("helper");
         ingredientDTO.setIngredientId(5);
-        ingredientDTO.setAmountInMG(15);
+        ingredientDTO.setAmount(15);
         ingredients.add(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setName("majsstivelse");
         ingredientDTO.setType("helper");
         ingredientDTO.setIngredientId(6);
-        ingredientDTO.setAmountInMG(120);
+        ingredientDTO.setAmount(120);
         ingredients.add(ingredientDTO);
 
         for (IngredientDTO ingredient : ingredients) {
@@ -105,51 +112,56 @@ public class ProductDAOTest {
 
         IngredientDTO ingredientDTO = new IngredientDTO();
         ingredientDTO.setIngredientId(1);
-        ingredientDTO.setAmountInMG(1);
+        ingredientDTO.setAmount(1);
         ingredients.add(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setName("norethisteronacetat");
         ingredientDTO.setType("active");
         ingredientDTO.setIngredientId(2);
-        ingredientDTO.setAmountInMG(0.5);
+        ingredientDTO.setAmount(0.5);
         ingredients.add(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setName("opovidon");
         ingredientDTO.setType("helper");
         ingredientDTO.setIngredientId(3);
-        ingredientDTO.setAmountInMG(50);
+        ingredientDTO.setAmount(50);
         ingredients.add(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setName("laktosemonohydrat");
         ingredientDTO.setType("helper");
         ingredientDTO.setIngredientId(4);
-        ingredientDTO.setAmountInMG(10);
+        ingredientDTO.setAmount(10);
         ingredients.add(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setName("magnesiumstearat");
         ingredientDTO.setType("helper");
         ingredientDTO.setIngredientId(5);
-        ingredientDTO.setAmountInMG(15);
+        ingredientDTO.setAmount(15);
         ingredients.add(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setName("majsstivelse");
         ingredientDTO.setType("helper");
         ingredientDTO.setIngredientId(6);
-        ingredientDTO.setAmountInMG(120);
+        ingredientDTO.setAmount(120);
         ingredients.add(ingredientDTO);
 
 //        recipeDTO.setIngredients(ingredients);
         recipeDTO.setIngredientsList(ingredients);
 
         productDAO.createIngredientList(recipeDTO);
+    }
+    @Test
+    public void getIngredientList() throws IUserDAO.DALException {
+        RecipeDTO recipeDTO = new RecipeDTO();
+        recipeDTO.setRecipeId(2);
+        List<IIngredientDTO> ingrediendts =  productDAO.getIngredientList(recipeDTO);
 
-
-
+        System.out.println(ingrediendts);
     }
 
 

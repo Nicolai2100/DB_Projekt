@@ -14,4 +14,8 @@ public interface IIngredientDTO {
 
     void setType(String type);
 
+    void setAmount(double amount);
+
+    double getAmount();
+
 }

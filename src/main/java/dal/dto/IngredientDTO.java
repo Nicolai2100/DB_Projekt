@@ -10,14 +10,6 @@ public class IngredientDTO implements IIngredientDTO {
     public IngredientDTO() {
     }
 
-    public double getAmountInMG() {
-        return amountInMG;
-    }
-
-    public void setAmountInMG(double amountInMG) {
-        this.amountInMG = amountInMG;
-    }
-
     @Override
     public int getIngredientId() {
         return ingredientId;
@@ -46,6 +38,16 @@ public class IngredientDTO implements IIngredientDTO {
     @Override
     public void setType(String type) {
         this.type = type;
+    }
+
+    @Override
+    public void setAmount(double amount) {
+        this.amountInMG = amount;
+    }
+
+    @Override
+    public double getAmount() {
+        return amountInMG;
     }
 
     @Override
