@@ -100,12 +100,6 @@ public class UserDAOImpl implements IUserDAO {
             }
         } catch (SQLException e) {
             System.out.println("Error! " + e.getMessage());
-        } finally {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                System.out.println(e.getMessage());
-            }
         }
         return returnUser;
     }
@@ -382,6 +376,7 @@ public class UserDAOImpl implements IUserDAO {
                             "ingredientid int, " +
                             "orderedby int, " +
                             "amountinkg int, " +
+                            "orderdate varchar(15), " +
                             "primary key (commoditybatchid), " +
                             "FOREIGN KEY (orderedby) " +
                             "REFERENCES user (userid) " +

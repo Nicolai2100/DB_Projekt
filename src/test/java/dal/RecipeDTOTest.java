@@ -1,15 +1,10 @@
 package dal;
 
 import dal.dto.IIngredientDTO;
-import dal.dto.IngredientDTO;
 import dal.dto.RecipeDTO;
 import org.junit.Test;
 
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
-import static org.junit.Assert.*;
 
 public class RecipeDTOTest {
     RecipeDTO recipeDTO = new RecipeDTO();

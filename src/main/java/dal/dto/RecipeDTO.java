@@ -2,7 +2,7 @@ package dal.dto;
 
 import java.util.*;
 
-public class RecipeDTO {
+public class RecipeDTO implements IRecipeDTO {
     private int recipeId;
     private String name;
     private IUserDTO madeBy;
@@ -14,11 +14,11 @@ public class RecipeDTO {
 
     @Override
     public String toString() {
-        String returnString = "RecipeID " + recipeId + " of type " + name + " made by userID: " + madeBy +
+        String returnString = "RecipeID " + recipeId + " of type " + name + " made by: " + madeBy + ". " +
                 "\nIngredients: \n";
 
-        for (IIngredientDTO ingredient: ingredientsList) {
-            returnString += "["+ingredient+"]\n";
+        for (IIngredientDTO ingredient : ingredientsList) {
+            returnString += "[" + ingredient + "]\n";
         }
       /*  Iterator it = ingredients.entrySet().iterator();
         while (it.hasNext()) {
@@ -52,7 +52,6 @@ public class RecipeDTO {
     public void setMadeBy(IUserDTO madeBy) {
         this.madeBy = madeBy;
     }
-
 
     public List<IIngredientDTO> getIngredientsList() {
         return ingredientsList;

@@ -7,16 +7,19 @@ import org.junit.Test;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.Assert.*;
 
 public class ProductDAOTest {
-    ProductDAO productDAO = new ProductDAO();
-    UserDAOImpl userDAO = new UserDAOImpl();
+    ProductDAO productDAO;
+    UserDAOImpl userDAO;
 
+    @Before
+    public void initialize() {
+        productDAO = new ProductDAO();
+        userDAO = new UserDAOImpl();
+    }
 
     @After
     public void closeAll() throws SQLException {
@@ -25,9 +28,13 @@ public class ProductDAOTest {
     }
 
     @Test
+    public void closeAllTest() throws SQLException {
+        userDAO.getConn().close();
+        productDAO.getConn().close();
+    }
+
+    @Test
     public void createConnection() {
-
-
     }
 
     @Test
@@ -49,7 +56,7 @@ public class ProductDAOTest {
     @Test
     public void createUser() throws IUserDAO.DALException {
 
-        UserDTO testUser = new UserDTO();
+        /*UserDTO testUser = new UserDTO();
         testUser.setUserId(10);
         testUser.setUserName("Puk Hansen");
         testUser.setIni("PH");
@@ -58,17 +65,41 @@ public class ProductDAOTest {
         roles.add("farmaceut");
         testUser.setRoles(roles);
         userDAO.createUser(testUser);
+        */
+
+        IUserDTO testUser = userDAO.getUser(10);
+        IUserDTO testUser2 = new UserDTO();
+        testUser2.setUserId(5);
+        testUser2.setUserName("Pælle Hansen");
+        testUser2.setIni("PH");
+        ArrayList<String> roles = new ArrayList();
+        roles.add("administrator");
+        roles.add("productleader");
+        testUser2.setRoles(roles);
+        userDAO.createUser(testUser2);
+    }
+
+
+    @Test
+    public void createCommodityBatch() {
+        ICommodityBatch commodityBatch = new CommodityBatchDTO();
+
+
+/*
+       productDAO.createCommodityBatch();
+*/
+
     }
 
     @Test
     public void getRecipe() {
-        RecipeDTO recipeDTO = productDAO.getRecipe(2);
+        IRecipeDTO recipeDTO = productDAO.getRecipe(2);
         System.out.println(recipeDTO);
     }
 
     @Test
     public void createRecipe() throws IUserDAO.DALException {
-        RecipeDTO recipeDTO = new RecipeDTO();
+        IRecipeDTO recipeDTO = new RecipeDTO();
         recipeDTO.setRecipeId(2);
         recipeDTO.setName("Norethisteron/estrogen");
         recipeDTO.setMadeBy(userDAO.getUser(10));

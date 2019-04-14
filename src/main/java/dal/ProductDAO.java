@@ -33,6 +33,13 @@ public class ProductDAO {
         }
     }
 
+    /*Systemet skal således understøtte
+  Oprettelse og administration af opskrifter med indholdsstoffer (Farmaceut)
+  Oprettelse og administration af råvarebatches (Produktionsleder)
+  Oprettelse og igangsætning af produktbatches (Produktionsleder)
+  Produktion af produktbatches (Laborant)
+  Lagerstatus af råvarer og råvarebatches (Produktionsleder)
+  */
     public void createProduct(ProductDTO product) {
         if (!product.getMadeBy().getRoles().contains("productionleader")) {
             System.out.println("User not authorized to proceed!");
@@ -56,7 +63,43 @@ public class ProductDAO {
         }
     }
 
-    public void createRecipe(RecipeDTO recipeDTO) {
+    /*Systemet skal således understøtte
+Oprettelse og administration af opskrifter med indholdsstoffer (Farmaceut)
+Oprettelse og administration af råvarebatches (Produktionsleder)
+Oprettelse og igangsætning af produktbatches (Produktionsleder)
+Produktion af produktbatches (Laborant)
+Lagerstatus af råvarer og råvarebatches (Produktionsleder)
+*/
+
+    public void createCommodityBatch(ICommodityBatch commodityBatch) {
+        IUserDTO userDTO = commodityBatch.getOrderedBy();
+        if (!userDTO.getRoles().contains("productleader")) {
+            System.out.println("User not authorized to proceed!");
+            return;
+        }
+        try {
+            PreparedStatement stmtInsertProductBatch = conn.prepareStatement(
+                    "INSERT INTO commoditybatch " +
+                            "VALUES(?,?,?,?,?)");
+            stmtInsertProductBatch.setInt(1,commodityBatch.getBatchId());
+            stmtInsertProductBatch.setInt(2,commodityBatch.getIngredientId());
+            stmtInsertProductBatch.setInt(3,commodityBatch.getOrderedBy().getUserId());
+            stmtInsertProductBatch.setDouble(4, commodityBatch.getAmountInKg());
+            stmtInsertProductBatch.setString(5, commodityBatch.getOrderDate());
+            stmtInsertProductBatch.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public ICommodityBatch getCommodityBatch() {
+        ICommodityBatch commodityBatch = new CommodityBatchDTO();
+
+
+        return commodityBatch;
+    }
+
+    public void createRecipe(IRecipeDTO recipeDTO) {
         //Først undersøges det om brugeren, der står på til at have oprettet opskriften har
         //den rette rolle til at kunne gøre det.
         IUserDTO userDTO = recipeDTO.getMadeBy();
@@ -85,15 +128,15 @@ public class ProductDAO {
         }
     }
 
-    public RecipeDTO getRecipe(int recipeId) {
-        RecipeDTO recipeDTO = new RecipeDTO();
+    public IRecipeDTO getRecipe(int recipeId) {
+        IRecipeDTO recipeDTO = new RecipeDTO();
         try {
             PreparedStatement stmtGetRecipe = conn.prepareStatement(
                     "SELECT * FROM recipe " +
                             "WHERE recipeid = ?;");
             stmtGetRecipe.setInt(1, recipeId);
             ResultSet rs = stmtGetRecipe.executeQuery();
-            while (rs.next()){
+            while (rs.next()) {
                 recipeDTO.setRecipeId(recipeId);
                 recipeDTO.setName(rs.getString(2));
                 recipeDTO.setMadeBy(userDAO.getUser(rs.getInt(3)));
@@ -113,7 +156,7 @@ public class ProductDAO {
      *
      * @param recipeDTO
      */
-    public void peakIngredientList(RecipeDTO recipeDTO) {
+    public void peakIngredientList(IRecipeDTO recipeDTO) {
         try {
             PreparedStatement getIngredientList = conn.prepareStatement(
                     "SELECT COUNT(*) FROM ingredientlist " +
@@ -134,7 +177,7 @@ public class ProductDAO {
         }
     }
 
-    public void createIngredientList(RecipeDTO recipeDTO) {
+    public void createIngredientList(IRecipeDTO recipeDTO) {
     /*    HashMap<String, IngredientDTO> ingredients = new HashMap<>();
         ingredients = recipeDTO.getIngredients();*/
         try {
@@ -169,7 +212,7 @@ public class ProductDAO {
         }
     }
 
-    public List<IIngredientDTO> getIngredientList(RecipeDTO recipeDTO) {
+    public List<IIngredientDTO> getIngredientList(IRecipeDTO recipeDTO) {
         List<IIngredientDTO> ingredientList = new ArrayList<>();
 
         try {
@@ -230,7 +273,6 @@ public class ProductDAO {
         }
         return ingredientDTO;
     }
-
 
     /**
      * Metoden henter et specifikt ingrediensid  fra ingredient-tabellen og returnerer den.

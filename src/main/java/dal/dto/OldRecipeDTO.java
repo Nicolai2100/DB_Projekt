@@ -3,7 +3,7 @@ package dal.dto;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OldRecipeDTO {
+public class OldRecipeDTO implements IOldrecipeDTO{
     private String name;
     //User
     private int madeBy;

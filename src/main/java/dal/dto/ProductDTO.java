@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProductDTO implements Serializable{
+public class ProductDTO implements IProductDTO{
 
     private int	productId;
     private String name;
