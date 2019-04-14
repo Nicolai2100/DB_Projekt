@@ -43,7 +43,6 @@ public class ProductDAO {
             PreparedStatement insertProduct = conn.prepareStatement(
                     "INSERT INTO product " +
                             "VALUES(?,?,?,?)");
-
             insertProduct.setInt(1, product.getProductId());
             insertProduct.setString(2, product.getName());
             insertProduct.setInt(3, product.getMadeBy().getUserId());
@@ -57,19 +56,14 @@ public class ProductDAO {
         }
     }
 
-
     public void createRecipe(RecipeDTO recipeDTO) {
-        try {
-            IUserDTO userDTO = userDAO.getUser(recipeDTO.getMadeBy());
-            if (!userDTO.getRoles().contains("farmaceut")) {
-                System.out.println("User not authorized to proceed!");
-                return;
-            }
-
-        } catch (IUserDAO.DALException e) {
-            e.printStackTrace();
+        //Først undersøges det om brugeren, der står på til at have oprettet opskriften har
+        //den rette rolle til at kunne gøre det.
+        IUserDTO userDTO = recipeDTO.getMadeBy();
+        if (!userDTO.getRoles().contains("farmaceut")) {
+            System.out.println("User not authorized to proceed!");
+            return;
         }
-
         try {
             conn.setAutoCommit(false);
             PreparedStatement insertProduct = conn.prepareStatement(
@@ -78,23 +72,67 @@ public class ProductDAO {
 
             insertProduct.setInt(1, recipeDTO.getRecipeId());
             insertProduct.setString(2, recipeDTO.getName());
-            insertProduct.setInt(3, recipeDTO.getMadeBy());
+            insertProduct.setInt(3, recipeDTO.getMadeBy().getUserId());
             //Hver liste af ingredienser bliver oprettet med opskriftens id som id... !?
             insertProduct.setInt(4, recipeDTO.getRecipeId());
 
-            createIngredientList(recipeDTO);
+            peakIngredientList(recipeDTO);
             insertProduct.executeUpdate();
             conn.commit();
             System.out.println("The recipe was successfully created.");
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
     }
 
+    public RecipeDTO getRecipe(int recipeId) {
+        RecipeDTO recipeDTO = new RecipeDTO();
+        try {
+            PreparedStatement stmtGetRecipe = conn.prepareStatement(
+                    "SELECT * FROM recipe " +
+                            "WHERE recipeid = ?;");
+            stmtGetRecipe.setInt(1, recipeId);
+            ResultSet rs = stmtGetRecipe.executeQuery();
+            while (rs.next()){
+                recipeDTO.setRecipeId(recipeId);
+                recipeDTO.setName(rs.getString(2));
+                recipeDTO.setMadeBy(userDAO.getUser(rs.getInt(3)));
+                recipeDTO.setIngredientsList(getIngredientList(recipeDTO));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (IUserDAO.DALException e) {
+            e.printStackTrace();
+        }
+        return recipeDTO;
+    }
 
-    //Liste af recipes...
+    /**
+     * Metoden undersøger om der allerede er en ingrediensliste, hvis ikke bliver der skabt en og hvis der er
+     * gør der ikke.
+     *
+     * @param recipeDTO
+     */
+    public void peakIngredientList(RecipeDTO recipeDTO) {
+        try {
+            PreparedStatement getIngredientList = conn.prepareStatement(
+                    "SELECT COUNT(*) FROM ingredientlist " +
+                            "WHERE ingredientlistid = ?;");
+            getIngredientList.setInt(1, recipeDTO.getRecipeId());
+            ResultSet rs = getIngredientList.executeQuery();
+            int result = 0;
+            if (rs.next()) {
+                result = rs.getInt(1);
+            }
+            if (result > 0) {
+                return;
+            } else {
+                createIngredientList(recipeDTO);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
     public void createIngredientList(RecipeDTO recipeDTO) {
     /*    HashMap<String, IngredientDTO> ingredients = new HashMap<>();
@@ -107,9 +145,9 @@ public class ProductDAO {
 
             insertIngredientList.setInt(1, recipeDTO.getRecipeId());
 
-            for (IngredientDTO ingredient: recipeDTO.getIngredientsList()) {
+            for (IIngredientDTO ingredient : recipeDTO.getIngredientsList()) {
                 insertIngredientList.setInt(2, ingredient.getIngredientId());
-                insertIngredientList.setDouble(3,ingredient.getAmount());
+                insertIngredientList.setDouble(3, ingredient.getAmount());
                 insertIngredientList.executeUpdate();
             }
 
@@ -130,8 +168,9 @@ public class ProductDAO {
             e.printStackTrace();
         }
     }
-    public List<IIngredientDTO> getIngredientList(RecipeDTO recipeDTO){
-        List<IIngredientDTO>ingredientList = new ArrayList<>();
+
+    public List<IIngredientDTO> getIngredientList(RecipeDTO recipeDTO) {
+        List<IIngredientDTO> ingredientList = new ArrayList<>();
 
         try {
             PreparedStatement getIngredientList = conn.prepareStatement(
@@ -152,6 +191,7 @@ public class ProductDAO {
         return ingredientList;
 
     }
+
     public void createIngredient(IngredientDTO ingredientDTO) {
         try {
             conn.setAutoCommit(false);
@@ -161,7 +201,7 @@ public class ProductDAO {
 
             insertIngredient.setInt(1, ingredientDTO.getIngredientId());
             insertIngredient.setString(2, ingredientDTO.getName());
-            insertIngredient.setString(3,ingredientDTO.getType());
+            insertIngredient.setString(3, ingredientDTO.getType());
             insertIngredient.executeUpdate();
             conn.commit();
             System.out.println("The ingredient was successfully created.");

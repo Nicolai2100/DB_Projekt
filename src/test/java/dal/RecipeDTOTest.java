@@ -1,5 +1,6 @@
 package dal;
 
+import dal.dto.IIngredientDTO;
 import dal.dto.IngredientDTO;
 import dal.dto.RecipeDTO;
 import org.junit.Test;
@@ -15,55 +16,7 @@ public class RecipeDTOTest {
 
     @Test
     public void toStringTest() {
-        HashMap<String, IngredientDTO> inlist = new HashMap<>();
-
-        IngredientDTO ingredientDTO = new IngredientDTO();
-        ingredientDTO.setName("estradiol");
-        ingredientDTO.setType("active");
-        ingredientDTO.setIngredientId(1);
-        ingredientDTO.setAmount(1);
-        inlist.put(ingredientDTO.getName(), ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setName("norethisteronacetat");
-        ingredientDTO.setType("active");
-        ingredientDTO.setIngredientId(2);
-        ingredientDTO.setAmount(0.5);
-        inlist.put(ingredientDTO.getName(), ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setName("opovidon");
-        ingredientDTO.setType("helper");
-        ingredientDTO.setIngredientId(3);
-        ingredientDTO.setAmount(50);
-        inlist.put(ingredientDTO.getName(), ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setName("laktosemonohydrat");
-        ingredientDTO.setType("helper");
-        ingredientDTO.setIngredientId(4);
-        ingredientDTO.setAmount(10);
-        inlist.put(ingredientDTO.getName(), ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setName("magnesiumstearat");
-        ingredientDTO.setType("helper");
-        ingredientDTO.setIngredientId(5);
-        ingredientDTO.setAmount(15);
-        inlist.put(ingredientDTO.getName(), ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setName("majsstivelse");
-        ingredientDTO.setType("helper");
-        ingredientDTO.setIngredientId(6);
-        ingredientDTO.setAmount(120);
-        inlist.put(ingredientDTO.getName(), ingredientDTO);
-
-        recipeDTO.setIngredients(inlist);
-        recipeDTO.setName("norethisteron/estrogen");
-        recipeDTO.setRecipeId(2);
-        recipeDTO.setMadeBy(10);
-        System.out.println(recipeDTO);
+        HashMap<String, IIngredientDTO> inlist = new HashMap<>();
 
     }
 

@@ -5,12 +5,10 @@ import java.util.*;
 public class RecipeDTO {
     private int recipeId;
     private String name;
-    private int madeBy;
-    private HashMap<String, IngredientDTO> ingredients;
-    private List<IngredientDTO> ingredientsList;
+    private IUserDTO madeBy;
+    private List<IIngredientDTO> ingredientsList;
 
     public RecipeDTO() {
-        ingredients = new HashMap<>();
         ingredientsList = new ArrayList<>();
     }
 
@@ -19,12 +17,15 @@ public class RecipeDTO {
         String returnString = "RecipeID " + recipeId + " of type " + name + " made by userID: " + madeBy +
                 "\nIngredients: \n";
 
-        Iterator it = ingredients.entrySet().iterator();
+        for (IIngredientDTO ingredient: ingredientsList) {
+            returnString += "["+ingredient+"]\n";
+        }
+      /*  Iterator it = ingredients.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry pair = (Map.Entry) it.next();
             returnString += "[" + pair.getValue() + "]\n";
             it.remove(); // avoids a ConcurrentModificationException
-        }
+        }*/
         return returnString;
     }
 
@@ -44,27 +45,20 @@ public class RecipeDTO {
         this.name = name;
     }
 
-    public int getMadeBy() {
+    public IUserDTO getMadeBy() {
         return madeBy;
     }
 
-    public void setMadeBy(int madeBy) {
+    public void setMadeBy(IUserDTO madeBy) {
         this.madeBy = madeBy;
     }
 
-    public HashMap<String, IngredientDTO> getIngredients() {
-        return ingredients;
-    }
 
-    public void setIngredients(HashMap<String, IngredientDTO> ingredients) {
-        this.ingredients = ingredients;
-    }
-
-    public List<IngredientDTO> getIngredientsList() {
+    public List<IIngredientDTO> getIngredientsList() {
         return ingredientsList;
     }
 
-    public void setIngredientsList(List<IngredientDTO> ingredientsList) {
+    public void setIngredientsList(List<IIngredientDTO> ingredientsList) {
         this.ingredientsList = ingredientsList;
     }
 }
