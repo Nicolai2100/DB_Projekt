@@ -24,10 +24,6 @@ public class ProductDTO implements Serializable{
         this.productId = productId;
     }
 
-    public UserDTO getMadeby() {
-        return madeBy;
-    }
-
     public String getName() {
         return name;
     }

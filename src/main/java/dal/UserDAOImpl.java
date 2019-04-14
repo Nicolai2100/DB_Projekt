@@ -357,7 +357,6 @@ public class UserDAOImpl implements IUserDAO {
                     "CREATE TABLE if NOT EXISTS ingredientlist " +
                             "(ingredientlistid int, " +
                             "ingredient int, " +
-                            "ingredientlist int, " +
                             "primary key (ingredientlistid), " +
                             "FOREIGN KEY (ingredient) REFERENCES ingredient (ingredientid) " +
                             "ON update CASCADE);");
@@ -405,8 +404,6 @@ public class UserDAOImpl implements IUserDAO {
                             "madeby int, " +
                             "recipe int, " +
                             "primary key (productid), " +
-                            "FOREIGN KEY (madeby) " +
-                            "REFERENCES user (userid), " +
                             "FOREIGN KEY (recipe) " +
                             "REFERENCES recipe(recipeid));");
 

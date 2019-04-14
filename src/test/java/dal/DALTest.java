@@ -1,3 +1,5 @@
+package dal;
+
 import dal.IUserDAO;
 import dal.UserDAOImpl;
 import dal.dto.IUserDTO;
@@ -41,6 +43,19 @@ public class DALTest {
         userDAO.initializeDataBase();
     }
 
+    @Test
+    public void createUser() throws IUserDAO.DALException {
+        UserDTO testUser = new UserDTO();
+        testUser.setUserId(10);
+        testUser.setUserName("Per Hansen");
+        testUser.setIni("PH");
+        ArrayList<String> roles = new ArrayList();
+        roles.add("administrator");
+        roles.add("farmaceut");
+        testUser.setRoles(roles);
+        userDAO.createUser(testUser);
+
+    }
     @Test
     public void test() {
         try {
