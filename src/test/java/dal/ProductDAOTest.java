@@ -5,15 +5,18 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
 
 public class ProductDAOTest {
-    ProductDAO productDAO;
-    UserDAOImpl userDAO;
+    private ProductDAO productDAO;
+    private UserDAOImpl userDAO;
+    private Connection conn;
 
     @Before
     public void initialize() {
@@ -79,15 +82,24 @@ public class ProductDAOTest {
         userDAO.createUser(testUser2);
     }
 
-
     @Test
-    public void createCommodityBatch() {
-        ICommodityBatch commodityBatch = new CommodityBatchDTO();
+    public void getCommodityBatch() throws IUserDAO.DALException {
+        ICommodityBatchDTO batchFromDB = productDAO.getCommodityBatch(1);
+        System.out.println(batchFromDB);
+    }
+    @Test
+    public void createCommodityBatch() throws IUserDAO.DALException {
 
-
-/*
-       productDAO.createCommodityBatch();
-*/
+        ICommodityBatchDTO commodityBatch = new CommodityBatchDTO();
+        IUserDTO testUser = userDAO.getUser(5);
+        commodityBatch.setOrderedBy(testUser);
+        commodityBatch.setBatchId(2);
+        commodityBatch.setAmountInKg(2.5);
+        commodityBatch.setIngredientDTO(productDAO.getIngredient(1));
+        commodityBatch.setOrderDate(LocalDateTime.now().toString());
+        /*System.out.println(LocalDateTime.now().toString());
+        */
+       productDAO.createCommodityBatch(commodityBatch);
 
     }
 

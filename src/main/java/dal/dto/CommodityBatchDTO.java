@@ -1,19 +1,20 @@
 package dal.dto;
 
-public class CommodityBatchDTO implements ICommodityBatch{
+public class CommodityBatchDTO implements ICommodityBatchDTO {
     private int batchId;
-    private int ingredientId;
+    private IIngredientDTO ingredientDTO;
     private double amountInKg;
     private String orderDate;
-
     //User
-    private int orderedBy;
+    private IUserDTO orderedBy;
+
     public CommodityBatchDTO(){
     }
 
     @Override
     public String toString() {
-        return "Commodity batch: " + batchId + "ingredient: " + ingredientId + "amount: " + amountInKg + "ordered by " + orderedBy;
+        return "Commodity batch: " + batchId + "ingredient: " + ingredientDTO.getName() + "amount: " + amountInKg + " kg, " + "" +
+                "ordered by: " + orderedBy +", order date: " + orderDate;
     }
 
     @Override
@@ -27,13 +28,13 @@ public class CommodityBatchDTO implements ICommodityBatch{
     }
 
     @Override
-    public int getIngredientId() {
-        return ingredientId;
+    public IIngredientDTO getIngredientDTO() {
+        return ingredientDTO;
     }
 
     @Override
-    public void setIngredientId(int ingredientId) {
-        this.ingredientId = ingredientId;
+    public void setIngredientDTO(IIngredientDTO ingredientDTO) {
+        this.ingredientDTO = ingredientDTO;
     }
 
     @Override
@@ -58,11 +59,11 @@ public class CommodityBatchDTO implements ICommodityBatch{
 
     @Override
     public IUserDTO getOrderedBy() {
-        return null;
+        return orderedBy;
     }
 
     @Override
     public void setOrderedBy(IUserDTO userDTO) {
-
+        this.orderedBy = userDTO;
     }
 }

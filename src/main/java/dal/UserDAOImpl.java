@@ -77,7 +77,6 @@ public class UserDAOImpl implements IUserDAO {
     public IUserDTO getUser(int userId) throws DALException {
         boolean empty = true;
         UserDTO returnUser = new UserDTO();
-        Connection conn = null;
         try {
             conn = createConnection();
             PreparedStatement pSmtSelectUser = conn.prepareStatement(
@@ -92,7 +91,7 @@ public class UserDAOImpl implements IUserDAO {
                 returnUser.setUserId(rs.getInt(1));
                 returnUser.setUserName(rs.getString(2));
                 returnUser.setIni(rs.getString(3));
-                returnUser.setRoles(getUserRoleList(conn, userId));
+                returnUser.setRoles(getUserRoleList(userId));
             }
             if (empty) {
                 System.out.println("No such user in the database!");
@@ -107,7 +106,6 @@ public class UserDAOImpl implements IUserDAO {
     @Override
     public List<IUserDTO> getUserList() throws DALException {
         List<IUserDTO> userList = new ArrayList<>();
-        Connection conn = null;
         try {
             conn = createConnection();
             PreparedStatement pSmtSelectAllTable = conn.prepareStatement(
@@ -124,28 +122,19 @@ public class UserDAOImpl implements IUserDAO {
                 returnUser.setIni(rs.getString("ini"));
                 userList.add(returnUser);
             }
-
-            pSmtSelectAllTable.close();
+            getAllUsersRoles(userList);
         } catch (SQLException e) {
             System.out.println("Error " + e.getMessage());
-        } finally {
-            getAllUsersRoles(conn, userList);
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                System.out.println(e.getMessage());
-            }
         }
         return userList;
     }
 
     @Override
     public void updateUser(IUserDTO user) throws DALException {
-        Connection conn = null;
         try {
             conn = createConnection();
 
-            if (!peekUser(conn, user.getUserId())) {
+            if (!peekUser(user.getUserId())) {
                 System.out.println("No such user in the database!");
             } else {
                 conn.setAutoCommit(false);
@@ -159,29 +148,20 @@ public class UserDAOImpl implements IUserDAO {
                 pSmtUpdateUser.setString(2, user.getIni());
                 pSmtUpdateUser.setInt(3, user.getUserId());
                 pSmtUpdateUser.executeUpdate();
-                //Hvis brugeren har fået nye roller oprettes de - men sletter ikke, hvis han har fået dem fjernet!
 
-                roleTransAct(conn, user);
+                roleTransAct(user);
                 System.out.println("The user was successfully updated!");
                 conn.commit();
             }
         } catch (SQLException e) {
             System.out.println("Error! " + e.getMessage());
-        } finally {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                System.out.println(e.getMessage());
-            }
         }
     }
 
     @Override
     public void deleteUser(int userId) throws DALException {
         int result;
-        Connection conn = null;
         try {
-            conn = createConnection();
             PreparedStatement pSmtDeleteUser = conn.prepareStatement(
                     "DELETE FROM user " +
                             "WHERE userid = ?");
@@ -195,19 +175,14 @@ public class UserDAOImpl implements IUserDAO {
             pSmtDeleteUser.close();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
-        } finally {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                System.out.println(e.getMessage());
-            }
+
         }
     }
 
     /**
      * Metoden henter en specifik brugers roller og returnerer dem i en liste.
      */
-    public List<String> getUserRoleList(Connection conn, int userID) {
+    public List<String> getUserRoleList(int userID) {
         List<String> userRoleList = new ArrayList<>();
         try {
             PreparedStatement pSmtSelectUserRoles = conn.prepareStatement(
@@ -230,10 +205,10 @@ public class UserDAOImpl implements IUserDAO {
     /**
      * Metoden henter og gemmer roller for alle brugere i en liste.
      */
-    public void getAllUsersRoles(Connection conn, List<IUserDTO> userDTOList) {
+    public void getAllUsersRoles(List<IUserDTO> userDTOList) {
 
         for (IUserDTO user : userDTOList) {
-            List<String> userRoleList = getUserRoleList(conn, user.getUserId());
+            List<String> userRoleList = getUserRoleList(user.getUserId());
             user.setRoles(userRoleList);
         }
     }
@@ -265,7 +240,7 @@ public class UserDAOImpl implements IUserDAO {
      * brugeren får flere roller end denne bør have.
      */
 
-    public void roleTransAct(Connection conn, IUserDTO user) {
+    public void roleTransAct(IUserDTO user) {
         List<String> newUserRoles = user.getRoles();
         try {
             PreparedStatement deleteRolesFromDB = conn.prepareStatement(
@@ -299,7 +274,7 @@ public class UserDAOImpl implements IUserDAO {
      * Metoden bruges til at undersøge om der eksisterer en bruger med et
      * specifikt userid i user_table. Den returnerer false, hvis der ikke gør.
      */
-    public boolean peekUser(Connection conn, int userID) throws DALException {
+    public boolean peekUser(int userID) throws DALException {
         int returnInt = 0;
         try {
             PreparedStatement prep = conn.prepareStatement(
@@ -376,7 +351,7 @@ public class UserDAOImpl implements IUserDAO {
                             "ingredientid int, " +
                             "orderedby int, " +
                             "amountinkg int, " +
-                            "orderdate varchar(15), " +
+                            "orderdate varchar(25), " +
                             "primary key (commoditybatchid), " +
                             "FOREIGN KEY (orderedby) " +
                             "REFERENCES user (userid) " +
@@ -421,11 +396,8 @@ public class UserDAOImpl implements IUserDAO {
             createTableUserRole.execute();
             createTableingredient.execute();
             createTableingredientlist.execute();
-
             createTableRecipe.execute();
-
             createTableCommodityBatch.execute();
-
             createTableProduct.execute();
             createTableOldRecipe.execute();
 
@@ -447,13 +419,12 @@ public class UserDAOImpl implements IUserDAO {
 
     public void dropAllTables(int deleteTable) {
         try {
-
             PreparedStatement dropTableUser = conn.prepareStatement(
                     "drop table user;");
             PreparedStatement dropTableUserRole = conn.prepareStatement(
                     "drop table userrole;");
             PreparedStatement dropTableIngredientList = conn.prepareStatement(
-                    "DROP TABLE ingredientlist;");
+                    "DROP TABLE ingredient ist;");
             PreparedStatement dropTableIngredient = conn.prepareStatement(
                     "DROP TABLE ingredient;");
             PreparedStatement dropTableRecipe = conn.prepareStatement(
@@ -466,14 +437,11 @@ public class UserDAOImpl implements IUserDAO {
                     "DROP TABLE commoditybatch;");
 
             if (deleteTable == 0) {
-
                 dropTableOldRecipe.execute();
                 dropTableProduct.execute();
                 dropTableCommodityBatch.execute();
-
                 dropTableRecipe.execute();
                 dropTableIngredientList.execute();
-
                 dropTableIngredient.execute();
                 dropTableUserRole.execute();
                 dropTableUser.execute();

@@ -71,7 +71,7 @@ Produktion af produktbatches (Laborant)
 Lagerstatus af råvarer og råvarebatches (Produktionsleder)
 */
 
-    public void createCommodityBatch(ICommodityBatch commodityBatch) {
+    public void createCommodityBatch(ICommodityBatchDTO commodityBatch) {
         IUserDTO userDTO = commodityBatch.getOrderedBy();
         if (!userDTO.getRoles().contains("productleader")) {
             System.out.println("User not authorized to proceed!");
@@ -82,7 +82,7 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
                     "INSERT INTO commoditybatch " +
                             "VALUES(?,?,?,?,?)");
             stmtInsertProductBatch.setInt(1,commodityBatch.getBatchId());
-            stmtInsertProductBatch.setInt(2,commodityBatch.getIngredientId());
+            stmtInsertProductBatch.setInt(2,commodityBatch.getIngredientDTO().getIngredientId());
             stmtInsertProductBatch.setInt(3,commodityBatch.getOrderedBy().getUserId());
             stmtInsertProductBatch.setDouble(4, commodityBatch.getAmountInKg());
             stmtInsertProductBatch.setString(5, commodityBatch.getOrderDate());
@@ -92,9 +92,42 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
         }
     }
 
-    public ICommodityBatch getCommodityBatch() {
-        ICommodityBatch commodityBatch = new CommodityBatchDTO();
+    public ICommodityBatchDTO getCommodityBatch(int commodityBatchId) {
+        ICommodityBatchDTO commodityBatch = new CommodityBatchDTO();
+        commodityBatch.setBatchId(commodityBatchId);
+        IIngredientDTO ingredientDTO = new IngredientDTO();
+        IUserDTO userDTO = new UserDTO();
+        try{
+            PreparedStatement stmtGetCommodityBatch = conn.prepareStatement(
+              "SELECT * FROM commoditybatch " +
+                      "JOIN ingredient ON ingredient.ingredientid " +
+                      "JOIN user " +
+                      "ON orderedby = userid " +
+                      "WHERE commoditybatchid = ?;");
 
+            stmtGetCommodityBatch.setInt(1,commodityBatchId);
+
+            ResultSet rs = stmtGetCommodityBatch.executeQuery();
+            while (rs.next()){
+
+                ingredientDTO.setIngredientId(rs.getInt(6));
+                ingredientDTO.setName(rs.getString(7));
+                ingredientDTO.setType(rs.getString(8));
+
+                userDTO.setUserId(rs.getInt(9));
+                userDTO.setUserName(rs.getString(10));
+                userDTO.setIni(rs.getString(11));
+
+                userDTO.setRoles(userDAO.getUserRoleList(userDTO.getUserId()));
+
+                commodityBatch.setIngredientDTO(ingredientDTO);
+                commodityBatch.setOrderedBy(userDTO);
+                commodityBatch.setAmountInKg(rs.getDouble(4));
+                commodityBatch.setOrderDate(rs.getString(5));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
         return commodityBatch;
     }

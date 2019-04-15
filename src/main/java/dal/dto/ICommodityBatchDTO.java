@@ -1,14 +1,14 @@
 package dal.dto;
 
-public interface ICommodityBatch {
+public interface ICommodityBatchDTO {
 
     int getBatchId();
 
     void setBatchId(int batchId);
 
-    int getIngredientId();
+    IIngredientDTO getIngredientDTO();
 
-    void setIngredientId(int ingredientId);
+    void setIngredientDTO(IIngredientDTO ingredientDTO);
 
     double getAmountInKg();
 
