@@ -71,18 +71,18 @@ Produktion af produktbatches (Laborant)
 Lagerstatus af råvarer og råvarebatches (Produktionsleder)
 */
 
-    public void createCommodityStock(){
+    public void createCommodityStock() {
 
-        try{
+        try {
             PreparedStatement pstmtInsertCommodityStock = conn.prepareStatement(
                     "INSERT INTO commoditystock "
             );
-        }catch (SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public void getCommodityStock(){
+    public void getCommodityStock() {
 
     }
 
@@ -96,9 +96,9 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
             PreparedStatement pstmtInsertProductBatch = conn.prepareStatement(
                     "INSERT INTO commoditybatch " +
                             "VALUES(?,?,?,?,?)");
-            pstmtInsertProductBatch.setInt(1,commodityBatch.getBatchId());
-            pstmtInsertProductBatch.setInt(2,commodityBatch.getIngredientDTO().getIngredientId());
-            pstmtInsertProductBatch.setInt(3,commodityBatch.getOrderedBy().getUserId());
+            pstmtInsertProductBatch.setInt(1, commodityBatch.getBatchId());
+            pstmtInsertProductBatch.setInt(2, commodityBatch.getIngredientDTO().getIngredientId());
+            pstmtInsertProductBatch.setInt(3, commodityBatch.getOrderedBy().getUserId());
             pstmtInsertProductBatch.setDouble(4, commodityBatch.getAmountInKg());
             pstmtInsertProductBatch.setString(5, commodityBatch.getOrderDate());
             pstmtInsertProductBatch.executeUpdate();
@@ -112,18 +112,18 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
         commodityBatch.setBatchId(commodityBatchId);
         IIngredientDTO ingredientDTO = new IngredientDTO();
         IUserDTO userDTO = new UserDTO();
-        try{
+        try {
             PreparedStatement pstmtGetCommodityBatch = conn.prepareStatement(
-              "SELECT * FROM commoditybatch " +
-                      "JOIN ingredient ON ingredient.ingredientid " +
-                      "JOIN user " +
-                      "ON orderedby = userid " +
-                      "WHERE commoditybatchid = ?;");
+                    "SELECT * FROM commoditybatch " +
+                            "JOIN ingredient ON ingredient.ingredientid " +
+                            "JOIN user " +
+                            "ON orderedby = userid " +
+                            "WHERE commoditybatchid = ?;");
 
-            pstmtGetCommodityBatch.setInt(1,commodityBatchId);
+            pstmtGetCommodityBatch.setInt(1, commodityBatchId);
 
             ResultSet rs = pstmtGetCommodityBatch.executeQuery();
-            while (rs.next()){
+            while (rs.next()) {
 
                 ingredientDTO.setIngredientId(rs.getInt(6));
                 ingredientDTO.setName(rs.getString(7));
@@ -277,8 +277,6 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
                 ingredientList.add(ingredientDTO);
 
 
-
-
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -292,11 +290,12 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
             conn.setAutoCommit(false);
             PreparedStatement pstmtInsertIngredient = conn.prepareStatement(
                     "INSERT INTO ingredient " +
-                            "VALUES(?,?,?)");
+                            "VALUES(?,?,?,?)");
 
             pstmtInsertIngredient.setInt(1, ingredientDTO.getIngredientId());
             pstmtInsertIngredient.setString(2, ingredientDTO.getName());
             pstmtInsertIngredient.setString(3, ingredientDTO.getType());
+            pstmtInsertIngredient.setInt(4, 1);
             pstmtInsertIngredient.executeUpdate();
             conn.commit();
             System.out.println("The ingredient was successfully created.");
@@ -355,4 +354,62 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
         return returnInt;
     }
 
+    public List<IIngredientDTO> checkForReorder() {
+        List<IIngredientDTO> toBeOrdered = new ArrayList<>();
+        try {
+            PreparedStatement pstmtGetReorder = conn.prepareStatement(
+                    "SELECT * " +
+                        "FROM ingredient " +
+                        "WHERE reorder = 1;");
+            ResultSet rs = pstmtGetReorder.executeQuery();
+
+            while (rs.next()){
+                IIngredientDTO ingredientDTO = new IngredientDTO();
+                ingredientDTO.setIngredientId(rs.getInt(1));
+                ingredientDTO.setName(rs.getString(2));
+                ingredientDTO.setType(rs.getString(3));
+                toBeOrdered.add(ingredientDTO);
+
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return toBeOrdered;
+    }
+    public void createTriggerForIngredient(){
+        try{
+            PreparedStatement pstmtDropTrigger = conn.prepareStatement(
+                    "DROP TRIGGER IF EXISTS 'set_reorder'");
+
+            PreparedStatement pstmtCreateTrigger = conn.prepareStatement(
+                    "CREATE TRIGGER 'set_reorder' AFTER UPDATE ON commoditybatch " +
+                            "FOR EACH ROW BEGIN " +
+                            "    set ingredient.reorder = 0 " +
+                            "    where ingredient.ingredient.id = commoditybatch.ingredientid " +
+                            "END;");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /*con.createStatement().execute("DROP TRIGGER IF EXISTS `insert_associated_inquiry`");
+
+triggerBuilder.append(" CREATE TRIGGER insert_associated_inquiry BEFORE UPDATE ON inquiry ");
+triggerBuilder.append(" FOR EACH ROW Begin ");
+
+triggerBuilder.append(" insert into associated_inquiries(inquiry_id , subject , content , inquiry_date , preferred_date ) " );
+triggerBuilder.append("values");
+        triggerBuilder.append(" ( " );
+            triggerBuilder.append(" OLD.id , ");
+            triggerBuilder.append(" OLD.subject , " );
+            triggerBuilder.append(" OLD.content , " );
+            triggerBuilder.append(" OLD.created_on , " );
+            triggerBuilder.append(" OLD.preffered_date " );
+        triggerBuilder.append(" ) ; ");
+
+triggerBuilder.append(" END ");
+
+con.createStatement().execute(triggerBuilder.toString());
+*/
 }

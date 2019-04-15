@@ -350,6 +350,7 @@ public class UserDAOImpl implements IUserDAO {
                             "orderedby INT, " +
                             "amountinkg INT, " +
                             "orderdate VARCHAR(25), " +
+                            "residue BIT, " +
                             "PRIMARY KEY (commoditybatchid), " +
                             "FOREIGN KEY (orderedby) " +
                             "REFERENCES user (userid), " +

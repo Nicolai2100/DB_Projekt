@@ -55,7 +55,11 @@ public class ProductDAOTest {
          */
         productDAO.createProduct(productDTO);
     }
+    @Test
+    public void createTrigger() throws IUserDAO.DALException {
+        productDAO.createTriggerForIngredient();
 
+    }
     @Test
     public void createUser() throws IUserDAO.DALException {
 
@@ -81,8 +85,17 @@ public class ProductDAOTest {
     }
 
     @Test
+    public void checkForReorder(){
+        List<IIngredientDTO> ingredientDTOS = productDAO.checkForReorder();
+
+        for (IIngredientDTO ing: ingredientDTOS) {
+            System.out.println(ing);
+        }
+    }
+
+    @Test
     public void getCommodityBatch() throws IUserDAO.DALException {
-        ICommodityBatchDTO batchFromDB = productDAO.getCommodityBatch(1);
+        ICommodityBatchDTO batchFromDB = productDAO.getCommodityBatch(2);
         System.out.println(batchFromDB);
     }
     @Test
