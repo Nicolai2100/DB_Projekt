@@ -302,94 +302,92 @@ public class UserDAOImpl implements IUserDAO {
         try {
             conn.setAutoCommit(false);
             PreparedStatement createTableUser = conn.prepareStatement(
-                    "CREATE TABLE if NOT EXISTS user " +
-                            "(userid int NOT NULL AUTO_INCREMENT, " +
-                            "name varchar(30) NOT NULL, " +
-                            "ini varchar(5), " +
-                            "admin int NULL, " +
-                            "primary key (userid), " +
+                    "CREATE TABLE IF NOT EXISTS user " +
+                            "(userid INT, " +
+                            "name VARCHAR(30) NOT NULL, " +
+                            "ini VARCHAR(5), " +
+                            "admin INT NULL, " +
+                            "PRIMARY KEY (userid), " +
                             "FOREIGN KEY (admin) " +
-                            "references user (userid));");
+                            "REFERENCES user (userid));");
 
             PreparedStatement createTableUserRole = conn.prepareStatement(
-                    "CREATE TABLE if NOT EXISTS userrole " +
+                    "CREATE TABLE IF NOT EXISTS userrole " +
                             "(userid int, " +
-                            "role varchar(30), " +
-                            "primary key (userid, role), " +
+                            "role VARCHAR(30), " +
+                            "PRIMARY KEY (userid, role), " +
                             "FOREIGN KEY (userid) REFERENCES user (userid) " +
-                            "ON DELETE CASCADE " +
-                            "ON UPDATE CASCADE);");
+                            "ON DELETE CASCADE);");
 
             PreparedStatement createTableingredient = conn.prepareStatement(
-                    "CREATE TABLE if NOT EXISTS ingredient " +
-                            "(ingredientid int, " +
-                            "name varchar(50), " +
-                            "type varchar(15), " +
-                            "primary key (ingredientid));");
+                    "CREATE TABLE IF NOT EXISTS ingredient " +
+                            "(ingredientid INT, " +
+                            "name VARCHAR(50), " +
+                            "type VARCHAR(15), " +
+                            "reorder BIT, " +
+                            "PRIMARY KEY (ingredientid));");
 
             PreparedStatement createTableingredientlist = conn.prepareStatement(
-                    "CREATE TABLE if NOT EXISTS ingredientlist " +
-                            "(ingredientlistid int, " +
-                            "ingredient int, " +
-                            "amountmg float, " +
-                            "primary key (ingredientlistid, ingredient));");
+                    "CREATE TABLE IF NOT EXISTS ingredientlist " +
+                            "(ingredientlistid INT, " +
+                            "ingredientid INT, " +
+                            "amountmg FLOAT, " +
+                            "PRIMARY KEY (ingredientlistid, ingredientid));");
 
             PreparedStatement createTableRecipe = conn.prepareStatement(
-                    "CREATE TABLE if NOT EXISTS recipe " +
-                            "(recipeid int," +
-                            "name varchar(50), " +
-                            "madeby int, " +
-                            "ingredientlist int, " +
-                            "primary key (recipeid), " +
+                    "CREATE TABLE IF NOT EXISTS recipe " +
+                            "(recipeid INT," +
+                            "name VARCHAR(50), " +
+                            "madeby INT, " +
+                            "ingredientlistidid INT, " +
+                            "PRIMARY KEY (recipeid), " +
                             "FOREIGN KEY (madeby) REFERENCES user (userid));");
-
-            //pas på med cascade her - skal ikke slettes når bruger slettes
 
             PreparedStatement createTableCommodityBatch = conn.prepareStatement(
                     "CREATE TABLE if NOT EXISTS commoditybatch " +
-                            "(commoditybatchid int, " +
-                            "ingredientid int, " +
-                            "orderedby int, " +
-                            "amountinkg int, " +
-                            "orderdate varchar(25), " +
-                            "primary key (commoditybatchid), " +
+                            "(commoditybatchid INT, " +
+                            "ingredientid INT, " +
+                            "orderedby INT, " +
+                            "amountinkg INT, " +
+                            "orderdate VARCHAR(25), " +
+                            "PRIMARY KEY (commoditybatchid), " +
                             "FOREIGN KEY (orderedby) " +
-                            "REFERENCES user (userid) " +
-                            "ON DELETE CASCADE, " +
-                            "foreign key (ingredientid) " +
-                            " references ingredient(ingredientid));");
+                            "REFERENCES user (userid), " +
+                            "FOREIGN KEY (ingredientid) " +
+                            "REFERENCES ingredient(ingredientid));");
 
-            //Nødvendig?????
-           /* PreparedStatement createTableCommodityStock = conn.prepareStatement(
-                    "CREATE TABLE if NOT EXISTS commoditystock " +
-                            "(commodity int, " +
-                            "amountinkg int, " +
-                            "primary key (commoditybatchid), " +
-                            "FOREIGN KEY (commodity) REFERENCES commoditybatch (commoditybatchid) " +
-                            "ON DELETE CASCADE);");
-*/
+            //Nødvendig?
+       /*     PreparedStatement createTableCommodityStock = conn.prepareStatement(
+                    "CREATE TABLE IF NOT EXISTS commoditystock " +
+                            "(commoditybatchid INT, " +
+                            "amountinkg INT, " +
+                            "expirationdate VARCHAR(60), " +
+                            "PRIMARY KEY (commoditybatchid), " +
+                            "FOREIGN KEY (commoditybatchid) REFERENCES commoditybatch (commoditybatchid) " +
+                            "ON DELETE CASCADE);");*/
+
             PreparedStatement createTableProduct = conn.prepareStatement(
-                    "CREATE TABLE if NOT EXISTS product " +
-                            "(productid int, " +
-                            "name varchar(50) not null, " +
-                            "madeby int, " +
-                            "recipe int, " +
-                            "primary key (productid), " +
+                    "CREATE TABLE IF NOT EXISTS product " +
+                            "(productid INT, " +
+                            "name VARCHAR(50) NOT NULL, " +
+                            "madeby INT, " +
+                            "recipe INT, " +
+                            "PRIMARY KEY (productid), " +
                             "FOREIGN KEY (recipe) " +
                             "REFERENCES recipe(recipeid));");
 
             PreparedStatement createTableOldRecipe = conn.prepareStatement(
-                    "CREATE TABLE if NOT EXISTS oldrecipe " +
-                            "(recipeid int, " +
-                            "name varchar(50) not null, " +
-                            "madeby int, " +
+                    "CREATE TABLE IF NOT EXISTS oldrecipe " +
+                            "(recipeid INT, " +
+                            "name VARCHAR(50) NOT NULL, " +
+                            "madeby INT, " +
                             "ingredientlist int, " +
-                            "outdated varchar(50) not null, " +
-                            "primary key (recipeid), " +
+                            "outdated VARCHAR(50) NOT NULL, " +
+                            "PRIMARY KEY (recipeid), " +
                             "FOREIGN KEY (madeby) " +
                             "REFERENCES user (userid), " +
-                            "foreign key (recipeid) " +
-                            "references ingredientlist(ingredientlistid));");
+                            "FOREIGN KEY (recipeid) " +
+                            "REFERENCES ingredientlist(ingredientlistid));");
 
             //rækkefølgen er vigtig!
             createTableUser.execute();
@@ -400,17 +398,10 @@ public class UserDAOImpl implements IUserDAO {
             createTableCommodityBatch.execute();
             createTableProduct.execute();
             createTableOldRecipe.execute();
+            //createTableCommodityStock.execute();
 
-/*
-            createTableCommodityStock.execute();
-*/
-
-/*
-            createTableProperty.execute();
-*/
-/*
+            //createTableProperty.execute();
             conn.commit();
-*/
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -424,7 +415,7 @@ public class UserDAOImpl implements IUserDAO {
             PreparedStatement dropTableUserRole = conn.prepareStatement(
                     "drop table userrole;");
             PreparedStatement dropTableIngredientList = conn.prepareStatement(
-                    "DROP TABLE ingredient ist;");
+                    "DROP TABLE ingredientlist;");
             PreparedStatement dropTableIngredient = conn.prepareStatement(
                     "DROP TABLE ingredient;");
             PreparedStatement dropTableRecipe = conn.prepareStatement(
@@ -435,8 +426,11 @@ public class UserDAOImpl implements IUserDAO {
                     "DROP TABLE product;");
             PreparedStatement dropTableCommodityBatch = conn.prepareStatement(
                     "DROP TABLE commoditybatch;");
+            PreparedStatement dropTableCommodityStock = conn.prepareStatement(
+                    "DROP TABLE commoditystock;");
 
             if (deleteTable == 0) {
+                dropTableCommodityStock.execute();
                 dropTableOldRecipe.execute();
                 dropTableProduct.execute();
                 dropTableCommodityBatch.execute();
@@ -445,6 +439,7 @@ public class UserDAOImpl implements IUserDAO {
                 dropTableIngredient.execute();
                 dropTableUserRole.execute();
                 dropTableUser.execute();
+
             }
         } catch (SQLException e) {
             e.printStackTrace();

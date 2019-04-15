@@ -253,7 +253,7 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
                 }*/
 
             conn.commit();
-            System.out.println("The ingredient list was successfully created.");
+            System.out.println("The ingredientlist was successfully created.");
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -265,7 +265,7 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
 
         try {
             PreparedStatement pstmtGetIngredientList = conn.prepareStatement(
-                    "SELECT ingredient, amountmg FROM ingredientlist " +
+                    "SELECT * FROM ingredientlist " +
                             "WHERE ingredientlistid = ?;");
 
             pstmtGetIngredientList.setInt(1, recipeDTO.getRecipeId());
@@ -275,6 +275,10 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
                 IIngredientDTO ingredientDTO = getIngredient(rs.getInt(1));
                 ingredientDTO.setAmount(rs.getDouble(2));
                 ingredientList.add(ingredientDTO);
+
+
+
+
             }
         } catch (SQLException e) {
             e.printStackTrace();

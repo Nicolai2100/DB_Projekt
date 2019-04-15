@@ -59,7 +59,7 @@ public class ProductDAOTest {
     @Test
     public void createUser() throws IUserDAO.DALException {
 
-        /*UserDTO testUser = new UserDTO();
+        UserDTO testUser = new UserDTO();
         testUser.setUserId(10);
         testUser.setUserName("Puk Hansen");
         testUser.setIni("PH");
@@ -68,17 +68,15 @@ public class ProductDAOTest {
         roles.add("farmaceut");
         testUser.setRoles(roles);
         userDAO.createUser(testUser);
-        */
 
-        IUserDTO testUser = userDAO.getUser(10);
         IUserDTO testUser2 = new UserDTO();
         testUser2.setUserId(5);
         testUser2.setUserName("Pælle Hansen");
         testUser2.setIni("PH");
-        ArrayList<String> roles = new ArrayList();
+        ArrayList<String> roles2 = new ArrayList();
         roles.add("administrator");
         roles.add("productleader");
-        testUser2.setRoles(roles);
+        testUser2.setRoles(roles2);
         userDAO.createUser(testUser2);
     }
 
