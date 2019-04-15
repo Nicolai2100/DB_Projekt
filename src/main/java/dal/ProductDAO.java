@@ -71,20 +71,6 @@ Produktion af produktbatches (Laborant)
 Lagerstatus af råvarer og råvarebatches (Produktionsleder)
 */
 
-    public void createCommodityStock() {
-
-        try {
-            PreparedStatement pstmtInsertCommodityStock = conn.prepareStatement(
-                    "INSERT INTO commoditystock "
-            );
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void getCommodityStock() {
-
-    }
 
     public void createCommodityBatch(ICommodityBatchDTO commodityBatch) {
         IUserDTO userDTO = commodityBatch.getOrderedBy();
@@ -143,7 +129,6 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return commodityBatch;
     }
 
@@ -291,7 +276,6 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
             PreparedStatement pstmtInsertIngredient = conn.prepareStatement(
                     "INSERT INTO ingredient " +
                             "VALUES(?,?,?,?)");
-
             pstmtInsertIngredient.setInt(1, ingredientDTO.getIngredientId());
             pstmtInsertIngredient.setString(2, ingredientDTO.getName());
             pstmtInsertIngredient.setString(3, ingredientDTO.getType());
