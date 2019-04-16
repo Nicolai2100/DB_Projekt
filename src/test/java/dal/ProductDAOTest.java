@@ -117,7 +117,7 @@ public class ProductDAOTest {
     @Test
     public void createRecipe() throws IUserDAO.DALException {
         IRecipeDTO recipeDTO = new RecipeDTO();
-        recipeDTO.setRecipeId(2);
+        recipeDTO.setRecipeId(3);
         recipeDTO.setName("Norethisteron/estrogen");
         recipeDTO.setMadeBy(userDAO.getUser(10));
         recipeDTO.setIngredientsList(productDAO.getIngredientList(recipeDTO));
@@ -237,9 +237,9 @@ public class ProductDAOTest {
     @Test
     public void runItAll() throws IUserDAO.DALException {
         DALTest dalTest = new DALTest();
-        dalTest.dropAllTables();
+      /*  dalTest.dropAllTables();
         dalTest.initializeDataBase();
-        createTriggers();
+        createTriggers();*/
         dalTest.createUser();
         createIngredient();
         createIngredientList();
