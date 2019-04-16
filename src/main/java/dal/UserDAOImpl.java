@@ -64,12 +64,6 @@ public class UserDAOImpl implements IUserDAO {
 
         } catch (SQLException e) {
             System.out.println("Error! " + e.getMessage());
-        } finally {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                System.out.println(e.getMessage());
-            }
         }
     }
 
@@ -164,7 +158,7 @@ public class UserDAOImpl implements IUserDAO {
         try {
             PreparedStatement pSmtDeleteUser = conn.prepareStatement(
                     "DELETE FROM user " +
-                            "WHERE userid = ?");
+                            "WHERE userid = ?;");
             pSmtDeleteUser.setInt(1, userId);
             result = pSmtDeleteUser.executeUpdate();
             if (result == 1) {
@@ -342,31 +336,35 @@ public class UserDAOImpl implements IUserDAO {
             PreparedStatement createTableingredientlist = conn.prepareStatement(
                     "CREATE TABLE IF NOT EXISTS ingredientlist " +
                             "(ingredientlistid INT, " +
+                            "edition INT, " +
                             "ingredientid INT, " +
                             "amountmg FLOAT, " +
-                            "PRIMARY KEY (ingredientlistid, ingredientid));");
+                            "PRIMARY KEY (ingredientlistid, edition, ingredientid));");
 
             PreparedStatement createTableRecipe = conn.prepareStatement(
                     "CREATE TABLE IF NOT EXISTS recipe " +
-                            "(recipeid INT," +
+                            "(recipeid INT, " +
+                            "edition INT, " +
                             "name VARCHAR(50), " +
                             "madeby INT, " +
                             "ingredientlistid INT, " +
                             "PRIMARY KEY (recipeid), " +
-                            "FOREIGN KEY (madeby) REFERENCES user (userid));");
+                            "FOREIGN KEY (ingredientlistid) " +
+                            "REFERENCES ingredientlist (ingredientlistid), " +
+                            "FOREIGN KEY (madeby) " +
+                            "REFERENCES user (userid));");
 
             PreparedStatement createTableOldRecipe = conn.prepareStatement(
                     "CREATE TABLE IF NOT EXISTS oldrecipe " +
                             "(recipeid INT, " +
+                            "edition INT, " +
                             "name VARCHAR(50) NOT NULL, " +
                             "madeby INT, " +
-                            "ingredientlist int, " +
+                            "ingredientlistid INT, " +
                             "outdated TIMESTAMP NOT NULL, " +
-                            "PRIMARY KEY (recipeid), " +
+                            "PRIMARY KEY (recipeid, edition), " +
                             "FOREIGN KEY (madeby) " +
-                            "REFERENCES user (userid), " +
-                            "FOREIGN KEY (recipeid) " +
-                            "REFERENCES ingredientlist(ingredientlistid));");
+                            "REFERENCES user (userid));");
 
             PreparedStatement createTableCommodityBatch = conn.prepareStatement(
                     "CREATE TABLE if NOT EXISTS commoditybatch " +
@@ -412,8 +410,6 @@ public class UserDAOImpl implements IUserDAO {
             createTableCommodityBatch.execute();
             createTableProduct.execute();
             createTableOldRecipe.execute();
-            //createTableCommodityStock.execute();
-
             //createTableProperty.execute();
             conn.commit();
 
@@ -425,34 +421,32 @@ public class UserDAOImpl implements IUserDAO {
     public void dropAllTables(int deleteTable) {
         try {
             PreparedStatement dropTableUser = conn.prepareStatement(
-                    "drop table user;");
+                    "drop table IF EXISTS user;");
             PreparedStatement dropTableUserRole = conn.prepareStatement(
-                    "drop table userrole;");
+                    "drop table IF EXISTS userrole;");
             PreparedStatement dropTableIngredientList = conn.prepareStatement(
-                    "DROP TABLE ingredientlist;");
+                    "DROP TABLE IF EXISTS ingredientlist;");
             PreparedStatement dropTableIngredient = conn.prepareStatement(
-                    "DROP TABLE ingredient;");
+                    "DROP TABLE IF EXISTS ingredient;");
             PreparedStatement dropTableRecipe = conn.prepareStatement(
-                    "DROP TABLE recipe;");
+                    "DROP TABLE IF EXISTS recipe;");
             PreparedStatement dropTableOldRecipe = conn.prepareStatement(
-                    "DROP TABLE oldrecipe;");
+                    "DROP TABLE IF EXISTS oldrecipe;");
             PreparedStatement dropTableProduct = conn.prepareStatement(
-                    "DROP TABLE product;");
+                    "DROP TABLE IF EXISTS product;");
             PreparedStatement dropTableCommodityBatch = conn.prepareStatement(
-                    "DROP TABLE commoditybatch;");
-            PreparedStatement dropTableCommodityStock = conn.prepareStatement(
-                    "DROP TABLE commoditystock;");
+                    "DROP TABLE IF EXISTS commoditybatch;");
+
 
             if (deleteTable == 0) {
-                //dropTableCommodityStock.execute();
                 dropTableOldRecipe.execute();
                 dropTableProduct.execute();
                 dropTableCommodityBatch.execute();
                 dropTableRecipe.execute();
                 dropTableIngredientList.execute();
-                /*dropTableIngredient.execute();
+                dropTableIngredient.execute();
                 dropTableUserRole.execute();
-                dropTableUser.execute();*/
+                dropTableUser.execute();
 
             }
         } catch (SQLException e) {

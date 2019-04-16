@@ -5,7 +5,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -62,34 +61,7 @@ public class ProductDAOTest {
     }
 
 
-    @Test
-    public void createTrigger() throws IUserDAO.DALException {
-        productDAO.createTriggerReorder();
 
-    }
-    @Test
-    public void createUser() throws IUserDAO.DALException {
-
-        UserDTO testUser = new UserDTO();
-        testUser.setUserId(10);
-        testUser.setUserName("Puk Hansen");
-        testUser.setIni("PH");
-        ArrayList<String> roles = new ArrayList();
-        roles.add("administrator");
-        roles.add("farmaceut");
-        testUser.setRoles(roles);
-        userDAO.createUser(testUser);
-
-        IUserDTO testUser2 = new UserDTO();
-        testUser2.setUserId(5);
-        testUser2.setUserName("Pælle Hansen");
-        testUser2.setIni("PH");
-        ArrayList<String> roles2 = new ArrayList();
-        roles.add("administrator");
-        roles.add("productleader");
-        testUser2.setRoles(roles2);
-        userDAO.createUser(testUser2);
-    }
 
     @Test
     public void checkForReorder(){
@@ -119,6 +91,22 @@ public class ProductDAOTest {
        productDAO.createCommodityBatch(commodityBatch);
 
     }
+
+
+    @Test
+    public void createTriggers() {
+        productDAO.createTriggerOldRecipe();
+        productDAO.createTriggerReorder();
+    }
+
+
+        @Test
+    public void updateRecipe() {
+        IRecipeDTO recipeDTO = productDAO.getRecipe(2);
+        recipeDTO.setName("snillert");
+        productDAO.updateRecipe(recipeDTO);
+    }
+
 
     @Test
     public void getRecipe() {
@@ -244,5 +232,20 @@ public class ProductDAOTest {
         IIngredientDTO ingredientDTO = productDAO.getIngredient(1);
         assertEquals(ingredientDTO.getType(), "active");
         System.out.println(ingredientDTO);
+    }
+
+    @Test
+    public void runItAll() throws IUserDAO.DALException {
+        DALTest dalTest = new DALTest();
+        dalTest.dropAllTables();
+        dalTest.initializeDataBase();
+        createTriggers();
+        dalTest.createUser();
+        createIngredient();
+        createIngredientList();
+        createRecipe();
+        deleteRecipe();
+
+
     }
 }

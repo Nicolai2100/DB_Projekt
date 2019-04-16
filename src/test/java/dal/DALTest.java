@@ -22,11 +22,6 @@ public class DALTest {
     public void ini() throws IUserDAO.DALException {
     }
 
-    @Test
-    public void testConn() throws IUserDAO.DALException {
-        userDAO.createConnection();
-    }
-
 
     @Test
     public void deleteUser() throws IUserDAO.DALException {
@@ -45,9 +40,10 @@ public class DALTest {
 
     @Test
     public void createUser() throws IUserDAO.DALException {
+
         UserDTO testUser = new UserDTO();
         testUser.setUserId(10);
-        testUser.setUserName("Per Hansen");
+        testUser.setUserName("Puk Hansen");
         testUser.setIni("PH");
         ArrayList<String> roles = new ArrayList();
         roles.add("administrator");
@@ -55,6 +51,15 @@ public class DALTest {
         testUser.setRoles(roles);
         userDAO.createUser(testUser);
 
+        IUserDTO testUser2 = new UserDTO();
+        testUser2.setUserId(5);
+        testUser2.setUserName("Pælle Hansen");
+        testUser2.setIni("PH");
+        ArrayList<String> roles2 = new ArrayList();
+        roles.add("administrator");
+        roles.add("productleader");
+        testUser2.setRoles(roles2);
+        userDAO.createUser(testUser2);
     }
     @Test
     public void test() {

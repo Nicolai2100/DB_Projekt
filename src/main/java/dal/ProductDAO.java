@@ -16,8 +16,7 @@ public class ProductDAO {
         } catch (IUserDAO.DALException e) {
             e.printStackTrace();
         }
-        createTriggerReorder();
-        createTriggerOldRecipe();
+
     }
 
     public Connection getConn() {
@@ -135,6 +134,44 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
         return commodityBatch;
     }
 
+    public void updateRecipe(IRecipeDTO recipeDTO) {
+        IUserDTO userDTO = recipeDTO.getMadeBy();
+        if (!userDTO.getRoles().contains("farmaceut")) {
+            System.out.println("User not authorized to proceed!");
+            return;
+        }
+        try {
+            conn.setAutoCommit(false);
+
+            PreparedStatement pstmtGetEdition = conn.prepareStatement(
+                    "SELECT edition " +
+                            "FROM recipe " +
+                            "WHERE recipeid = ?;");
+            pstmtGetEdition.setInt(1, recipeDTO.getRecipeId());
+            ResultSet rs = pstmtGetEdition.executeQuery();
+            int edition = 1;
+            if (rs.next()) {
+                edition += rs.getInt(1);
+            }
+            PreparedStatement pstmtUpdateRecipe = conn.prepareStatement(
+                    "UPDATE recipe " +
+                            "SET " +
+                            "edition = ?, " +
+                            "name = ?, " +
+                            "madeby = ?;");
+
+            pstmtUpdateRecipe.setInt(1, edition);
+            pstmtUpdateRecipe.setString(2, recipeDTO.getName());
+            pstmtUpdateRecipe.setInt(3, recipeDTO.getMadeBy().getUserId());
+
+            //Hver liste af ingredienser bliver oprettet med opskriftens id som id... !?
+            updateIngredientList(recipeDTO, edition);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     public void createRecipe(IRecipeDTO recipeDTO) {
         //Først undersøges det om brugeren, der står på til at have oprettet opskriften har
         //den rette rolle til at kunne gøre det.
@@ -145,18 +182,19 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
         }
         try {
             conn.setAutoCommit(false);
-            PreparedStatement pstmtInsertProduct = conn.prepareStatement(
+            PreparedStatement pstmtInsertRecipe = conn.prepareStatement(
                     "INSERT INTO recipe " +
-                            "VALUES(?,?,?,?)");
+                            "VALUES(?,?,?,?,?)");
 
-            pstmtInsertProduct.setInt(1, recipeDTO.getRecipeId());
-            pstmtInsertProduct.setString(2, recipeDTO.getName());
-            pstmtInsertProduct.setInt(3, recipeDTO.getMadeBy().getUserId());
+            pstmtInsertRecipe.setInt(1, recipeDTO.getRecipeId());
+            pstmtInsertRecipe.setInt(2, 1);
+            pstmtInsertRecipe.setString(3, recipeDTO.getName());
+            pstmtInsertRecipe.setInt(4, recipeDTO.getMadeBy().getUserId());
             //Hver liste af ingredienser bliver oprettet med opskriftens id som id... !?
-            pstmtInsertProduct.setInt(4, recipeDTO.getRecipeId());
+            pstmtInsertRecipe.setInt(5, recipeDTO.getRecipeId());
 
             peakIngredientList(recipeDTO);
-            pstmtInsertProduct.executeUpdate();
+            pstmtInsertRecipe.executeUpdate();
             conn.commit();
             System.out.println("The recipe was successfully created.");
         } catch (SQLException e) {
@@ -186,16 +224,20 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
         return recipeDTO;
     }
 
-    public void deleteRecipe(int recepeId) {
+    public void deleteRecipe(int recipeId) {
         try {
             PreparedStatement pstmtDeleteRecipe = conn.prepareStatement(
                     "DELETE FROM recipe " +
-                            "WHERE recipeid = ?");
-            pstmtDeleteRecipe.setInt(1, recepeId);
+                            "WHERE recipeid = ?;");
+            pstmtDeleteRecipe.setInt(1, recipeId);
             int result = pstmtDeleteRecipe.executeUpdate();
             System.out.println(result);
+            //Validerer ikke korrekt
+            System.out.println("The recipe with id: " + recipeId + " was successfully deleted.");
         } catch (SQLException e) {
             e.printStackTrace();
+            System.out.println("The recipe was not deleted.");
+
         }
     }
 
@@ -226,33 +268,42 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
         }
     }
 
-    public void createIngredientList(IRecipeDTO recipeDTO) {
-    /*    HashMap<String, IngredientDTO> ingredients = new HashMap<>();
-        ingredients = recipeDTO.getIngredients();*/
+    public void updateIngredientList(IRecipeDTO recipeDTO, int edition) {
         try {
             conn.setAutoCommit(false);
             PreparedStatement pstmtInsertIngredientList = conn.prepareStatement(
-                    "INSERT INTO ingredientlist " +
-                            "VALUES(?,?,?)");
-
+                    "INSERT INTO ingredientlist(ingredientlistid, edition, ingredientid, amountmg) " +
+                            "VALUES(?,?,?,?)");
             pstmtInsertIngredientList.setInt(1, recipeDTO.getRecipeId());
 
             for (IIngredientDTO ingredient : recipeDTO.getIngredientsList()) {
-                pstmtInsertIngredientList.setInt(2, ingredient.getIngredientId());
-                pstmtInsertIngredientList.setDouble(3, ingredient.getAmount());
+                pstmtInsertIngredientList.setInt(2, edition);
+                pstmtInsertIngredientList.setInt(3, ingredient.getIngredientId());
+                pstmtInsertIngredientList.setDouble(4, ingredient.getAmount());
                 pstmtInsertIngredientList.executeUpdate();
             }
+            conn.commit();
+            System.out.println("The ingredientlist was successfully updated.");
 
-           /* Iterator it = ingredients.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry pair = (Map.Entry) it.next();
-                IngredientDTO ingredientDTO = (IngredientDTO) pair.getValue();
-                stmtInsertIngredientList.setInt(2, ingredientDTO.getIngredientId());
-                stmtInsertIngredientList.setDouble(3, ingredientDTO.getAmountInMG());
-                stmtInsertIngredientList.executeUpdate();
-                it.remove(); // avoids a ConcurrentModificationException
-                }*/
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
+    public void createIngredientList(IRecipeDTO recipeDTO) {
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement pstmtInsertIngredientList = conn.prepareStatement(
+                    "INSERT INTO ingredientlist(ingredientlistid, edition, ingredientid, amountmg) " +
+                            "VALUES(?,?,?,?)");
+            pstmtInsertIngredientList.setInt(1, recipeDTO.getRecipeId());
+
+            for (IIngredientDTO ingredient : recipeDTO.getIngredientsList()) {
+                pstmtInsertIngredientList.setInt(2, 1);
+                pstmtInsertIngredientList.setInt(3, ingredient.getIngredientId());
+                pstmtInsertIngredientList.setDouble(4, ingredient.getAmount());
+                pstmtInsertIngredientList.executeUpdate();
+            }
             conn.commit();
             System.out.println("The ingredientlist was successfully created.");
 
@@ -380,9 +431,6 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
 
     public void createTriggerReorder() {
         try {
-            PreparedStatement pstmtDropTriggerReorder = conn.prepareStatement(
-                    "DROP TRIGGER IF EXISTS set_reorder;");
-
             PreparedStatement pstmtCreateTriggerReorder = conn.prepareStatement(
                     "CREATE TRIGGER set_reorder " +
                             "AFTER INSERT ON commoditybatch " +
@@ -393,7 +441,6 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
                             "WHERE ingredient.ingredientid = new.ingredientid; " +
                             "END;");
 
-            pstmtDropTriggerReorder.execute();
             pstmtCreateTriggerReorder.execute();
 
         } catch (SQLException e) {
@@ -410,8 +457,9 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
                             "FOR EACH ROW " +
                             "BEGIN " +
                             "INSERT INTO oldrecipe " +
-                            "VALUES (" +
-                            "old.recipeid,  " +
+                            "VALUES " +
+                            "(old.recipeid,  " +
+                            "old.edition, " +
                             "old.name, " +
                             "old.madeby, " +
                             "old.ingredientlistid, " +
@@ -424,21 +472,15 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
                             "FOR EACH ROW " +
                             "BEGIN " +
                             "INSERT INTO oldrecipe " +
-                            "VALUES (" +
-                            "new.recipeid,  " +
+                            "VALUES " +
+                            "(new.recipeid,  " +
+                            "new.edition, " +
                             "new.name, " +
                             "new.madeby, " +
                             "new.ingredientlistid, " +
                             "NOW()); " +
                             "END;");
 
-            PreparedStatement pstmtDropSaveRecipeDeleteTrigger = conn.prepareStatement(
-                    "DROP TRIGGER IF EXISTS save_recipe_delete;");
-            PreparedStatement pstmtDropSaveRecipeUpdateTrigger = conn.prepareStatement(
-                    "DROP TRIGGER IF EXISTS save_recipe_update"
-            );
-            pstmtDropSaveRecipeDeleteTrigger.execute();
-            pstmtDropSaveRecipeUpdateTrigger.execute();
             pstmtCreateTriggerSaveUpdatedRecipe.execute();
             pstmtCreateTriggerSaveDeletedRecipe.execute();
 
@@ -446,26 +488,25 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
             e.printStackTrace();
         }
     }
-}
-/* PreparedStatement createTableRecipe = conn.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS recipe " +
-                            "(recipeid INT," +
-                            "name VARCHAR(50), " +
-                            "madeby INT, " +
-                            "ingredientlistidid INT, " +
-                            "PRIMARY KEY (recipeid), " +
-                            "FOREIGN KEY (madeby) REFERENCES user (userid));");*/
 
-/*   PreparedStatement createTableOldRecipe = conn.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS oldrecipe " +
-                            "(recipeid INT, " +
-                            "name VARCHAR(50) NOT NULL, " +
-                            "madeby INT, " +
-                            "ingredientlist int, " +
-                            "outdated VARCHAR(50) NOT NULL, " +
-                            "PRIMARY KEY (recipeid), " +
-                            "FOREIGN KEY (madeby) " +
-                            "REFERENCES user (userid), " +
-                            "FOREIGN KEY (recipeid) " +
-                            "REFERENCES ingredientlist(ingredientlistid));");
-*/
+    public void dropTriggers() {
+        try {
+
+            PreparedStatement pstmtDropTriggerReorder = conn.prepareStatement(
+                    "DROP TRIGGER IF EXISTS set_reorder;");
+
+            PreparedStatement pstmtDropSaveRecipeDeleteTrigger = conn.prepareStatement(
+                    "DROP TRIGGER IF EXISTS save_recipe_delete;");
+
+            PreparedStatement pstmtDropSaveRecipeUpdateTrigger = conn.prepareStatement(
+                    "DROP TRIGGER IF EXISTS save_recipe_update"
+            );
+            pstmtDropSaveRecipeDeleteTrigger.execute();
+            pstmtDropSaveRecipeUpdateTrigger.execute();
+            pstmtDropTriggerReorder.execute();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}
