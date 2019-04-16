@@ -104,9 +104,9 @@ public class ProductDAOTest {
         ICommodityBatchDTO commodityBatch = new CommodityBatchDTO();
         IUserDTO testUser = userDAO.getUser(5);
         commodityBatch.setOrderedBy(testUser);
-        commodityBatch.setBatchId(2);
+        commodityBatch.setBatchId(3);
         commodityBatch.setAmountInKg(2.5);
-        commodityBatch.setIngredientDTO(productDAO.getIngredient(1));
+        commodityBatch.setIngredientDTO(productDAO.getIngredient(2));
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
         /*System.out.println(LocalDateTime.now().toString());
         */

@@ -16,6 +16,7 @@ public class ProductDAO {
         } catch (IUserDAO.DALException e) {
             e.printStackTrace();
         }
+       createTriggerForIngredient();
     }
 
     public Connection getConn() {
@@ -79,15 +80,16 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
             return;
         }
         try {
-            PreparedStatement pstmtInsertProductBatch = conn.prepareStatement(
+            PreparedStatement pstmtInsertCommodityBatch = conn.prepareStatement(
                     "INSERT INTO commoditybatch " +
-                            "VALUES(?,?,?,?,?)");
-            pstmtInsertProductBatch.setInt(1, commodityBatch.getBatchId());
-            pstmtInsertProductBatch.setInt(2, commodityBatch.getIngredientDTO().getIngredientId());
-            pstmtInsertProductBatch.setInt(3, commodityBatch.getOrderedBy().getUserId());
-            pstmtInsertProductBatch.setDouble(4, commodityBatch.getAmountInKg());
-            pstmtInsertProductBatch.setString(5, commodityBatch.getOrderDate());
-            pstmtInsertProductBatch.executeUpdate();
+                            "VALUES(?,?,?,?,?,?)");
+            pstmtInsertCommodityBatch.setInt(1, commodityBatch.getBatchId());
+            pstmtInsertCommodityBatch.setInt(2, commodityBatch.getIngredientDTO().getIngredientId());
+            pstmtInsertCommodityBatch.setInt(3, commodityBatch.getOrderedBy().getUserId());
+            pstmtInsertCommodityBatch.setDouble(4, commodityBatch.getAmountInKg());
+            pstmtInsertCommodityBatch.setString(5, commodityBatch.getOrderDate());
+            pstmtInsertCommodityBatch.setBoolean(6,false);
+            pstmtInsertCommodityBatch.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -364,36 +366,23 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
     public void createTriggerForIngredient(){
         try{
             PreparedStatement pstmtDropTrigger = conn.prepareStatement(
-                    "DROP TRIGGER IF EXISTS 'set_reorder'");
+                    "DROP TRIGGER IF EXISTS set_reorder;");
 
             PreparedStatement pstmtCreateTrigger = conn.prepareStatement(
-                    "CREATE TRIGGER 'set_reorder' AFTER UPDATE ON commoditybatch " +
-                            "FOR EACH ROW BEGIN " +
-                            "    set ingredient.reorder = 0 " +
-                            "    where ingredient.ingredient.id = commoditybatch.ingredientid " +
-                            "END;");
+                    "CREATE TRIGGER set_reorder " +
+                            "AFTER INSERT ON commoditybatch " +
+                            "FOR EACH ROW " +
+                        "BEGIN " +
+                            "UPDATE ingredient " +
+                            "SET ingredient.reorder = 0 " +
+                            "WHERE ingredient.ingredientid = new.ingredientid; " +
+                        "END;");
+
+            pstmtDropTrigger.execute();
+            pstmtCreateTrigger.execute();
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-
-    /*con.createStatement().execute("DROP TRIGGER IF EXISTS `insert_associated_inquiry`");
-
-triggerBuilder.append(" CREATE TRIGGER insert_associated_inquiry BEFORE UPDATE ON inquiry ");
-triggerBuilder.append(" FOR EACH ROW Begin ");
-
-triggerBuilder.append(" insert into associated_inquiries(inquiry_id , subject , content , inquiry_date , preferred_date ) " );
-triggerBuilder.append("values");
-        triggerBuilder.append(" ( " );
-            triggerBuilder.append(" OLD.id , ");
-            triggerBuilder.append(" OLD.subject , " );
-            triggerBuilder.append(" OLD.content , " );
-            triggerBuilder.append(" OLD.created_on , " );
-            triggerBuilder.append(" OLD.preffered_date " );
-        triggerBuilder.append(" ) ; ");
-
-triggerBuilder.append(" END ");
-
-con.createStatement().execute(triggerBuilder.toString());
-*/
 }
