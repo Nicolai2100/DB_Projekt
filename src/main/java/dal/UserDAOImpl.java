@@ -311,6 +311,18 @@ public class UserDAOImpl implements IUserDAO {
                             "FOREIGN KEY (admin) " +
                             "REFERENCES user (userid));");
 
+
+            /*
+            Hvis brugere slettes - hvad gør vi så med commodity batch ect?
+            PreparedStatement createTableOldUser = conn.prepareStatement(
+                    "CREATE TABLE IF NOT EXISTS olduser " +
+                            "(userid INT, " +
+                            "name VARCHAR(30) NOT NULL, " +
+                            "ini VARCHAR(5), " +
+                            "PRIMARY KEY (userid), " +
+                            "FOREIGN KEY (admin) " +
+                            "REFERENCES user (userid));");
+*/
             PreparedStatement createTableUserRole = conn.prepareStatement(
                     "CREATE TABLE IF NOT EXISTS userrole " +
                             "(userid int, " +
@@ -339,9 +351,22 @@ public class UserDAOImpl implements IUserDAO {
                             "(recipeid INT," +
                             "name VARCHAR(50), " +
                             "madeby INT, " +
-                            "ingredientlistidid INT, " +
+                            "ingredientlistid INT, " +
                             "PRIMARY KEY (recipeid), " +
                             "FOREIGN KEY (madeby) REFERENCES user (userid));");
+
+            PreparedStatement createTableOldRecipe = conn.prepareStatement(
+                    "CREATE TABLE IF NOT EXISTS oldrecipe " +
+                            "(recipeid INT, " +
+                            "name VARCHAR(50) NOT NULL, " +
+                            "madeby INT, " +
+                            "ingredientlist int, " +
+                            "outdated TIMESTAMP NOT NULL, " +
+                            "PRIMARY KEY (recipeid), " +
+                            "FOREIGN KEY (madeby) " +
+                            "REFERENCES user (userid), " +
+                            "FOREIGN KEY (recipeid) " +
+                            "REFERENCES ingredientlist(ingredientlistid));");
 
             PreparedStatement createTableCommodityBatch = conn.prepareStatement(
                     "CREATE TABLE if NOT EXISTS commoditybatch " +
@@ -377,18 +402,6 @@ public class UserDAOImpl implements IUserDAO {
                             "FOREIGN KEY (recipe) " +
                             "REFERENCES recipe(recipeid));");
 
-            PreparedStatement createTableOldRecipe = conn.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS oldrecipe " +
-                            "(recipeid INT, " +
-                            "name VARCHAR(50) NOT NULL, " +
-                            "madeby INT, " +
-                            "ingredientlist int, " +
-                            "outdated VARCHAR(50) NOT NULL, " +
-                            "PRIMARY KEY (recipeid), " +
-                            "FOREIGN KEY (madeby) " +
-                            "REFERENCES user (userid), " +
-                            "FOREIGN KEY (recipeid) " +
-                            "REFERENCES ingredientlist(ingredientlistid));");
 
             //rækkefølgen er vigtig!
             createTableUser.execute();
@@ -431,15 +444,15 @@ public class UserDAOImpl implements IUserDAO {
                     "DROP TABLE commoditystock;");
 
             if (deleteTable == 0) {
-                dropTableCommodityStock.execute();
+                //dropTableCommodityStock.execute();
                 dropTableOldRecipe.execute();
                 dropTableProduct.execute();
                 dropTableCommodityBatch.execute();
                 dropTableRecipe.execute();
                 dropTableIngredientList.execute();
-                dropTableIngredient.execute();
+                /*dropTableIngredient.execute();
                 dropTableUserRole.execute();
-                dropTableUser.execute();
+                dropTableUser.execute();*/
 
             }
         } catch (SQLException e) {

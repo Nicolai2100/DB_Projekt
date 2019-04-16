@@ -16,7 +16,6 @@ import static org.junit.Assert.*;
 public class ProductDAOTest {
     private ProductDAO productDAO;
     private UserDAOImpl userDAO;
-    private Connection conn;
 
     @Before
     public void initialize() {
@@ -38,6 +37,7 @@ public class ProductDAOTest {
 
     @Test
     public void createConnection() {
+
     }
 
     @Test
@@ -56,8 +56,15 @@ public class ProductDAOTest {
         productDAO.createProduct(productDTO);
     }
     @Test
+    public void deleteRecipe() throws IUserDAO.DALException {
+        productDAO.deleteRecipe(2);
+
+    }
+
+
+    @Test
     public void createTrigger() throws IUserDAO.DALException {
-        productDAO.createTriggerForIngredient();
+        productDAO.createTriggerReorder();
 
     }
     @Test
@@ -108,8 +115,7 @@ public class ProductDAOTest {
         commodityBatch.setAmountInKg(2.5);
         commodityBatch.setIngredientDTO(productDAO.getIngredient(2));
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
-        /*System.out.println(LocalDateTime.now().toString());
-        */
+
        productDAO.createCommodityBatch(commodityBatch);
 
     }
@@ -144,43 +150,31 @@ public class ProductDAOTest {
         ingredients.add(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
-        ingredientDTO.setName("norethisteronacetat");
-        ingredientDTO.setType("active");
         ingredientDTO.setIngredientId(2);
         ingredientDTO.setAmount(0.5);
         ingredients.add(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
-        ingredientDTO.setName("opovidon");
-        ingredientDTO.setType("helper");
         ingredientDTO.setIngredientId(3);
         ingredientDTO.setAmount(50);
         ingredients.add(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
-        ingredientDTO.setName("laktosemonohydrat");
-        ingredientDTO.setType("helper");
         ingredientDTO.setIngredientId(4);
         ingredientDTO.setAmount(10);
         ingredients.add(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
-        ingredientDTO.setName("magnesiumstearat");
-        ingredientDTO.setType("helper");
         ingredientDTO.setIngredientId(5);
         ingredientDTO.setAmount(15);
         ingredients.add(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
-        ingredientDTO.setName("majsstivelse");
-        ingredientDTO.setType("helper");
         ingredientDTO.setIngredientId(6);
         ingredientDTO.setAmount(120);
         ingredients.add(ingredientDTO);
 
-//        recipeDTO.setIngredients(ingredients);
         recipeDTO.setIngredientsList(ingredients);
-
         productDAO.createIngredientList(recipeDTO);
     }
 

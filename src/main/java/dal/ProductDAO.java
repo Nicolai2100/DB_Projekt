@@ -16,7 +16,8 @@ public class ProductDAO {
         } catch (IUserDAO.DALException e) {
             e.printStackTrace();
         }
-       createTriggerForIngredient();
+        createTriggerReorder();
+        createTriggerOldRecipe();
     }
 
     public Connection getConn() {
@@ -88,7 +89,7 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
             pstmtInsertCommodityBatch.setInt(3, commodityBatch.getOrderedBy().getUserId());
             pstmtInsertCommodityBatch.setDouble(4, commodityBatch.getAmountInKg());
             pstmtInsertCommodityBatch.setString(5, commodityBatch.getOrderDate());
-            pstmtInsertCommodityBatch.setBoolean(6,false);
+            pstmtInsertCommodityBatch.setBoolean(6, false);
             pstmtInsertCommodityBatch.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -183,6 +184,19 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
             e.printStackTrace();
         }
         return recipeDTO;
+    }
+
+    public void deleteRecipe(int recepeId) {
+        try {
+            PreparedStatement pstmtDeleteRecipe = conn.prepareStatement(
+                    "DELETE FROM recipe " +
+                            "WHERE recipeid = ?");
+            pstmtDeleteRecipe.setInt(1, recepeId);
+            int result = pstmtDeleteRecipe.executeUpdate();
+            System.out.println(result);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -345,11 +359,11 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
         try {
             PreparedStatement pstmtGetReorder = conn.prepareStatement(
                     "SELECT * " +
-                        "FROM ingredient " +
-                        "WHERE reorder = 1;");
+                            "FROM ingredient " +
+                            "WHERE reorder = 1;");
             ResultSet rs = pstmtGetReorder.executeQuery();
 
-            while (rs.next()){
+            while (rs.next()) {
                 IIngredientDTO ingredientDTO = new IngredientDTO();
                 ingredientDTO.setIngredientId(rs.getInt(1));
                 ingredientDTO.setName(rs.getString(2));
@@ -363,26 +377,95 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
 
         return toBeOrdered;
     }
-    public void createTriggerForIngredient(){
-        try{
-            PreparedStatement pstmtDropTrigger = conn.prepareStatement(
+
+    public void createTriggerReorder() {
+        try {
+            PreparedStatement pstmtDropTriggerReorder = conn.prepareStatement(
                     "DROP TRIGGER IF EXISTS set_reorder;");
 
-            PreparedStatement pstmtCreateTrigger = conn.prepareStatement(
+            PreparedStatement pstmtCreateTriggerReorder = conn.prepareStatement(
                     "CREATE TRIGGER set_reorder " +
                             "AFTER INSERT ON commoditybatch " +
                             "FOR EACH ROW " +
-                        "BEGIN " +
+                            "BEGIN " +
                             "UPDATE ingredient " +
                             "SET ingredient.reorder = 0 " +
                             "WHERE ingredient.ingredientid = new.ingredientid; " +
-                        "END;");
+                            "END;");
 
-            pstmtDropTrigger.execute();
-            pstmtCreateTrigger.execute();
+            pstmtDropTriggerReorder.execute();
+            pstmtCreateTriggerReorder.execute();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void createTriggerOldRecipe() {
+        try {
+            PreparedStatement pstmtCreateTriggerSaveDeletedRecipe = conn.prepareStatement(
+                    "CREATE TRIGGER save_recipe_delete " +
+                            "BEFORE DELETE ON recipe " +
+                            "FOR EACH ROW " +
+                            "BEGIN " +
+                            "INSERT INTO oldrecipe " +
+                            "VALUES (" +
+                            "old.recipeid,  " +
+                            "old.name, " +
+                            "old.madeby, " +
+                            "old.ingredientlistid, " +
+                            "NOW()); " +
+                            "END;");
+
+            PreparedStatement pstmtCreateTriggerSaveUpdatedRecipe = conn.prepareStatement(
+                    "CREATE TRIGGER save_recipe_update " +
+                            "BEFORE UPDATE ON recipe " +
+                            "FOR EACH ROW " +
+                            "BEGIN " +
+                            "INSERT INTO oldrecipe " +
+                            "VALUES (" +
+                            "new.recipeid,  " +
+                            "new.name, " +
+                            "new.madeby, " +
+                            "new.ingredientlistid, " +
+                            "NOW()); " +
+                            "END;");
+
+            PreparedStatement pstmtDropSaveRecipeDeleteTrigger = conn.prepareStatement(
+                    "DROP TRIGGER IF EXISTS save_recipe_delete;");
+            PreparedStatement pstmtDropSaveRecipeUpdateTrigger = conn.prepareStatement(
+                    "DROP TRIGGER IF EXISTS save_recipe_update"
+            );
+            pstmtDropSaveRecipeDeleteTrigger.execute();
+            pstmtDropSaveRecipeUpdateTrigger.execute();
+            pstmtCreateTriggerSaveUpdatedRecipe.execute();
+            pstmtCreateTriggerSaveDeletedRecipe.execute();
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 }
+/* PreparedStatement createTableRecipe = conn.prepareStatement(
+                    "CREATE TABLE IF NOT EXISTS recipe " +
+                            "(recipeid INT," +
+                            "name VARCHAR(50), " +
+                            "madeby INT, " +
+                            "ingredientlistidid INT, " +
+                            "PRIMARY KEY (recipeid), " +
+                            "FOREIGN KEY (madeby) REFERENCES user (userid));");*/
+
+/*   PreparedStatement createTableOldRecipe = conn.prepareStatement(
+                    "CREATE TABLE IF NOT EXISTS oldrecipe " +
+                            "(recipeid INT, " +
+                            "name VARCHAR(50) NOT NULL, " +
+                            "madeby INT, " +
+                            "ingredientlist int, " +
+                            "outdated VARCHAR(50) NOT NULL, " +
+                            "PRIMARY KEY (recipeid), " +
+                            "FOREIGN KEY (madeby) " +
+                            "REFERENCES user (userid), " +
+                            "FOREIGN KEY (recipeid) " +
+                            "REFERENCES ingredientlist(ingredientlistid));");
+*/
