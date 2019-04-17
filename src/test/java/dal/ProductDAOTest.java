@@ -95,6 +95,8 @@ public class ProductDAOTest {
 
     @Test
     public void createTriggers() {
+        productDAO.dropTriggers();
+
         productDAO.createTriggerOldRecipe();
         productDAO.createTriggerReorder();
     }
@@ -117,7 +119,7 @@ public class ProductDAOTest {
     @Test
     public void createRecipe() throws IUserDAO.DALException {
         IRecipeDTO recipeDTO = new RecipeDTO();
-        recipeDTO.setRecipeId(3);
+        recipeDTO.setRecipeId(2);
         recipeDTO.setName("Norethisteron/estrogen");
         recipeDTO.setMadeBy(userDAO.getUser(10));
         recipeDTO.setIngredientsList(productDAO.getIngredientList(recipeDTO));

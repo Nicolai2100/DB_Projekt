@@ -410,7 +410,6 @@ public class UserDAOImpl implements IUserDAO {
             createTableCommodityBatch.execute();
             createTableProduct.execute();
             createTableOldRecipe.execute();
-            //createTableProperty.execute();
             conn.commit();
 
         } catch (SQLException e) {

@@ -164,8 +164,10 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
             pstmtUpdateRecipe.setString(2, recipeDTO.getName());
             pstmtUpdateRecipe.setInt(3, recipeDTO.getMadeBy().getUserId());
 
+            pstmtUpdateRecipe.executeUpdate();
             //Hver liste af ingredienser bliver oprettet med opskriftens id som id... !?
             updateIngredientList(recipeDTO, edition);
+            conn.commit();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -212,8 +214,8 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
             ResultSet rs = pstmtGetRecipe.executeQuery();
             while (rs.next()) {
                 recipeDTO.setRecipeId(recipeId);
-                recipeDTO.setName(rs.getString(2));
-                recipeDTO.setMadeBy(userDAO.getUser(rs.getInt(3)));
+                recipeDTO.setName(rs.getString(3));
+                recipeDTO.setMadeBy(userDAO.getUser(rs.getInt(4)));
                 recipeDTO.setIngredientsList(getIngredientList(recipeDTO));
             }
         } catch (SQLException e) {
@@ -275,9 +277,9 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
                     "INSERT INTO ingredientlist(ingredientlistid, edition, ingredientid, amountmg) " +
                             "VALUES(?,?,?,?)");
             pstmtInsertIngredientList.setInt(1, recipeDTO.getRecipeId());
+            pstmtInsertIngredientList.setInt(2, edition);
 
             for (IIngredientDTO ingredient : recipeDTO.getIngredientsList()) {
-                pstmtInsertIngredientList.setInt(2, edition);
                 pstmtInsertIngredientList.setInt(3, ingredient.getIngredientId());
                 pstmtInsertIngredientList.setDouble(4, ingredient.getAmount());
                 pstmtInsertIngredientList.executeUpdate();
@@ -324,11 +326,9 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
             ResultSet rs = pstmtGetIngredientList.executeQuery();
 
             while (rs.next()) {
-                IIngredientDTO ingredientDTO = getIngredient(rs.getInt(1));
-                ingredientDTO.setAmount(rs.getDouble(2));
+                IIngredientDTO ingredientDTO = getIngredient(rs.getInt(3));
+                ingredientDTO.setAmount(rs.getDouble(4));
                 ingredientList.add(ingredientDTO);
-
-
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -473,11 +473,11 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
                             "BEGIN " +
                             "INSERT INTO oldrecipe " +
                             "VALUES " +
-                            "(new.recipeid,  " +
-                            "new.edition, " +
-                            "new.name, " +
-                            "new.madeby, " +
-                            "new.ingredientlistid, " +
+                            "(old.recipeid,  " +
+                            "old.edition, " +
+                            "old.name, " +
+                            "old.madeby, " +
+                            "old.ingredientlistid, " +
                             "NOW()); " +
                             "END;");
 
