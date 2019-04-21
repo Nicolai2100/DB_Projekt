@@ -3,6 +3,7 @@ package dal;
 import dal.dto.IUserDTO;
 import dal.dto.UserDTO;
 
+import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,21 +41,28 @@ public class UserDAOImpl implements IUserDAO {
             System.out.println("Error in userID!");
             return;
         }
+        if (!user.getRoles().contains("admin") && user.getAdmin() == null) {
+            System.out.println("Error in authorization!");
+            System.out.println("Contact administrator!");
+            return;
+        }
+
         try {
             conn.setAutoCommit(false);
             PreparedStatement pSmtInsertUser = conn.prepareStatement(
                     "INSERT INTO user " +
-                            "VALUES(?,?,?,?)");
+                            "VALUES(?,?,?,?,?)");
             pSmtInsertUser.setInt(1, user.getUserId());
             pSmtInsertUser.setString(2, user.getUserName());
             pSmtInsertUser.setString(3, user.getIni());
+            pSmtInsertUser.setBoolean(4, true);
+
             Integer adminId;
             if (user.getAdmin() != null) {
                 adminId = user.getAdmin().getUserId();
-                pSmtInsertUser.setInt(4, adminId);
+                pSmtInsertUser.setInt(5, adminId);
             } else {
-                pSmtInsertUser.setNull(4, Types.INTEGER);
-
+                pSmtInsertUser.setNull(5, Types.INTEGER);
             }
             pSmtInsertUser.executeUpdate();
             setUserRoles(conn, user);
@@ -70,13 +78,12 @@ public class UserDAOImpl implements IUserDAO {
     @Override
     public IUserDTO getUser(int userId) throws DALException {
         boolean empty = true;
-        UserDTO returnUser = new UserDTO();
+        IUserDTO returnUser = new UserDTO();
         try {
             conn = createConnection();
             PreparedStatement pSmtSelectUser = conn.prepareStatement(
-                    "SELECT * " +
-                            "FROM user " +
-                            "WHERE userid = ?");
+                    "SELECT * FROM user " +
+                            "WHERE userid = ?;");
 
             pSmtSelectUser.setInt(1, userId);
             ResultSet rs = pSmtSelectUser.executeQuery();
@@ -85,6 +92,16 @@ public class UserDAOImpl implements IUserDAO {
                 returnUser.setUserId(rs.getInt(1));
                 returnUser.setUserName(rs.getString(2));
                 returnUser.setIni(rs.getString(3));
+                returnUser.setIsActive(rs.getBoolean(4));
+
+                int adminId = rs.getInt(5);
+                IUserDTO admin;
+                if (adminId < 1) {
+                    admin = null;
+                } else {
+                    admin = getUser(adminId);
+                }
+                returnUser.setAdmin(admin);
                 returnUser.setRoles(getUserRoleList(userId));
             }
             if (empty) {
@@ -156,20 +173,27 @@ public class UserDAOImpl implements IUserDAO {
     public void deleteUser(int userId) throws DALException {
         int result;
         try {
-            PreparedStatement pSmtDeleteUser = conn.prepareStatement(
+            /*PreparedStatement pSmtDeleteUser = conn.prepareStatement(
                     "DELETE FROM user " +
                             "WHERE userid = ?;");
             pSmtDeleteUser.setInt(1, userId);
-            result = pSmtDeleteUser.executeUpdate();
+            result = pSmtDeleteUser.executeUpdate();*/
+
+            PreparedStatement psmtInactivateUser = conn.prepareStatement(
+                    "UPDATE user " +
+                            "SET " +
+                            "active = 0 " +
+                            "WHERE userid = ? ");
+            psmtInactivateUser.setInt(1, userId);
+            result = psmtInactivateUser.executeUpdate();
             if (result == 1) {
-                System.out.println("The user with user-ID: " + userId + " was successfully deleted from the system.");
+                System.out.println("The user with user-ID: " + userId + " is now inactive.");
             } else {
                 System.out.println("Error no such user exists in the database!");
             }
-            pSmtDeleteUser.close();
+            //pSmtDeleteUser.close();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
-
         }
     }
 
@@ -299,14 +323,15 @@ public class UserDAOImpl implements IUserDAO {
                     "CREATE TABLE IF NOT EXISTS user " +
                             "(userid INT, " +
                             "name VARCHAR(30) NOT NULL, " +
-                            "ini VARCHAR(5), " +
+                            "ini VARCHAR(5)," +
+                            "active BIT, " +
                             "admin INT NULL, " +
                             "PRIMARY KEY (userid), " +
                             "FOREIGN KEY (admin) " +
                             "REFERENCES user (userid));");
 
 
-            /*
+/*
             Hvis brugere slettes - hvad gør vi så med commodity batch ect?
             PreparedStatement createTableOldUser = conn.prepareStatement(
                     "CREATE TABLE IF NOT EXISTS olduser " +

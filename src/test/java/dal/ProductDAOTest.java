@@ -15,11 +15,14 @@ import static org.junit.Assert.*;
 public class ProductDAOTest {
     private ProductDAO productDAO;
     private UserDAOImpl userDAO;
+    private DALTest dalTest;
+
 
     @Before
     public void initialize() {
         productDAO = new ProductDAO();
         userDAO = new UserDAOImpl();
+        dalTest = new DALTest();
     }
 
     @After
@@ -54,6 +57,7 @@ public class ProductDAOTest {
          */
         productDAO.createProduct(productDTO);
     }
+
     @Test
     public void deleteRecipe() throws IUserDAO.DALException {
         productDAO.deleteRecipe(2);
@@ -61,13 +65,11 @@ public class ProductDAOTest {
     }
 
 
-
-
     @Test
-    public void checkForReorder(){
+    public void checkForReorder() {
         List<IIngredientDTO> ingredientDTOS = productDAO.checkForReorder();
 
-        for (IIngredientDTO ing: ingredientDTOS) {
+        for (IIngredientDTO ing : ingredientDTOS) {
             System.out.println(ing);
         }
     }
@@ -77,6 +79,7 @@ public class ProductDAOTest {
         ICommodityBatchDTO batchFromDB = productDAO.getCommodityBatch(2);
         System.out.println(batchFromDB);
     }
+
     @Test
     public void createCommodityBatch() throws IUserDAO.DALException {
 
@@ -88,7 +91,7 @@ public class ProductDAOTest {
         commodityBatch.setIngredientDTO(productDAO.getIngredient(2));
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
 
-       productDAO.createCommodityBatch(commodityBatch);
+        productDAO.createCommodityBatch(commodityBatch);
 
     }
 
@@ -102,7 +105,7 @@ public class ProductDAOTest {
     }
 
 
-        @Test
+    @Test
     public void updateRecipe() {
         IRecipeDTO recipeDTO = productDAO.getRecipe(2);
         recipeDTO.setName("snillert");
@@ -237,17 +240,19 @@ public class ProductDAOTest {
     }
 
     @Test
-    public void runItAll() throws IUserDAO.DALException {
-        DALTest dalTest = new DALTest();
-      /*  dalTest.dropAllTables();
+    public void initializeItAll() throws IUserDAO.DALException {
+        //dalTest.dropAllTables();
         dalTest.initializeDataBase();
-        createTriggers();*/
+        createTriggers();
+    }
+
+    @Test
+    public void testItAll() throws IUserDAO.DALException {
         dalTest.createUser();
         createIngredient();
         createIngredientList();
         createRecipe();
         deleteRecipe();
-
 
     }
 }

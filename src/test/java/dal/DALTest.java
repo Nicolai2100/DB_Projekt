@@ -39,28 +39,32 @@ public class DALTest {
     }
 
     @Test
+    void getUser() throws IUserDAO.DALException {
+        IUserDTO testUser = userDAO.getUser(10);
+        System.out.println(testUser);
+    }
+
+    @Test
     public void createUser() throws IUserDAO.DALException {
-
-        UserDTO testUser = new UserDTO();
-        testUser.setUserId(10);
-        testUser.setUserName("Puk Hansen");
-        testUser.setIni("PH");
-        ArrayList<String> roles = new ArrayList();
-        roles.add("administrator");
-        roles.add("farmaceut");
-        testUser.setRoles(roles);
-        userDAO.createUser(testUser);
-
         IUserDTO testUser2 = new UserDTO();
         testUser2.setUserId(5);
         testUser2.setUserName("Pælle Hansen");
         testUser2.setIni("PH");
         ArrayList<String> roles2 = new ArrayList();
-        roles.add("administrator");
-        roles.add("productleader");
+        roles2.add("admin");
+        roles2.add("productleader");
         testUser2.setRoles(roles2);
         userDAO.createUser(testUser2);
+
+        UserDTO testUser = new UserDTO();
+        testUser.setUserId(10);
+        testUser.setUserName("Puk Larsen");
+        testUser.setIni("PL");
+        testUser.addRole("farmaceut");
+        testUser.setAdmin(userDAO.getUser(5));
+        userDAO.createUser(testUser);
     }
+
     @Test
     public void test() {
         try {
@@ -69,7 +73,7 @@ public class DALTest {
             testUser.setUserName("Per Hansen");
             testUser.setIni("PH");
             ArrayList<String> roles = new ArrayList();
-            roles.add("administrator");
+            roles.add("admin");
             testUser.setRoles(roles);
 
             userDAO.createUser(testUser);

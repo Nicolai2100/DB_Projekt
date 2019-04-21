@@ -41,6 +41,11 @@ public class ProductDAO {
   Produktion af produktbatches (Laborant)
   Lagerstatus af råvarer og råvarebatches (Produktionsleder)
   */
+
+    //todo
+    // Vi kunne godt tænke os at det er muligt at udsøge produktbatches,
+    // der er hhv. bestilt, under produktion og færdiggjort.
+
     public void createProduct(ProductDTO product) {
         if (!product.getMadeBy().getRoles().contains("productionleader")) {
             System.out.println("User not authorized to proceed!");
