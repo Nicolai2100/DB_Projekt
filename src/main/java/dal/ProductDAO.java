@@ -126,7 +126,6 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
                 userDTO.setUserId(rs.getInt(9));
                 userDTO.setUserName(rs.getString(10));
                 userDTO.setIni(rs.getString(11));
-
                 userDTO.setRoles(userDAO.getUserRoleList(userDTO.getUserId()));
 
                 commodityBatch.setIngredientDTO(ingredientDTO);
@@ -208,7 +207,7 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
             //Hver liste af ingredienser bliver oprettet med opskriftens id som id... !?
             pstmtInsertRecipe.setInt(5, recipeDTO.getRecipeId());
 
-            isIngredientListCreated(recipeDTO);
+            isIngredientListCreated(recipeDTO, edition);
             pstmtInsertRecipe.executeUpdate();
             conn.commit();
             System.out.println("The recipe was successfully created.");
@@ -288,12 +287,15 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
      *
      * @param recipeDTO
      */
-    public void isIngredientListCreated(IRecipeDTO recipeDTO) {
+    public void isIngredientListCreated(IRecipeDTO recipeDTO, int edition) {
         try {
             PreparedStatement pstmtGetIngredientList = conn.prepareStatement(
                     "SELECT COUNT(*) FROM ingredientlist " +
-                            "WHERE ingredientlistid = ?;");
+                            "WHERE ingredientlistid = ? " +
+                            "AND edition = ?;");
             pstmtGetIngredientList.setInt(1, recipeDTO.getRecipeId());
+            pstmtGetIngredientList.setInt(2, edition);
+
             ResultSet rs = pstmtGetIngredientList.executeQuery();
             int result = 0;
             if (rs.next()) {
@@ -302,7 +304,7 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
             if (result > 0) {
                 return;
             } else {
-                createIngredientList(recipeDTO);
+                createIngredientList(recipeDTO, edition);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -331,8 +333,11 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
         }
     }
 
-    public void createIngredientList(IRecipeDTO recipeDTO) {
+    public void createIngredientList(IRecipeDTO recipeDTO, int edition) {
         try {
+            for (IIngredientDTO ingredient: recipeDTO.getIngredientsList()) {
+                isIngredientThere(ingredient);
+            }
             conn.setAutoCommit(false);
             PreparedStatement pstmtInsertIngredientList = conn.prepareStatement(
                     "INSERT INTO ingredientlist(ingredientlistid, edition, ingredientid, amountmg) " +
@@ -340,7 +345,7 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
             pstmtInsertIngredientList.setInt(1, recipeDTO.getRecipeId());
 
             for (IIngredientDTO ingredient : recipeDTO.getIngredientsList()) {
-                pstmtInsertIngredientList.setInt(2, 1);
+                pstmtInsertIngredientList.setInt(2, edition);
                 pstmtInsertIngredientList.setInt(3, ingredient.getIngredientId());
                 pstmtInsertIngredientList.setDouble(4, ingredient.getAmount());
                 pstmtInsertIngredientList.executeUpdate();
@@ -348,6 +353,30 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
             conn.commit();
             System.out.println("The ingredientlist was successfully created.");
 
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Opretter et ingrediens i DB, hvis der ikke findes et
+     * med dets id
+     * @param ingredient
+     */
+    private void isIngredientThere(IIngredientDTO ingredient) {
+        try {
+            PreparedStatement pstmtIsIngThere = conn.prepareStatement(
+                    "SELECT COUNT(*) " +
+                            "FROM ingredient " +
+                            "WHERE ingredientid = ?;");
+            pstmtIsIngThere.setInt(1, ingredient.getIngredientId());
+           ResultSet rs = pstmtIsIngThere.executeQuery();
+           if (rs.next()){
+               int result = rs.getInt(1);
+               if (result < 1){
+                   createIngredient(ingredient);
+               }
+           }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -376,7 +405,7 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
 
     }
 
-    public void createIngredient(IngredientDTO ingredientDTO) {
+    public void createIngredient(IIngredientDTO ingredientDTO) {
         try {
             conn.setAutoCommit(false);
             PreparedStatement pstmtInsertIngredient = conn.prepareStatement(

@@ -6,6 +6,7 @@ public class RecipeDTO implements IRecipeDTO {
     private int recipeId;
     private String name;
     private IUserDTO madeBy;
+    private int edition;
     private List<IIngredientDTO> ingredientsList;
 
     public RecipeDTO() {
@@ -59,5 +60,14 @@ public class RecipeDTO implements IRecipeDTO {
 
     public void setIngredientsList(List<IIngredientDTO> ingredientsList) {
         this.ingredientsList = ingredientsList;
+    }
+
+    @Override
+    public int getEdition() {
+        return edition;
+    }
+    @Override
+    public void setEdition(int edition){
+        this.edition = edition;
     }
 }

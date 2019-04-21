@@ -364,7 +364,9 @@ public class UserDAOImpl implements IUserDAO {
                             "edition INT, " +
                             "ingredientid INT, " +
                             "amountmg FLOAT, " +
-                            "PRIMARY KEY (ingredientlistid, edition, ingredientid));");
+                            "PRIMARY KEY (ingredientlistid, edition, ingredientid), " +
+                            "FOREIGN KEY (ingredientid) " +
+                            "REFERENCES ingredient (ingredientid));");
 
             PreparedStatement createTableRecipe = conn.prepareStatement(
                     "CREATE TABLE IF NOT EXISTS recipe " +
@@ -388,6 +390,9 @@ public class UserDAOImpl implements IUserDAO {
                             "ingredientlistid INT, " +
                             "outdated TIMESTAMP NOT NULL, " +
                             "PRIMARY KEY (recipeid, edition), " +
+                            "FOREIGN KEY (ingredientlistid) " +
+                            "REFERENCES ingredientlist (ingredientlistid) " +
+                            "ON DELETE CASCADE, " +
                             "FOREIGN KEY (madeby) " +
                             "REFERENCES user (userid));");
 

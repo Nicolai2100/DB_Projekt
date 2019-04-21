@@ -19,4 +19,8 @@ public interface IRecipeDTO {
     List<IIngredientDTO> getIngredientsList();
 
     void setIngredientsList(List<IIngredientDTO> ingredientsList);
+
+    int getEdition();
+
+    void setEdition(int edition);
 }

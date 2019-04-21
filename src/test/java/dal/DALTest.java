@@ -17,6 +17,8 @@ import static org.junit.Assert.fail;
 
 public class DALTest {
     UserDAOImpl userDAO = new UserDAOImpl();
+    ProductDAO productDAO = new ProductDAO();
+    ProductDAOTest productDAOTest = new ProductDAOTest();
 
     @Before
     public void ini() throws IUserDAO.DALException {
@@ -36,6 +38,18 @@ public class DALTest {
     @Test
     public void initializeDataBase() throws IUserDAO.DALException {
         userDAO.initializeDataBase();
+    }
+
+    @Test
+    public void initializeItAll() throws IUserDAO.DALException {
+        dropAllTables();
+        initializeDataBase();
+
+/*
+        productDAOTest.createTriggers();
+*/
+        createUser();
+
     }
 
     @Test

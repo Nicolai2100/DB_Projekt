@@ -92,7 +92,9 @@ public class ProductDAOTest {
 
     @Test
     public void createTriggers() {
+/*
         productDAO.dropTriggers();
+*/
 
         productDAO.createTriggerOldRecipe();
         productDAO.createTriggerReorder();
@@ -104,7 +106,7 @@ public class ProductDAOTest {
         IUserDTO testUser = new UserDTO();
         testUser.addRole("farmaceut");
         testUser.setIsActive(true);
-        productDAO.deleteRecipe(2,testUser);
+        productDAO.deleteRecipe(2, testUser);
 
     }
 
@@ -128,8 +130,55 @@ public class ProductDAOTest {
         recipeDTO.setRecipeId(2);
         recipeDTO.setName("Norethisteron/estrogen");
         recipeDTO.setMadeBy(userDAO.getUser(10));
+/*
         recipeDTO.setIngredientsList(productDAO.getIngredientList(recipeDTO));
+*/
+        List<IIngredientDTO> ingredients = new ArrayList<>();
+        IngredientDTO ingredientDTO = new IngredientDTO();
+        ingredientDTO.setIngredientId(1);
+        ingredientDTO.setName("estradiol");
+        ingredientDTO.setType("active");
+        ingredientDTO.setAmount(1);
+        ingredients.add(ingredientDTO);
+
+        ingredientDTO = new IngredientDTO();
+        ingredientDTO.setIngredientId(2);
+        ingredientDTO.setName("norethisteronacetat");
+        ingredientDTO.setType("active");
+        ingredientDTO.setAmount(0.5);
+        ingredients.add(ingredientDTO);
+
+        ingredientDTO = new IngredientDTO();
+        ingredientDTO.setIngredientId(3);
+        ingredientDTO.setName("opovidon");
+        ingredientDTO.setType("helper");
+        ingredientDTO.setAmount(50);
+        ingredients.add(ingredientDTO);
+
+        ingredientDTO = new IngredientDTO();
+        ingredientDTO.setIngredientId(4);
+        ingredientDTO.setName("laktosemonohydrat");
+        ingredientDTO.setType("helper");
+        ingredientDTO.setAmount(10);
+        ingredients.add(ingredientDTO);
+
+        ingredientDTO = new IngredientDTO();
+        ingredientDTO.setIngredientId(5);
+        ingredientDTO.setName("magnesiumstearat");
+        ingredientDTO.setType("helper");
+        ingredientDTO.setAmount(15);
+        ingredients.add(ingredientDTO);
+
+        ingredientDTO = new IngredientDTO();
+        ingredientDTO.setIngredientId(6);
+        ingredientDTO.setName("majsstivelse");
+        ingredientDTO.setType("helper");
+        ingredientDTO.setAmount(120);
+        ingredients.add(ingredientDTO);
+
+        recipeDTO.setIngredientsList(ingredients);
         productDAO.createRecipe(recipeDTO);
+
     }
 
     @Test
@@ -142,36 +191,48 @@ public class ProductDAOTest {
 
         IngredientDTO ingredientDTO = new IngredientDTO();
         ingredientDTO.setIngredientId(1);
+        ingredientDTO.setName("estradiol");
+        ingredientDTO.setType("active");
         ingredientDTO.setAmount(1);
         ingredients.add(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setIngredientId(2);
+        ingredientDTO.setName("norethisteronacetat");
+        ingredientDTO.setType("active");
         ingredientDTO.setAmount(0.5);
         ingredients.add(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setIngredientId(3);
+        ingredientDTO.setName("opovidon");
+        ingredientDTO.setType("helper");
         ingredientDTO.setAmount(50);
         ingredients.add(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setIngredientId(4);
+        ingredientDTO.setName("laktosemonohydrat");
+        ingredientDTO.setType("helper");
         ingredientDTO.setAmount(10);
         ingredients.add(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setIngredientId(5);
+        ingredientDTO.setName("magnesiumstearat");
+        ingredientDTO.setType("helper");
         ingredientDTO.setAmount(15);
         ingredients.add(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setIngredientId(6);
+        ingredientDTO.setName("majsstivelse");
+        ingredientDTO.setType("helper");
         ingredientDTO.setAmount(120);
         ingredients.add(ingredientDTO);
 
         recipeDTO.setIngredientsList(ingredients);
-        productDAO.createIngredientList(recipeDTO);
+        productDAO.createIngredientList(recipeDTO, 1);
     }
 
     @Test
@@ -242,12 +303,6 @@ public class ProductDAOTest {
         System.out.println(ingredientDTO);
     }
 
-    @Test
-    public void initializeItAll() throws IUserDAO.DALException {
-        //dalTest.dropAllTables();
-        dalTest.initializeDataBase();
-        createTriggers();
-    }
 
     @Test
     public void testItAll() throws IUserDAO.DALException {
