@@ -48,20 +48,13 @@ public class ProductDAO {
 
     public void createProduct(ProductDTO product) {
         //kontroller om han er aktiv i systemet
-        if (!product.getMadeBy().getRoles().contains("productionleader")) {
+        if (!product.getMadeBy().getRoles().contains("productionleader") || !product.getMadeBy().getIsActive()) {
             System.out.println("User not authorized to proceed!");
             return;
         }
         try {
             conn.setAutoCommit(false);
-            PreparedStatement pstmtInsertProduct = conn.prepareStatement(
-                    "INSERT INTO product " +
-                            "VALUES(?,?,?,?)");
-            pstmtInsertProduct.setInt(1, product.getProductId());
-            pstmtInsertProduct.setString(2, product.getName());
-            pstmtInsertProduct.setInt(3, product.getMadeBy().getUserId());
-            pstmtInsertProduct.setInt(4, product.getRecipe());
-            pstmtInsertProduct.executeUpdate();
+
             conn.commit();
             System.out.println("The product was successfully created.");
 
@@ -195,7 +188,6 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
             if (returnEdition != 0) {
                 edition += returnEdition;
             }
-
             conn.setAutoCommit(false);
             PreparedStatement pstmtInsertRecipe = conn.prepareStatement(
                     "INSERT INTO recipe " +
@@ -204,9 +196,8 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
             pstmtInsertRecipe.setInt(2, edition);
             pstmtInsertRecipe.setString(3, recipeDTO.getName());
             pstmtInsertRecipe.setInt(4, recipeDTO.getMadeBy().getUserId());
-            //Hver liste af ingredienser bliver oprettet med opskriftens id som id... !?
             pstmtInsertRecipe.setInt(5, recipeDTO.getRecipeId());
-
+            //Opretter ingrediensliste
             isIngredientListCreated(recipeDTO, edition);
             pstmtInsertRecipe.executeUpdate();
             conn.commit();
@@ -232,7 +223,6 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return edition;
     }
 
@@ -335,7 +325,7 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
 
     public void createIngredientList(IRecipeDTO recipeDTO, int edition) {
         try {
-            for (IIngredientDTO ingredient: recipeDTO.getIngredientsList()) {
+            for (IIngredientDTO ingredient : recipeDTO.getIngredientsList()) {
                 isIngredientThere(ingredient);
             }
             conn.setAutoCommit(false);
@@ -361,6 +351,7 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
     /**
      * Opretter et ingrediens i DB, hvis der ikke findes et
      * med dets id
+     *
      * @param ingredient
      */
     private void isIngredientThere(IIngredientDTO ingredient) {
@@ -370,13 +361,13 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
                             "FROM ingredient " +
                             "WHERE ingredientid = ?;");
             pstmtIsIngThere.setInt(1, ingredient.getIngredientId());
-           ResultSet rs = pstmtIsIngThere.executeQuery();
-           if (rs.next()){
-               int result = rs.getInt(1);
-               if (result < 1){
-                   createIngredient(ingredient);
-               }
-           }
+            ResultSet rs = pstmtIsIngThere.executeQuery();
+            if (rs.next()) {
+                int result = rs.getInt(1);
+                if (result < 1) {
+                    createIngredient(ingredient);
+                }
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -444,35 +435,6 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
         return ingredientDTO;
     }
 
-    /**
-     * Metoden henter et specifikt ingrediensid  fra ingredient-tabellen og returnerer den.
-     */
-    public int getIngredientId(String type) throws IUserDAO.DALException {
-        int returnInt = 0;
-        try {
-            PreparedStatement pStmtSelectRoleId = conn.prepareStatement(
-                    "SELECT  ingredientid  " +
-                            "FROM ingredient " +
-                            "WHERE type = ?");
-            pStmtSelectRoleId.setString(1, type);
-
-            ResultSet rs = pStmtSelectRoleId.executeQuery();
-            if (rs.next()) {
-                returnInt = rs.getInt("ingredientid");
-            }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        if (returnInt == 0) {
-            // Hvis den returnerer 0 betyder det at ingrediensen ikke findes, og derfor skal den oprettes. - laves senere
-
-/*          todo laves senere
-            returnInt = createNewRole(conn, role);
-*/
-        }
-        return returnInt;
-    }
-
     public List<IIngredientDTO> checkForReorder() {
         List<IIngredientDTO> toBeOrdered = new ArrayList<>();
         try {
@@ -515,7 +477,6 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
             e.printStackTrace();
         }
     }
-
 
     public void createTriggerOldRecipe() {
         try {
@@ -573,6 +534,50 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
             pstmtDropSaveRecipeUpdateTrigger.execute();
             pstmtDropTriggerReorder.execute();
 
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void cleanTables() {
+        try {
+            PreparedStatement pstmtDeleteRecipe = conn.prepareStatement("DELETE FROM recipe;");
+            PreparedStatement pstmtDeleteOldRecipe = conn.prepareStatement("DELETE FROM oldrecipe;");
+            PreparedStatement pstmtDeleteIngredientLists = conn.prepareStatement("DELETE FROM ingredientlist;");
+            PreparedStatement pstmtDeleteIngredients = conn.prepareStatement("DELETE FROM ingredient;");
+            PreparedStatement pstmtDeleteUsers = conn.prepareStatement("DELETE FROM user;");
+
+            pstmtDeleteRecipe.execute();
+            pstmtDeleteOldRecipe.execute();
+            pstmtDeleteIngredientLists.execute();
+            pstmtDeleteIngredients.execute();
+
+            for (IUserDTO user : userDAO.getUserList()) {
+                if (user.getAdmin() != null) ;
+                userDAO.deleteUser(user.getUserId());
+            }
+
+            pstmtDeleteUsers.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (IUserDAO.DALException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void getAllOldRecipes() {
+        PreparedStatement pstmtGetAllOld = null;
+        try {
+            pstmtGetAllOld = conn.prepareStatement(
+                    "SELECT * FROM oldrecipe;");
+
+            ResultSet rs = pstmtGetAllOld.executeQuery();
+            while (rs.next()) {
+                RecipeDTO recipeDTO = new RecipeDTO();
+                recipeDTO.setName(rs.getString(3));
+                recipeDTO.setEdition(rs.getInt(2));
+                System.out.println(recipeDTO);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

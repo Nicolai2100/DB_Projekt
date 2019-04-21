@@ -1,5 +1,6 @@
 package dal.dto;
 
+import java.sql.Date;
 import java.util.*;
 
 public class RecipeDTO implements IRecipeDTO {
@@ -8,6 +9,7 @@ public class RecipeDTO implements IRecipeDTO {
     private IUserDTO madeBy;
     private int edition;
     private List<IIngredientDTO> ingredientsList;
+    Date outDated;
 
     public RecipeDTO() {
         ingredientsList = new ArrayList<>();
@@ -70,4 +72,5 @@ public class RecipeDTO implements IRecipeDTO {
     public void setEdition(int edition){
         this.edition = edition;
     }
+
 }

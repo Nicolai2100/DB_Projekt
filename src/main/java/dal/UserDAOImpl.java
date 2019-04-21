@@ -80,7 +80,6 @@ public class UserDAOImpl implements IUserDAO {
         boolean empty = true;
         IUserDTO returnUser = new UserDTO();
         try {
-            conn = createConnection();
             PreparedStatement pSmtSelectUser = conn.prepareStatement(
                     "SELECT * FROM user " +
                             "WHERE userid = ?;");
@@ -118,7 +117,6 @@ public class UserDAOImpl implements IUserDAO {
     public List<IUserDTO> getUserList() throws DALException {
         List<IUserDTO> userList = new ArrayList<>();
         try {
-            conn = createConnection();
             PreparedStatement pSmtSelectAllTable = conn.prepareStatement(
                     "SELECT * " +
                             "FROM user");
@@ -143,7 +141,6 @@ public class UserDAOImpl implements IUserDAO {
     @Override
     public void updateUser(IUserDTO user) throws DALException {
         try {
-            conn = createConnection();
 
             if (!peekUser(user.getUserId())) {
                 System.out.println("No such user in the database!");
@@ -173,21 +170,22 @@ public class UserDAOImpl implements IUserDAO {
     public void deleteUser(int userId) throws DALException {
         int result;
         try {
-            /*PreparedStatement pSmtDeleteUser = conn.prepareStatement(
+            PreparedStatement pSmtDeleteUser = conn.prepareStatement(
                     "DELETE FROM user " +
                             "WHERE userid = ?;");
             pSmtDeleteUser.setInt(1, userId);
-            result = pSmtDeleteUser.executeUpdate();*/
+            result = pSmtDeleteUser.executeUpdate();
 
-            PreparedStatement psmtInactivateUser = conn.prepareStatement(
+
+            /*PreparedStatement psmtInactivateUser = conn.prepareStatement(
                     "UPDATE user " +
                             "SET " +
                             "active = 0 " +
                             "WHERE userid = ? ");
             psmtInactivateUser.setInt(1, userId);
-            result = psmtInactivateUser.executeUpdate();
+            result = psmtInactivateUser.executeUpdate();*/
             if (result == 1) {
-                System.out.println("The user with user-ID: " + userId + " is now inactive.");
+                System.out.println("The user with user-ID: " + userId + " is now deleted/inactive.");
             } else {
                 System.out.println("Error no such user exists in the database!");
             }
@@ -328,7 +326,8 @@ public class UserDAOImpl implements IUserDAO {
                             "admin INT NULL, " +
                             "PRIMARY KEY (userid), " +
                             "FOREIGN KEY (admin) " +
-                            "REFERENCES user (userid));");
+                            "REFERENCES user (userid)" +
+                            "ON DELETE CASCADE);");
 
 
 /*
