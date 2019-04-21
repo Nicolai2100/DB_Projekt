@@ -58,12 +58,6 @@ public class ProductDAOTest {
         productDAO.createProduct(productDTO);
     }
 
-    @Test
-    public void deleteRecipe() throws IUserDAO.DALException {
-        productDAO.deleteRecipe(2);
-
-    }
-
 
     @Test
     public void checkForReorder() {
@@ -104,6 +98,15 @@ public class ProductDAOTest {
         productDAO.createTriggerReorder();
     }
 
+
+    @Test
+    public void deleteRecipe() throws IUserDAO.DALException {
+        IUserDTO testUser = new UserDTO();
+        testUser.addRole("farmaceut");
+        testUser.setIsActive(true);
+        productDAO.deleteRecipe(2,testUser);
+
+    }
 
     @Test
     public void updateRecipe() {
@@ -248,9 +251,9 @@ public class ProductDAOTest {
 
     @Test
     public void testItAll() throws IUserDAO.DALException {
-        dalTest.createUser();
+        /*dalTest.createUser();
         createIngredient();
-        createIngredientList();
+        createIngredientList();*/
         createRecipe();
         deleteRecipe();
 

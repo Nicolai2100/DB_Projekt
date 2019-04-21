@@ -47,6 +47,7 @@ public class ProductDAO {
     // der er hhv. bestilt, under produktion og færdiggjort.
 
     public void createProduct(ProductDTO product) {
+        //kontroller om han er aktiv i systemet
         if (!product.getMadeBy().getRoles().contains("productionleader")) {
             System.out.println("User not authorized to proceed!");
             return;
@@ -141,7 +142,7 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
 
     public void updateRecipe(IRecipeDTO recipeDTO) {
         IUserDTO userDTO = recipeDTO.getMadeBy();
-        if (!userDTO.getRoles().contains("farmaceut")) {
+        if (!userDTO.getRoles().contains("farmaceut") || !userDTO.getIsActive()) {
             System.out.println("User not authorized to proceed!");
             return;
         }
@@ -176,37 +177,64 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
     }
 
     public void createRecipe(IRecipeDTO recipeDTO) {
         //Først undersøges det om brugeren, der står på til at have oprettet opskriften har
         //den rette rolle til at kunne gøre det.
         IUserDTO userDTO = recipeDTO.getMadeBy();
-        if (!userDTO.getRoles().contains("farmaceut")) {
+        if (!userDTO.getRoles().contains("farmaceut") || !userDTO.getIsActive()) {
             System.out.println("User not authorized to proceed!");
             return;
         }
+        int edition = 1;
         try {
+            //Hvis en opskriften oprettes med det samme id som ligger i oldrecipe,
+            //må man gå ud fra at den nye opskrift er en ny udgave af den fra oldrecipe.
+            //Derfor får den automatisk et korrekt edition-nummer.
+            int returnEdition = haveOldRecipe(recipeDTO.getRecipeId());
+            if (returnEdition != 0) {
+                edition += returnEdition;
+            }
+
             conn.setAutoCommit(false);
             PreparedStatement pstmtInsertRecipe = conn.prepareStatement(
                     "INSERT INTO recipe " +
                             "VALUES(?,?,?,?,?)");
-
             pstmtInsertRecipe.setInt(1, recipeDTO.getRecipeId());
-            pstmtInsertRecipe.setInt(2, 1);
+            pstmtInsertRecipe.setInt(2, edition);
             pstmtInsertRecipe.setString(3, recipeDTO.getName());
             pstmtInsertRecipe.setInt(4, recipeDTO.getMadeBy().getUserId());
             //Hver liste af ingredienser bliver oprettet med opskriftens id som id... !?
             pstmtInsertRecipe.setInt(5, recipeDTO.getRecipeId());
 
-            peakIngredientList(recipeDTO);
+            isIngredientListCreated(recipeDTO);
             pstmtInsertRecipe.executeUpdate();
             conn.commit();
             System.out.println("The recipe was successfully created.");
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private int haveOldRecipe(int recipeId) {
+        int edition = 0;
+        try {
+            PreparedStatement pstmtHaveOldRecipe = conn.prepareStatement(
+                    "SELECT MAX(edition) " +
+                            "FROM oldrecipe " +
+                            "WHERE recipeid = ?;");
+            pstmtHaveOldRecipe.setInt(1, recipeId);
+            ResultSet rs = pstmtHaveOldRecipe.executeQuery();
+            if (rs.next()) {
+                edition = rs.getInt(1);
+                System.out.println(edition);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return edition;
     }
 
     public IRecipeDTO getRecipe(int recipeId) {
@@ -231,16 +259,22 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
         return recipeDTO;
     }
 
-    public void deleteRecipe(int recipeId) {
+    public void deleteRecipe(int recipeId, IUserDTO userDTO) {
+        if (!userDTO.getRoles().contains("farmaceut") || !userDTO.getIsActive()) {
+            System.out.println("User not authorized to proceed!");
+            return;
+        }
         try {
             PreparedStatement pstmtDeleteRecipe = conn.prepareStatement(
                     "DELETE FROM recipe " +
                             "WHERE recipeid = ?;");
             pstmtDeleteRecipe.setInt(1, recipeId);
             int result = pstmtDeleteRecipe.executeUpdate();
-            System.out.println(result);
-            //Validerer ikke korrekt
-            System.out.println("The recipe with id: " + recipeId + " was successfully deleted.");
+            if (result < 1) {
+                System.out.println("Error! No such recipe in the system!");
+            } else {
+                System.out.println("The recipe with id: " + recipeId + " was successfully deleted.");
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             System.out.println("The recipe was not deleted.");
@@ -254,7 +288,7 @@ Lagerstatus af råvarer og råvarebatches (Produktionsleder)
      *
      * @param recipeDTO
      */
-    public void peakIngredientList(IRecipeDTO recipeDTO) {
+    public void isIngredientListCreated(IRecipeDTO recipeDTO) {
         try {
             PreparedStatement pstmtGetIngredientList = conn.prepareStatement(
                     "SELECT COUNT(*) FROM ingredientlist " +
