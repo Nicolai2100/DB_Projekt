@@ -3,14 +3,13 @@ package dal;
 import dal.dto.*;
 
 import java.sql.*;
-import java.util.*;
 
 public class ProductDAO {
     private Connection conn;
-    private UserDAOImpl userDAO;
+    private UserDAO userDAO;
 
     public ProductDAO() {
-        userDAO = new UserDAOImpl();
+        userDAO = new UserDAO();
         try {
             conn = createConnection();
         } catch (IUserDAO.DALException e) {
