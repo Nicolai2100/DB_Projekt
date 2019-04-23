@@ -7,31 +7,17 @@ import java.sql.*;
 public class ProductDAO {
     private Connection conn;
     private UserDAO userDAO;
+    private ConnectionDAO connectionDAO;
 
-    public ProductDAO() {
+    public ProductDAO(ConnectionDAO connectionDAO) {
+        this.connectionDAO = connectionDAO;
+/*
         userDAO = new UserDAO();
-        try {
-            conn = createConnection();
-        } catch (IUserDAO.DALException e) {
-            e.printStackTrace();
-        }
-
+*/
+        conn = connectionDAO.getConn();
     }
 
-    public Connection getConn() {
-        return conn;
-    }
 
-    public Connection createConnection() throws IUserDAO.DALException {
-        String dataBase = "jdbc:mysql://ec2-52-30-211-3.eu-west-1.compute.amazonaws.com/jekala";
-        String user = "jekala";
-        String password = "d0czCtqcu5015NhwwP5zl";
-        try {
-            return DriverManager.getConnection(dataBase, user, password);
-        } catch (SQLException e) {
-            throw new IUserDAO.DALException(e.getMessage());
-        }
-    }
 
     /*Systemet skal således understøtte
   Oprettelse og administration af opskrifter med indholdsstoffer (Farmaceut)

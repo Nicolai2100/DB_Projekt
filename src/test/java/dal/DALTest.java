@@ -2,9 +2,11 @@ package dal;
 
 import dal.dto.IUserDTO;
 import dal.dto.UserDTO;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.jupiter.api.Test;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,14 +14,22 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 public class DALTest {
-    UserDAO userDAO = new UserDAO();
-    ConnectionDAO connectionDAO = new ConnectionDAO();
-    ProductDAOTest productDAOTest = new ProductDAOTest();
+
+    ConnectionDAO connectionDAO;
+    UserDAO userDAO;
+    ProductDAOTest productDAOTest;
 
     @Before
     public void ini() throws IUserDAO.DALException {
+        connectionDAO = new ConnectionDAO();
+        userDAO = new UserDAO(connectionDAO);
+        productDAOTest = new ProductDAOTest();
     }
 
+    @After
+    public void closeConn() throws SQLException {
+        connectionDAO.getConn().close();
+    }
 
     @Test
     public void deleteUser() throws IUserDAO.DALException {

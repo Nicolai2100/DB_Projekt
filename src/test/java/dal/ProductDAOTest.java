@@ -26,8 +26,8 @@ public class ProductDAOTest {
     @Before
     public void initialize() {
         connectionDAO = new ConnectionDAO();
-        productDAO = new ProductDAO();
-        userDAO = new UserDAO();
+        productDAO = new ProductDAO(connectionDAO);
+        userDAO = new UserDAO(connectionDAO);
         ingredientDAO = new IngredientDAO(connectionDAO);
         ingredientListDAO = new IngredientListDAO(connectionDAO, userDAO, ingredientDAO);
         commodityDAO = new CommodityDAO(connectionDAO, userDAO);
@@ -39,15 +39,9 @@ public class ProductDAOTest {
 
     @After
     public void closeAll() throws SQLException {
-        userDAO.getConn().close();
-        productDAO.getConn().close();
+        connectionDAO.getConn().close();
     }
 
-    @Test
-    public void closeAllTest() throws SQLException {
-        userDAO.getConn().close();
-        productDAO.getConn().close();
-    }
 
     @Test
     public void cleanTables() {

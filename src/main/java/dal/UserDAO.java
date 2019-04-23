@@ -15,26 +15,7 @@ public class UserDAO implements IUserDAO {
 
     public UserDAO(ConnectionDAO connectionDAO) {
         this.connectionDAO = connectionDAO;
-        try {
-            conn = connectionDAO.createConnection();
-        } catch (DALException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public Connection getConn() {
-        return conn;
-    }
-
-    public Connection createConnection() throws DALException {
-        String dataBase = "jdbc:mysql://ec2-52-30-211-3.eu-west-1.compute.amazonaws.com/jekala";
-        String user = "jekala";
-        String password = "d0czCtqcu5015NhwwP5zl";
-        try {
-            return DriverManager.getConnection(dataBase, user, password);
-        } catch (SQLException e) {
-            throw new DALException(e.getMessage());
-        }
+        conn = connectionDAO.getConn();
     }
 
     @Override
