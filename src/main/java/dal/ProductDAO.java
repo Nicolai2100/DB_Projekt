@@ -8,29 +8,8 @@ public class ProductDAO {
     private Connection conn;
     private UserDAO userDAO;
 
-    public ProductDAO() {
-        userDAO = new UserDAO();
-        try {
-            conn = createConnection();
-        } catch (IUserDAO.DALException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    public Connection getConn() {
-        return conn;
-    }
-
-    public Connection createConnection() throws IUserDAO.DALException {
-        String dataBase = "jdbc:mysql://ec2-52-30-211-3.eu-west-1.compute.amazonaws.com/jekala";
-        String user = "jekala";
-        String password = "d0czCtqcu5015NhwwP5zl";
-        try {
-            return DriverManager.getConnection(dataBase, user, password);
-        } catch (SQLException e) {
-            throw new IUserDAO.DALException(e.getMessage());
-        }
+    public ProductDAO(ConnectionDAO connectionDAO){
+        this.conn = connectionDAO.getConn();
     }
 
     /*Systemet skal således understøtte

@@ -26,7 +26,7 @@ public class ProductDAOTest {
     @Before
     public void initialize() {
         connectionDAO = new ConnectionDAO();
-        productDAO = new ProductDAO();
+        productDAO = new ProductDAO(connectionDAO);
         userDAO = new UserDAO();
         ingredientDAO = new IngredientDAO(connectionDAO);
         ingredientListDAO = new IngredientListDAO(connectionDAO, userDAO, ingredientDAO);
