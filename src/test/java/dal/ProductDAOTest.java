@@ -53,7 +53,7 @@ public class ProductDAOTest {
         productDTO.setName("Ost");
         productDTO.setProductId(1);
         productDTO.setRecipe(1);
-        /*productDTO.setProductBatches();
+        /*productDTO.setCommodityBatches();
          */
         productDAO.createProduct(productDTO);
     }
