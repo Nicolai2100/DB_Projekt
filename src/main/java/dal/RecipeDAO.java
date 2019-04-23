@@ -15,8 +15,12 @@ public class RecipeDAO {
     private UserDAO userDAO;
     private OldRecipeDAO oldRecipeDAO;
 
-    public RecipeDAO(ConnectionDAO connectionDAO, IngredientListDAO ingredientListDAO, UserDAO userDAO, OldRecipeDAO oldRecipeDAO) {
-        this.oldRecipeDAO = oldRecipeDAO;
+    public OldRecipeDAO getOldRecipeDAO() {
+        return oldRecipeDAO;
+    }
+
+    public RecipeDAO(ConnectionDAO connectionDAO, IngredientListDAO ingredientListDAO, UserDAO userDAO) {
+        this.oldRecipeDAO = new OldRecipeDAO(connectionDAO,this);
         this.ingredientListDAO = ingredientListDAO;
         this.userDAO = userDAO;
         conn = connectionDAO.getConn();

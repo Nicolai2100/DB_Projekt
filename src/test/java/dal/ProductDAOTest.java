@@ -13,17 +13,17 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 public class ProductDAOTest {
-    private ProductDAO productDAO;
-    private UserDAO userDAO;
-    private DALTest dalTest;
-    private ConnectionDAO connectionDAO;
-    private IngredientListDAO ingredientListDAO;
-    private IngredientDAO ingredientDAO;
-    private CommodityDAO commodityDAO;
-    private RecipeDAO recipeDAO;
-    private OldRecipeDAO oldRecipeDAO;
+    ConnectionDAO connectionDAO = new ConnectionDAO();
+    ProductDAO productDAO = new ProductDAO(connectionDAO);
+    UserDAO userDAO = new UserDAO(connectionDAO);
+    IngredientDAO ingredientDAO = new IngredientDAO(connectionDAO);
+    IngredientListDAO ingredientListDAO = new IngredientListDAO(connectionDAO, userDAO, ingredientDAO);
+    CommodityDAO commodityDAO = new CommodityDAO(connectionDAO, userDAO);
+    RecipeDAO recipeDAO = new RecipeDAO(connectionDAO, ingredientListDAO, userDAO);
+    OldRecipeDAO oldRecipeDAO = recipeDAO.getOldRecipeDAO();
+    DALTest dalTest = new DALTest();
 
-    @Before
+   /* @Before
     public void initialize() {
         connectionDAO = new ConnectionDAO();
         productDAO = new ProductDAO(connectionDAO);
@@ -36,7 +36,7 @@ public class ProductDAOTest {
 
         dalTest = new DALTest();
     }
-
+*/
     @After
     public void closeAll() throws SQLException {
         connectionDAO.getConn().close();

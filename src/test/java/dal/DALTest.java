@@ -15,12 +15,12 @@ import static org.junit.Assert.fail;
 
 public class DALTest {
 
-    ConnectionDAO connectionDAO;
-    UserDAO userDAO;
+    ConnectionDAO connectionDAO = new ConnectionDAO();
+    UserDAO userDAO = new UserDAO(connectionDAO);
     ProductDAOTest productDAOTest;
 
     @Before
-    public void ini() throws IUserDAO.DALException {
+    public void initialize() {
         connectionDAO = new ConnectionDAO();
         userDAO = new UserDAO(connectionDAO);
         productDAOTest = new ProductDAOTest();
@@ -67,17 +67,15 @@ public class DALTest {
     @Test
     public void createUser() throws IUserDAO.DALException {
         IUserDTO testUser2 = new UserDTO();
-        testUser2.setUserId(5);
+        testUser2.setUserId(56);
         testUser2.setUserName("Pælle Hansen");
         testUser2.setIni("PH");
-        ArrayList<String> roles2 = new ArrayList();
-        roles2.add("admin");
-        roles2.add("productleader");
-        testUser2.setRoles(roles2);
+        testUser2.addRole("admin");
+        testUser2.addRole("productleader");
         userDAO.createUser(testUser2);
 
         UserDTO testUser = new UserDTO();
-        testUser.setUserId(10);
+        testUser.setUserId(106);
         testUser.setUserName("Puk Larsen");
         testUser.setIni("PL");
         testUser.addRole("farmaceut");
