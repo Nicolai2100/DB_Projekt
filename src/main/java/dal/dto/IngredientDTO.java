@@ -1,10 +1,11 @@
 package dal.dto;
 
 public class IngredientDTO implements IIngredientDTO {
-    private int	ingredientId;
+    private int ingredientId;
     private String name;
     private String type;
     private double amountInMG;
+    private int minAmountInMG;
 
 
     public IngredientDTO() {
@@ -48,6 +49,16 @@ public class IngredientDTO implements IIngredientDTO {
     @Override
     public double getAmount() {
         return amountInMG;
+    }
+
+    @Override
+    public void setMinAmountMG(int minAmount) {
+        this.minAmountInMG = minAmount;
+    }
+
+    @Override
+    public int getMinAmountMG() {
+        return minAmountInMG;
     }
 
     @Override

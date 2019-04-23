@@ -4,6 +4,7 @@ import dal.dto.IUserDTO;
 import dal.dto.UserDTO;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
@@ -17,13 +18,12 @@ public class DALTest {
 
     ConnectionDAO connectionDAO = new ConnectionDAO();
     UserDAO userDAO = new UserDAO(connectionDAO);
-    ProductDAOTest productDAOTest;
 
     @Before
     public void initialize() {
-        connectionDAO = new ConnectionDAO();
+        /*connectionDAO = new ConnectionDAO();
         userDAO = new UserDAO(connectionDAO);
-        productDAOTest = new ProductDAOTest();
+        productDAOTest = new ProductDAOTest();*/
     }
 
     @After
@@ -33,7 +33,7 @@ public class DALTest {
 
     @Test
     public void deleteUser() throws IUserDAO.DALException {
-        userDAO.deleteUser(13);
+        userDAO.deleteUser(10);
     }
 
     @Test
@@ -50,12 +50,13 @@ public class DALTest {
     public void initializeItAll() throws IUserDAO.DALException {
         dropAllTables();
         initializeDataBase();
-
-/*
-        productDAOTest.createTriggers();
-*/
         createUser();
+    }
 
+    @Test
+    void createTriggers() {
+        connectionDAO.createTriggerOldRecipe();
+        connectionDAO.createTriggerReorder();
     }
 
     @Test
@@ -67,7 +68,7 @@ public class DALTest {
     @Test
     public void createUser() throws IUserDAO.DALException {
         IUserDTO testUser2 = new UserDTO();
-        testUser2.setUserId(56);
+        testUser2.setUserId(5);
         testUser2.setUserName("Pælle Hansen");
         testUser2.setIni("PH");
         testUser2.addRole("admin");
@@ -75,7 +76,7 @@ public class DALTest {
         userDAO.createUser(testUser2);
 
         UserDTO testUser = new UserDTO();
-        testUser.setUserId(106);
+        testUser.setUserId(10);
         testUser.setUserName("Puk Larsen");
         testUser.setIni("PL");
         testUser.addRole("farmaceut");

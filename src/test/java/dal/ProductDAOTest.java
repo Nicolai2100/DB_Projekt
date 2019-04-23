@@ -253,6 +253,7 @@ public class ProductDAOTest {
         ingredientDTO.setType("active");
         ingredientDTO.setIngredientId(1);
         ingredientDTO.setAmount(1);
+        ingredientDTO.setMinAmountMG(100000);
         ingredients.add(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();

@@ -18,4 +18,10 @@ public interface IIngredientDTO {
 
     double getAmount();
 
+    void setMinAmountMG(int minAmount);
+
+    int getMinAmountMG();
+
+
+
 }

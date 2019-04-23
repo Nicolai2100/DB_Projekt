@@ -14,7 +14,7 @@ public class IngredientDAO {
     private ConnectionDAO connectionDAO;
     private Connection conn;
 
-    public IngredientDAO(ConnectionDAO connectionDAO){
+    public IngredientDAO(ConnectionDAO connectionDAO) {
         this.connectionDAO = connectionDAO;
         conn = connectionDAO.getConn();
     }
@@ -24,11 +24,12 @@ public class IngredientDAO {
             conn.setAutoCommit(false);
             PreparedStatement pstmtInsertIngredient = conn.prepareStatement(
                     "INSERT INTO ingredient " +
-                            "VALUES(?,?,?,?)");
+                            "VALUES(?,?,?,?,?)");
             pstmtInsertIngredient.setInt(1, ingredientDTO.getIngredientId());
             pstmtInsertIngredient.setString(2, ingredientDTO.getName());
             pstmtInsertIngredient.setString(3, ingredientDTO.getType());
-            pstmtInsertIngredient.setInt(4, 1);
+            pstmtInsertIngredient.setInt(4, ingredientDTO.getMinAmountMG());
+            pstmtInsertIngredient.setInt(5, 1);
             pstmtInsertIngredient.executeUpdate();
             conn.commit();
             System.out.println("The ingredient was successfully created.");

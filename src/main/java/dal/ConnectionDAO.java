@@ -22,9 +22,9 @@ public class ConnectionDAO {
     }
 
     public Connection createConnection() throws IUserDAO.DALException {
-        String dataBase = "jdbc:mysql://ec2-52-30-211-3.eu-west-1.compute.amazonaws.com/jekala";
-        String user = "jekala";
-        String password = "d0czCtqcu5015NhwwP5zl";
+        String dataBase = "jdbc:mysql://ec2-52-30-211-3.eu-west-1.compute.amazonaws.com/s185039";
+        String user = "s185039";
+        String password = "R655RYydKhmVGgXQb0zeo";
         try {
             return DriverManager.getConnection(dataBase, user, password);
         } catch (SQLException e) {
@@ -153,17 +153,6 @@ public class ConnectionDAO {
                             "REFERENCES user (userid)" +
                             "ON DELETE CASCADE);");
 
-/*
-            Hvis brugere slettes - hvad gør vi så med commodity batch ect?
-            PreparedStatement createTableOldUser = conn.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS olduser " +
-                            "(userid INT, " +
-                            "name VARCHAR(30) NOT NULL, " +
-                            "ini VARCHAR(5), " +
-                            "PRIMARY KEY (userid), " +
-                            "FOREIGN KEY (admin) " +
-                            "REFERENCES user (userid));");
-*/
             PreparedStatement createTableUserRole = conn.prepareStatement(
                     "CREATE TABLE IF NOT EXISTS userrole " +
                             "(userid int, " +
@@ -177,7 +166,7 @@ public class ConnectionDAO {
                             "(ingredientid INT, " +
                             "name VARCHAR(50), " +
                             "type VARCHAR(15), " +
-                            "minrequiredamountinkg INT," +
+                            "minamountinmg INT, " +
                             "reorder BIT, " +
                             "PRIMARY KEY (ingredientid));");
 
