@@ -8,8 +8,8 @@ public class ProductDAO {
     private Connection conn;
     private UserDAO userDAO;
 
-    public ProductDAO(ConnectionDAO connectionDAO){
-        this.conn = connectionDAO.getConn();
+    public ProductDAO(){
+        this.conn = ConnectionDAO.createConnection();
     }
 
     /*Systemet skal således understøtte
@@ -35,7 +35,7 @@ public class ProductDAO {
 
             PreparedStatement pstmtInsertProduct = conn.prepareStatement(
                     "INSERT INTO product " +
-                            "VALUES(?,?,?,?,?,?,?,?)");
+                            "VALUES(?,?,?,?,?,?,?)");
 
             pstmtInsertProduct.setInt(1, product.getProductId());
             pstmtInsertProduct.setString(2, product.getName());
@@ -44,7 +44,7 @@ public class ProductDAO {
             pstmtInsertProduct.setDate(5, product.getProductionDate());
             pstmtInsertProduct.setInt(6, product.getVolume());
             // pstmtInsertProduct.setString(7, product.getCommodityBatches());
-            pstmtInsertProduct.setDate(8, product.getExpirationDate());
+            pstmtInsertProduct.setDate(7, product.getExpirationDate());
 
 
             pstmtInsertProduct.executeUpdate();

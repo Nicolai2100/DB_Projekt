@@ -99,9 +99,6 @@ public class IngredientListDAO {
 
     public void createIngredientList(IRecipeDTO recipeDTO, int edition) {
         try {
-            for (IIngredientDTO ingredient : recipeDTO.getIngredientsList()) {
-                ingredientDAO.isIngredientThere(ingredient);
-            }
             conn.setAutoCommit(false);
             PreparedStatement pstmtInsertIngredientList = conn.prepareStatement(
                     "INSERT INTO ingredientlist(ingredientlistid, edition, ingredientid, amountmg) " +

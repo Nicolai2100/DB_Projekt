@@ -10,13 +10,12 @@ import java.sql.SQLException;
 
 public class OldRecipeDAO {
     private Connection conn;
-    private ConnectionDAO connectionDAO;
     private RecipeDAO recipeDAO;
 
-    public OldRecipeDAO(ConnectionDAO connectionDAO, RecipeDAO recipeDAO) {
-        this.connectionDAO = connectionDAO;
+    public OldRecipeDAO(RecipeDAO recipeDAO) {
+        this.conn = ConnectionDAO.createConnection();
         this.recipeDAO = recipeDAO;
-        conn = connectionDAO.getConn();
+
 
     }
 

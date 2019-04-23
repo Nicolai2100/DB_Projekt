@@ -5,30 +5,38 @@ import dal.dto.*;
 import java.sql.*;
 
 public class ConnectionDAO {
-    private Connection conn;
+    private static Connection conn;
     private UserDAO userDAO;
 
     public ConnectionDAO() {
-        userDAO = new UserDAO(this);
-        try {
-            conn = createConnection();
-        } catch (IUserDAO.DALException e) {
-            e.printStackTrace();
-        }
+        userDAO = new UserDAO();
+
     }
 
     public Connection getConn() {
         return conn;
     }
 
-    public Connection createConnection() throws IUserDAO.DALException {
-        String dataBase = "jdbc:mysql://ec2-52-30-211-3.eu-west-1.compute.amazonaws.com/s185039";
-        String user = "s185039";
-        String password = "R655RYydKhmVGgXQb0zeo";
+    public static Connection createConnection() {
         try {
-            return DriverManager.getConnection(dataBase, user, password);
+            if (conn == null) {
+                String dataBase = "jdbc:mysql://ec2-52-30-211-3.eu-west-1.compute.amazonaws.com/jekala";
+                String user = "jekala";
+                String password = "d0czCtqcu5015NhwwP5zl";
+
+                conn = DriverManager.getConnection(dataBase, user, password);
+            }
         } catch (SQLException e) {
-            throw new IUserDAO.DALException(e.getMessage());
+            e.printStackTrace();
+        }
+        return conn;
+    }
+
+    public void closeConn() {
+        try {
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
@@ -228,6 +236,9 @@ public class ConnectionDAO {
                             "name VARCHAR(50) NOT NULL, " +
                             "madeby INT, " +
                             "recipe INT, " +
+                            "production_date DATE, " +
+                            "volume INT, " +
+                            "expiration_date DATE, " +
                             "PRIMARY KEY (productid), " +
                             "FOREIGN KEY (recipe) " +
                             "REFERENCES recipe(recipeid));");

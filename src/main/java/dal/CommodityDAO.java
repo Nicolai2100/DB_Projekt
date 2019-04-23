@@ -12,10 +12,10 @@ public class CommodityDAO {
     private UserDAO userDAO;
     private Connection conn;
 
-    public CommodityDAO(ConnectionDAO connectionDAO, UserDAO userDAO) {
-        this.connectionDAO = connectionDAO;
+    public CommodityDAO(UserDAO userDAO) {
+
         this.userDAO = userDAO;
-        this.conn = connectionDAO.getConn();
+        this.conn = ConnectionDAO.createConnection();
     }
 
     public void createCommodityBatch(ICommodityBatchDTO commodityBatch) {

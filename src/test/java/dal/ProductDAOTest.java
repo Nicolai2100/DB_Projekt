@@ -5,7 +5,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.sql.Date;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,12 +16,12 @@ import static org.junit.Assert.*;
 
 public class ProductDAOTest {
     ConnectionDAO connectionDAO = new ConnectionDAO();
-    ProductDAO productDAO = new ProductDAO(connectionDAO);
-    UserDAO userDAO = new UserDAO(connectionDAO);
-    IngredientDAO ingredientDAO = new IngredientDAO(connectionDAO);
-    IngredientListDAO ingredientListDAO = new IngredientListDAO(connectionDAO, userDAO, ingredientDAO);
-    CommodityDAO commodityDAO = new CommodityDAO(connectionDAO, userDAO);
-    RecipeDAO recipeDAO = new RecipeDAO(connectionDAO, ingredientListDAO, userDAO);
+    ProductDAO productDAO = new ProductDAO();
+    UserDAO userDAO = new UserDAO();
+    IngredientDAO ingredientDAO = new IngredientDAO();
+    IngredientListDAO ingredientListDAO = new IngredientListDAO(userDAO, ingredientDAO);
+    CommodityDAO commodityDAO = new CommodityDAO(userDAO);
+    RecipeDAO recipeDAO = new RecipeDAO(ingredientListDAO, userDAO);
     OldRecipeDAO oldRecipeDAO = recipeDAO.getOldRecipeDAO();
     DALTest dalTest = new DALTest();
 
@@ -37,11 +39,6 @@ public class ProductDAOTest {
         dalTest = new DALTest();
     }
 */
-    @After
-    public void closeAll() throws SQLException {
-        connectionDAO.getConn().close();
-    }
-
 
     @Test
     public void cleanTables() {
@@ -53,15 +50,21 @@ public class ProductDAOTest {
 
 
         ProductDTO productDTO = new ProductDTO();
-
-        UserDTO userDTO = (UserDTO) userDAO.getUser(10);
-        productDTO.setMadeBy(userDTO);
+        UserDTO testUser = (UserDTO) userDAO.getUser(2);
+        productDTO.setMadeBy(testUser);
         productDTO.setName("Ost");
         productDTO.setProductId(1);
-        productDTO.setRecipe(1);
-        /*productDTO.setProductBatches();
+        productDTO.setRecipe(2);
+        productDTO.setProductionDate(new Date(System.currentTimeMillis()));
+
+        productDTO.setExpirationDate(new Date(System.currentTimeMillis()));
+
+        productDTO.setVolume(100);
+
+        /*productDTO.setCommodityBatches();
          */
         productDAO.createProduct(productDTO);
+        System.out.println("Product created");
     }
 
 
@@ -96,9 +99,9 @@ public class ProductDAOTest {
 
     @Test
     public void createTriggers() {
-/*
-        productDAO.dropTriggers();
-*/
+
+        connectionDAO.dropTriggers();
+
         connectionDAO.createTriggerOldRecipe();
         connectionDAO.createTriggerReorder();
     }
@@ -128,12 +131,12 @@ public class ProductDAOTest {
     @Test
     public void createRecipe() throws IUserDAO.DALException {
         IRecipeDTO recipeDTO = new RecipeDTO();
-        recipeDTO.setRecipeId(2);
+        recipeDTO.setRecipeId(1);
         recipeDTO.setName("Norethisteron/estrogen");
         recipeDTO.setMadeBy(userDAO.getUser(10));
-/*
-        recipeDTO.setIngredientsList(productDAO.getIngredientList(recipeDTO));
-*/
+
+        recipeDTO.setIngredientsList(ingredientListDAO.getIngredientList(recipeDTO));
+
         List<IIngredientDTO> ingredients = new ArrayList<>();
         IngredientDTO ingredientDTO = new IngredientDTO();
         ingredientDTO.setIngredientId(1);
@@ -239,9 +242,9 @@ public class ProductDAOTest {
     public void getIngredientList() throws IUserDAO.DALException {
         RecipeDTO recipeDTO = new RecipeDTO();
         recipeDTO.setRecipeId(2);
-        List<IIngredientDTO> ingrediendts = ingredientListDAO.getIngredientList(recipeDTO);
+        List<IIngredientDTO> ingredients = ingredientListDAO.getIngredientList(recipeDTO);
 
-        System.out.println(ingrediendts);
+        System.out.println(ingredients);
     }
 
     @Test
@@ -316,11 +319,11 @@ public class ProductDAOTest {
          */
         IUserDTO testUser_2 = new UserDTO();
         testUser_2.setUserId(2);
-        testUser_2.setUserName("Pælle Hansen");
+        testUser_2.setUserName("Pelle Hansen");
         testUser_2.setIni("PH");
         ArrayList<String> roles2 = new ArrayList();
         roles2.add("admin");
-        roles2.add("productleader");
+        roles2.add("productionleader");
         testUser_2.setRoles(roles2);
         testUser_2.setIsActive(true);
         userDAO.createUser(testUser_2);
@@ -348,6 +351,7 @@ public class ProductDAOTest {
         ingredientDTO.setType("active");
         ingredientDTO.setAmount(1);
         ingredients.add(ingredientDTO);
+        ingredientDAO.createIngredient(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setIngredientId(2);
@@ -355,6 +359,7 @@ public class ProductDAOTest {
         ingredientDTO.setType("active");
         ingredientDTO.setAmount(0.5);
         ingredients.add(ingredientDTO);
+        ingredientDAO.createIngredient(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setIngredientId(3);
@@ -362,6 +367,7 @@ public class ProductDAOTest {
         ingredientDTO.setType("helper");
         ingredientDTO.setAmount(50);
         ingredients.add(ingredientDTO);
+        ingredientDAO.createIngredient(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setIngredientId(4);
@@ -369,6 +375,7 @@ public class ProductDAOTest {
         ingredientDTO.setType("helper");
         ingredientDTO.setAmount(10);
         ingredients.add(ingredientDTO);
+        ingredientDAO.createIngredient(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setIngredientId(5);
@@ -376,6 +383,7 @@ public class ProductDAOTest {
         ingredientDTO.setType("helper");
         ingredientDTO.setAmount(15);
         ingredients.add(ingredientDTO);
+        ingredientDAO.createIngredient(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setIngredientId(6);
@@ -383,8 +391,11 @@ public class ProductDAOTest {
         ingredientDTO.setType("helper");
         ingredientDTO.setAmount(120);
         ingredients.add(ingredientDTO);
+        ingredientDAO.createIngredient(ingredientDTO);
+
 
         recipeDTO.setIngredientsList(ingredients);
+        ingredientListDAO.createIngredientList(recipeDTO, 1);
         recipeDAO.createRecipe(recipeDTO);
 
         /**
@@ -424,8 +435,11 @@ public class ProductDAOTest {
          */
         //todo få testUser_2 til at oprette et product-batch
 
-        recipeDAO.deleteRecipe(2, testUser_3);
+//        recipeDAO.deleteRecipe(2, testUser_3);
 
-        oldRecipeDAO.getAllOldRecipes();
+        //      oldRecipeDAO.getAllOldRecipes();
+
+        createProduct();
+
     }
 }
