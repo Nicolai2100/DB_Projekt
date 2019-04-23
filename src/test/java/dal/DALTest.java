@@ -67,7 +67,7 @@ public class DALTest {
         testUser2.setUserName("Pælle Hansen");
         testUser2.setIni("PH");
         testUser2.addRole("admin");
-        testUser2.addRole("productleader");
+        testUser2.addRole("productionleader");
         userDAO.createUser(testUser2);
 
         UserDTO testUser = new UserDTO();

@@ -13,7 +13,6 @@ import java.util.List;
 public class IngredientListDAO {
     private Connection conn;
     private IngredientDAO ingredientDAO;
-    private ConnectionDAO connectionDAO;
 
     public IngredientListDAO(UserDAO userDAO, IngredientDAO ingredientDAO) {
         ingredientDAO = ingredientDAO;

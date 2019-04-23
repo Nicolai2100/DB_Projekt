@@ -22,11 +22,12 @@ public class IngredientDAO {
             conn.setAutoCommit(false);
             PreparedStatement pstmtInsertIngredient = conn.prepareStatement(
                     "INSERT INTO ingredient " +
-                            "VALUES(?,?,?,?)");
+                            "VALUES(?,?,?,?,?)");
             pstmtInsertIngredient.setInt(1, ingredientDTO.getIngredientId());
             pstmtInsertIngredient.setString(2, ingredientDTO.getName());
             pstmtInsertIngredient.setString(3, ingredientDTO.getType());
             pstmtInsertIngredient.setInt(4, 1);
+            pstmtInsertIngredient.setBoolean(5, true);
             pstmtInsertIngredient.executeUpdate();
             conn.commit();
             System.out.println("The ingredient was successfully created.");
