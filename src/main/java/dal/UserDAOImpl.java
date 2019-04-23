@@ -354,6 +354,7 @@ public class UserDAOImpl implements IUserDAO {
                             "(ingredientid INT, " +
                             "name VARCHAR(50), " +
                             "type VARCHAR(15), " +
+                            "minamountinkg INT," +
                             "reorder BIT, " +
                             "PRIMARY KEY (ingredientid));");
 
