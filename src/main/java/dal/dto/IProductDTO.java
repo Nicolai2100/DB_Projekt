@@ -1,6 +1,6 @@
 package dal.dto;
 
-import java.util.ArrayList;
+import java.sql.Date;
 import java.util.List;
 
 public interface IProductDTO {
@@ -17,11 +17,24 @@ public interface IProductDTO {
 
     void setRecipe(int recipe);
 
-    List<String> getProductBatches();
+    List<String> getCommodityBatches();
 
-    void setProductBatches(List<String> productBatches);
+    void setCommodityBatches(List<String> commodityBatches);
+
+    Date getProductionDate();
+
+    void setProductionDate(Date productionDate);
+
+    int getVolume();
+
+    void setVolume(int volume);
+
+    Date getExpirationDate();
+
+    void setExpirationDate(Date expirationDate);
 
     UserDTO getMadeBy();
 
     void setMadeBy(UserDTO madeBy);
+
 }

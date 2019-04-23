@@ -14,14 +14,26 @@ import static org.junit.Assert.*;
 
 public class ProductDAOTest {
     private ProductDAO productDAO;
-    private UserDAOImpl userDAO;
+    private UserDAO userDAO;
     private DALTest dalTest;
-
+    private ConnectionDAO connectionDAO;
+    private IngredientListDAO ingredientListDAO;
+    private IngredientDAO ingredientDAO;
+    private CommodityDAO commodityDAO;
+    private RecipeDAO recipeDAO;
+    private OldRecipeDAO oldRecipeDAO;
 
     @Before
     public void initialize() {
-        productDAO = new ProductDAO();
-        userDAO = new UserDAOImpl();
+        connectionDAO = new ConnectionDAO();
+        productDAO = new ProductDAO(connectionDAO);
+        userDAO = new UserDAO();
+        ingredientDAO = new IngredientDAO(connectionDAO);
+        ingredientListDAO = new IngredientListDAO(connectionDAO, userDAO, ingredientDAO);
+        commodityDAO = new CommodityDAO(connectionDAO, userDAO);
+        oldRecipeDAO = new OldRecipeDAO(connectionDAO, recipeDAO);
+        recipeDAO = new RecipeDAO(connectionDAO, ingredientListDAO, userDAO, oldRecipeDAO);
+
         dalTest = new DALTest();
     }
 
@@ -39,7 +51,7 @@ public class ProductDAOTest {
 
     @Test
     public void cleanTables() {
-        productDAO.cleanTables();
+        connectionDAO.cleanTables();
     }
 
     @Test
@@ -53,7 +65,7 @@ public class ProductDAOTest {
         productDTO.setName("Ost");
         productDTO.setProductId(1);
         productDTO.setRecipe(1);
-        /*productDTO.setProductBatches();
+        /*productDTO.setCommodityBatches();
          */
         productDAO.createProduct(productDTO);
     }
@@ -61,7 +73,7 @@ public class ProductDAOTest {
 
     @Test
     public void checkForReorder() {
-        List<IIngredientDTO> ingredientDTOS = productDAO.checkForReorder();
+        List<IIngredientDTO> ingredientDTOS = ingredientDAO.checkForReorder();
 
         for (IIngredientDTO ing : ingredientDTOS) {
             System.out.println(ing);
@@ -70,7 +82,7 @@ public class ProductDAOTest {
 
     @Test
     public void getCommodityBatch() throws IUserDAO.DALException {
-        ICommodityBatchDTO batchFromDB = productDAO.getCommodityBatch(2);
+        ICommodityBatchDTO batchFromDB = commodityDAO.getCommodityBatch(2);
         System.out.println(batchFromDB);
     }
 
@@ -82,10 +94,10 @@ public class ProductDAOTest {
         commodityBatch.setOrderedBy(testUser);
         commodityBatch.setBatchId(3);
         commodityBatch.setAmountInKg(2.5);
-        commodityBatch.setIngredientDTO(productDAO.getIngredient(2));
+        commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(2));
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
 
-        productDAO.createCommodityBatch(commodityBatch);
+        commodityDAO.createCommodityBatch(commodityBatch);
     }
 
     @Test
@@ -93,8 +105,8 @@ public class ProductDAOTest {
 /*
         productDAO.dropTriggers();
 */
-        productDAO.createTriggerOldRecipe();
-        productDAO.createTriggerReorder();
+        connectionDAO.createTriggerOldRecipe();
+        connectionDAO.createTriggerReorder();
     }
 
     @Test
@@ -102,20 +114,20 @@ public class ProductDAOTest {
         IUserDTO testUser = new UserDTO();
         testUser.addRole("farmaceut");
         testUser.setIsActive(true);
-        productDAO.deleteRecipe(2, testUser);
+        recipeDAO.deleteRecipe(2, testUser);
     }
 
     @Test
     public void updateRecipe() {
-        IRecipeDTO recipeDTO = productDAO.getRecipe(2);
+        IRecipeDTO recipeDTO = recipeDAO.getRecipe(2);
         recipeDTO.setName("snillert");
-        productDAO.updateRecipe(recipeDTO);
+        recipeDAO.updateRecipe(recipeDTO);
     }
 
 
     @Test
     public void getRecipe() {
-        IRecipeDTO recipeDTO = productDAO.getRecipe(2);
+        IRecipeDTO recipeDTO = recipeDAO.getRecipe(2);
         System.out.println(recipeDTO);
     }
 
@@ -172,7 +184,7 @@ public class ProductDAOTest {
         ingredients.add(ingredientDTO);
 
         recipeDTO.setIngredientsList(ingredients);
-        productDAO.createRecipe(recipeDTO);
+        recipeDAO.createRecipe(recipeDTO);
     }
 
     @Test
@@ -226,14 +238,14 @@ public class ProductDAOTest {
         ingredients.add(ingredientDTO);
 
         recipeDTO.setIngredientsList(ingredients);
-        productDAO.createIngredientList(recipeDTO, 1);
+        ingredientListDAO.createIngredientList(recipeDTO, 1);
     }
 
     @Test
     public void getIngredientList() throws IUserDAO.DALException {
         RecipeDTO recipeDTO = new RecipeDTO();
         recipeDTO.setRecipeId(2);
-        List<IIngredientDTO> ingrediendts = productDAO.getIngredientList(recipeDTO);
+        List<IIngredientDTO> ingrediendts = ingredientListDAO.getIngredientList(recipeDTO);
 
         System.out.println(ingrediendts);
     }
@@ -285,13 +297,13 @@ public class ProductDAOTest {
         ingredients.add(ingredientDTO);
 
         for (IngredientDTO ingredient : ingredients) {
-            productDAO.createIngredient(ingredient);
+            ingredientDAO.createIngredient(ingredient);
         }
     }
 
     @Test
     public void getIngredient() throws IUserDAO.DALException {
-        IIngredientDTO ingredientDTO = productDAO.getIngredient(1);
+        IIngredientDTO ingredientDTO = ingredientDAO.getIngredient(1);
         assertEquals(ingredientDTO.getType(), "active");
         System.out.println(ingredientDTO);
     }
@@ -302,7 +314,7 @@ public class ProductDAOTest {
         /**
          * Alt slettes
          */
-        productDAO.cleanTables();
+        connectionDAO.cleanTables();
 
         /**
          * Brugerne oprettes
@@ -378,16 +390,16 @@ public class ProductDAOTest {
         ingredients.add(ingredientDTO);
 
         recipeDTO.setIngredientsList(ingredients);
-        productDAO.createRecipe(recipeDTO);
+        recipeDAO.createRecipe(recipeDTO);
 
         /**
          * Liste over råvarer der skal bestilles
          */
         System.out.println("To be ordered: ");
-        List<IIngredientDTO> ingredientDTOS = productDAO.checkForReorder();
+        List<IIngredientDTO> ingredientDTOS = ingredientDAO.checkForReorder();
 
         for (IIngredientDTO ing : ingredientDTOS) {
-            System.out.println(""+(ingredientDTOS.indexOf(ing)+1) + " " + ing);
+            System.out.println("" + (ingredientDTOS.indexOf(ing) + 1) + " " + ing);
         }
         /**
          * Der bestilles et råvare batch
@@ -397,19 +409,19 @@ public class ProductDAOTest {
         commodityBatch.setOrderedBy(testUser);
         commodityBatch.setBatchId(3);
         commodityBatch.setAmountInKg(2.5);
-        commodityBatch.setIngredientDTO(productDAO.getIngredient(2));
+        commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(2));
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
 
-        productDAO.createCommodityBatch(commodityBatch);
+        commodityDAO.createCommodityBatch(commodityBatch);
 
         /**
          * Liste over råvarer der skal bestilles
          */
         System.out.println("To be ordered: ");
-        List<IIngredientDTO> ingredientDTOS2 = productDAO.checkForReorder();
+        List<IIngredientDTO> ingredientDTOS2 = ingredientDAO.checkForReorder();
 
         for (IIngredientDTO ing2 : ingredientDTOS2) {
-            System.out.println(""+(ingredientDTOS2.indexOf(ing2)+1) +" "+ ing2);
+            System.out.println("" + (ingredientDTOS2.indexOf(ing2) + 1) + " " + ing2);
         }
 
         /**
@@ -417,8 +429,8 @@ public class ProductDAOTest {
          */
         //todo få testUser_2 til at oprette et product-batch
 
-        productDAO.deleteRecipe(2, testUser_3);
+        recipeDAO.deleteRecipe(2, testUser_3);
 
-        productDAO.getAllOldRecipes();
+        oldRecipeDAO.getAllOldRecipes();
     }
 }
