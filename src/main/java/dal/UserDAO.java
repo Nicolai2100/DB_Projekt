@@ -15,7 +15,7 @@ public class UserDAO implements IUserDAO {
 
     public UserDAO(ConnectionDAO connectionDAO) {
         this.connectionDAO = connectionDAO;
-        conn = connectionDAO.getConn();
+        conn = this.connectionDAO.getConn();
     }
 
     @Override

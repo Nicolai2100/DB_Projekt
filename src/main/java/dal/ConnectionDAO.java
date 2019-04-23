@@ -15,7 +15,6 @@ public class ConnectionDAO {
         } catch (IUserDAO.DALException e) {
             e.printStackTrace();
         }
-
     }
 
     public Connection getConn() {
