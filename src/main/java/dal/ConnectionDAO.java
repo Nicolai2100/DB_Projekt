@@ -9,7 +9,7 @@ public class ConnectionDAO {
     private UserDAO userDAO;
 
     public ConnectionDAO() {
-        userDAO = new UserDAO();
+        userDAO = new UserDAO(this);
 
     }
 

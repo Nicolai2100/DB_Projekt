@@ -11,8 +11,9 @@ import java.util.List;
 
 public class UserDAO implements IUserDAO {
     private Connection conn;
-
-    public UserDAO() {
+    private ConnectionDAO connectionDAO;
+    public UserDAO(ConnectionDAO connectionDAO) {
+        this.connectionDAO = connectionDAO;
         this.conn = ConnectionDAO.createConnection();
     }
 

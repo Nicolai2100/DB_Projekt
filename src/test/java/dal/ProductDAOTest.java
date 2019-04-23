@@ -17,9 +17,9 @@ import static org.junit.Assert.*;
 public class ProductDAOTest {
     ConnectionDAO connectionDAO = new ConnectionDAO();
     ProductDAO productDAO = new ProductDAO();
-    UserDAO userDAO = new UserDAO();
-    IngredientDAO ingredientDAO = new IngredientDAO();
-    IngredientListDAO ingredientListDAO = new IngredientListDAO(userDAO, ingredientDAO);
+    UserDAO userDAO = new UserDAO(connectionDAO);
+    IngredientDAO ingredientDAO = new IngredientDAO(connectionDAO);
+    IngredientListDAO ingredientListDAO = new IngredientListDAO(connectionDAO, userDAO, ingredientDAO);
     CommodityDAO commodityDAO = new CommodityDAO(userDAO);
     RecipeDAO recipeDAO = new RecipeDAO(ingredientListDAO, userDAO);
     OldRecipeDAO oldRecipeDAO = recipeDAO.getOldRecipeDAO();
