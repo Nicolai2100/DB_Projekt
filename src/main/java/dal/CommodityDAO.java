@@ -8,12 +8,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class CommodityDAO {
-    private ConnectionDAO connectionDAO;
     private UserDAO userDAO;
     private Connection conn;
 
     public CommodityDAO(UserDAO userDAO) {
-
         this.userDAO = userDAO;
         this.conn = ConnectionDAO.createConnection();
     }

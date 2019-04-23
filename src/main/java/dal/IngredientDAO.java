@@ -11,12 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class IngredientDAO {
-    private ConnectionDAO connectionDAO;
     private Connection conn;
 
-    public IngredientDAO(ConnectionDAO connectionDAO) {
-        this.connectionDAO = connectionDAO;
-        conn = connectionDAO.getConn();
+    public IngredientDAO() {
+        this.conn = ConnectionDAO.createConnection();
     }
 
     public void createIngredient(IIngredientDTO ingredientDTO) {

@@ -17,7 +17,7 @@ import static org.junit.Assert.fail;
 public class DALTest {
 
     ConnectionDAO connectionDAO = new ConnectionDAO();
-    UserDAO userDAO = new UserDAO(connectionDAO);
+    UserDAO userDAO = new UserDAO();
 
     @Before
     public void initialize() {

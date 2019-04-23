@@ -6,7 +6,6 @@ import java.sql.*;
 
 public class ProductDAO {
     private Connection conn;
-    private UserDAO userDAO;
 
     public ProductDAO(){
         this.conn = ConnectionDAO.createConnection();

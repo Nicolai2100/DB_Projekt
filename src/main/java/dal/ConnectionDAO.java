@@ -9,12 +9,7 @@ public class ConnectionDAO {
     private UserDAO userDAO;
 
     public ConnectionDAO() {
-        userDAO = new UserDAO(this);
-
-    }
-
-    public Connection getConn() {
-        return conn;
+        userDAO = new UserDAO();
     }
 
     public static Connection createConnection() {
@@ -23,7 +18,6 @@ public class ConnectionDAO {
                 String dataBase = "jdbc:mysql://ec2-52-30-211-3.eu-west-1.compute.amazonaws.com/jekala";
                 String user = "jekala";
                 String password = "d0czCtqcu5015NhwwP5zl";
-
                 conn = DriverManager.getConnection(dataBase, user, password);
             }
         } catch (SQLException e) {

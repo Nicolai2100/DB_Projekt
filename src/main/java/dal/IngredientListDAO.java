@@ -13,12 +13,10 @@ import java.util.List;
 public class IngredientListDAO {
     private Connection conn;
     private IngredientDAO ingredientDAO;
-    private ConnectionDAO connectionDAO;
 
-    public IngredientListDAO(ConnectionDAO connectionDAO, UserDAO userDAO, IngredientDAO ingredientDAO) {
-        this.connectionDAO = connectionDAO;
+    public IngredientListDAO(IngredientDAO ingredientDAO) {
         this.ingredientDAO = ingredientDAO;
-        this.conn = connectionDAO.getConn();
+        this.conn = ConnectionDAO.createConnection();
     }
 
 

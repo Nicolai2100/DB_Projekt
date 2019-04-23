@@ -15,8 +15,6 @@ public class OldRecipeDAO {
     public OldRecipeDAO(RecipeDAO recipeDAO) {
         this.conn = ConnectionDAO.createConnection();
         this.recipeDAO = recipeDAO;
-
-
     }
 
 
