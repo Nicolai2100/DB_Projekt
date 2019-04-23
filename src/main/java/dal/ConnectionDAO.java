@@ -116,12 +116,14 @@ public class ConnectionDAO {
 
     public void cleanTables() {
         try {
+            PreparedStatement pstmtDeleteProduct = conn.prepareStatement("DELETE FROM product;");
             PreparedStatement pstmtDeleteRecipe = conn.prepareStatement("DELETE FROM recipe;");
             PreparedStatement pstmtDeleteOldRecipe = conn.prepareStatement("DELETE FROM oldrecipe;");
             PreparedStatement pstmtDeleteIngredientLists = conn.prepareStatement("DELETE FROM ingredientlist;");
             PreparedStatement pstmtDeleteIngredients = conn.prepareStatement("DELETE FROM ingredient;");
             PreparedStatement pstmtDeleteUsers = conn.prepareStatement("DELETE FROM user;");
 
+            pstmtDeleteProduct.execute();
             pstmtDeleteRecipe.execute();
             pstmtDeleteOldRecipe.execute();
             pstmtDeleteIngredientLists.execute();

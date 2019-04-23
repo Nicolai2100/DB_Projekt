@@ -312,9 +312,9 @@ public class ProductDAOTest {
         /**
          * Alt slettes
          */
-/*
+
         connectionDAO.cleanTables();
-*/
+
 
         /**
          * Brugerne oprettes
