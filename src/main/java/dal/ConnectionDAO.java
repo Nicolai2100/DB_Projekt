@@ -15,9 +15,9 @@ public class ConnectionDAO {
     public static Connection createConnection() {
         try {
             if (conn == null) {
-                String dataBase = "jdbc:mysql://ec2-52-30-211-3.eu-west-1.compute.amazonaws.com/jekala";
-                String user = "jekala";
-                String password = "d0czCtqcu5015NhwwP5zl";
+                String dataBase = "jdbc:mysql://ec2-52-30-211-3.eu-west-1.compute.amazonaws.com/s185039";
+                String user = "s185039";
+                String password = "R655RYydKhmVGgXQb0zeo";
                 conn = DriverManager.getConnection(dataBase, user, password);
             }
         } catch (SQLException e) {

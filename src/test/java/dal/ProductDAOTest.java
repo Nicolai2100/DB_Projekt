@@ -353,7 +353,6 @@ public class ProductDAOTest {
         ingredientDTO.setType("active");
         ingredientDTO.setAmount(1);
         ingredients.add(ingredientDTO);
-        ingredientDAO.createIngredient(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setIngredientId(2);
@@ -361,7 +360,6 @@ public class ProductDAOTest {
         ingredientDTO.setType("active");
         ingredientDTO.setAmount(0.5);
         ingredients.add(ingredientDTO);
-        ingredientDAO.createIngredient(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setIngredientId(3);
@@ -369,7 +367,6 @@ public class ProductDAOTest {
         ingredientDTO.setType("helper");
         ingredientDTO.setAmount(50);
         ingredients.add(ingredientDTO);
-        ingredientDAO.createIngredient(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setIngredientId(4);
@@ -377,7 +374,6 @@ public class ProductDAOTest {
         ingredientDTO.setType("helper");
         ingredientDTO.setAmount(10);
         ingredients.add(ingredientDTO);
-        ingredientDAO.createIngredient(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setIngredientId(5);
@@ -385,7 +381,6 @@ public class ProductDAOTest {
         ingredientDTO.setType("helper");
         ingredientDTO.setAmount(15);
         ingredients.add(ingredientDTO);
-        ingredientDAO.createIngredient(ingredientDTO);
 
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setIngredientId(6);
@@ -393,11 +388,7 @@ public class ProductDAOTest {
         ingredientDTO.setType("helper");
         ingredientDTO.setAmount(120);
         ingredients.add(ingredientDTO);
-        ingredientDAO.createIngredient(ingredientDTO);
 
-
-        recipeDTO.setIngredientsList(ingredients);
-        ingredientListDAO.createIngredientList(recipeDTO, 1);
         recipeDAO.createRecipe(recipeDTO);
 
         /**
