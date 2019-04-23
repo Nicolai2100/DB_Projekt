@@ -17,9 +17,9 @@ public interface IProductDTO {
 
     void setRecipe(int recipe);
 
-    List<String> getCommodityBatches();
+    List<ICommodityBatchDTO> getCommodityBatches();
 
-    void setCommodityBatches(List<String> commodityBatches);
+    void setCommodityBatches(List<ICommodityBatchDTO> commodityBatches);
 
     Date getProductionDate();
 

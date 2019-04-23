@@ -61,10 +61,9 @@ public class ProductDAOTest {
 
         productDTO.setVolume(100);
 
-        /*productDTO.setCommodityBatches();
-         */
+        productDTO.getCommodityBatches().add(commodityDAO.getCommodityBatch(2));
+
         productDAO.createProduct(productDTO);
-        System.out.println("Product created");
     }
 
 
@@ -87,12 +86,12 @@ public class ProductDAOTest {
     public void createCommodityBatch() throws IUserDAO.DALException {
 
         ICommodityBatchDTO commodityBatch = new CommodityBatchDTO();
-        IUserDTO testUser = userDAO.getUser(5);
+        IUserDTO testUser = userDAO.getUser(2);
         commodityBatch.setOrderedBy(testUser);
         commodityBatch.setBatchId(3);
         commodityBatch.setAmountInKg(2.5);
         commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(2));
-        commodityBatch.setOrderDate(LocalDateTime.now().toString());
+        commodityBatch.setOrderDate(LocalDate.now().toString());
 
         commodityDAO.createCommodityBatch(commodityBatch);
     }
@@ -415,7 +414,7 @@ public class ProductDAOTest {
         ICommodityBatchDTO commodityBatch = new CommodityBatchDTO();
         IUserDTO testUser = userDAO.getUser(2);
         commodityBatch.setOrderedBy(testUser);
-        commodityBatch.setBatchId(3);
+        commodityBatch.setBatchId(2);
         commodityBatch.setAmountInKg(2.5);
         commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(2));
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
@@ -440,7 +439,6 @@ public class ProductDAOTest {
 //        recipeDAO.deleteRecipe(2, testUser_3);
 
         //      oldRecipeDAO.getAllOldRecipes();
-
         createProduct();
 
     }

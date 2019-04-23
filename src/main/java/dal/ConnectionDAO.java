@@ -116,6 +116,8 @@ public class ConnectionDAO {
 
     public void cleanTables() {
         try {
+            PreparedStatement pstmtDeleteProductCommodityRelation = conn.prepareStatement("DELETE FROM product_commodity_relationship;");
+            PreparedStatement pstmtDeleteCommodityBatch = conn.prepareStatement("DELETE FROM commoditybatch;");
             PreparedStatement pstmtDeleteProduct = conn.prepareStatement("DELETE FROM product;");
             PreparedStatement pstmtDeleteRecipe = conn.prepareStatement("DELETE FROM recipe;");
             PreparedStatement pstmtDeleteOldRecipe = conn.prepareStatement("DELETE FROM oldrecipe;");
@@ -123,6 +125,8 @@ public class ConnectionDAO {
             PreparedStatement pstmtDeleteIngredients = conn.prepareStatement("DELETE FROM ingredient;");
             PreparedStatement pstmtDeleteUsers = conn.prepareStatement("DELETE FROM user;");
 
+            pstmtDeleteProductCommodityRelation.execute();
+            pstmtDeleteCommodityBatch.execute();
             pstmtDeleteProduct.execute();
             pstmtDeleteRecipe.execute();
             pstmtDeleteOldRecipe.execute();
@@ -218,7 +222,7 @@ public class ConnectionDAO {
                             "ingredientid INT, " +
                             "orderedby INT, " +
                             "amountinkg INT, " +
-                            "orderdate VARCHAR(25), " +
+                            "orderdate VARCHAR(50), " +
                             "residue BIT, " +
                             "PRIMARY KEY (commoditybatchid), " +
                             "FOREIGN KEY (orderedby) " +
@@ -239,6 +243,16 @@ public class ConnectionDAO {
                             "FOREIGN KEY (recipe) " +
                             "REFERENCES recipe(recipeid));");
 
+            PreparedStatement createTableProductCommodityRelationship = conn.prepareStatement(
+                    "CREATE TABLE IF NOT EXISTS product_commodity_relationship " +
+                            "(product_batch_id INT, " +
+                            "commodity_batch_id INT, " +
+                            "PRIMARY KEY (product_batch_id, commodity_batch_id), " +
+                            "FOREIGN KEY (product_batch_id) " +
+                            "REFERENCES product(productid)," +
+                            "FOREIGN KEY (commodity_batch_id) " +
+                            "REFERENCES commoditybatch(commoditybatchid));");
+
 
             //rækkefølgen er vigtig!
             createTableUser.execute();
@@ -249,6 +263,7 @@ public class ConnectionDAO {
             createTableCommodityBatch.execute();
             createTableProduct.execute();
             createTableOldRecipe.execute();
+            createTableProductCommodityRelationship.execute();
             conn.commit();
 
         } catch (SQLException e) {
@@ -274,9 +289,12 @@ public class ConnectionDAO {
                     "DROP TABLE IF EXISTS product;");
             PreparedStatement dropTableCommodityBatch = conn.prepareStatement(
                     "DROP TABLE IF EXISTS commoditybatch;");
+            PreparedStatement dropTableProductCommodityRelation = conn.prepareStatement(
+                    "DROP TABLE IF EXISTS product_commodity_relationship;");
 
 
             if (deleteTable == 0) {
+                dropTableProductCommodityRelation.execute();
                 dropTableOldRecipe.execute();
                 dropTableProduct.execute();
                 dropTableCommodityBatch.execute();

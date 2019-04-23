@@ -2,10 +2,7 @@ package dal;
 
 import dal.dto.*;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class CommodityDAO {
     private UserDAO userDAO;
@@ -18,11 +15,12 @@ public class CommodityDAO {
 
     public void createCommodityBatch(ICommodityBatchDTO commodityBatch) {
         IUserDTO userDTO = commodityBatch.getOrderedBy();
-        if (!userDTO.getRoles().contains("productleader")) {
+        if (!userDTO.getRoles().contains("productionleader")) {
             System.out.println("User not authorized to proceed!");
             return;
         }
         try {
+            conn.setAutoCommit(false);
             PreparedStatement pstmtInsertCommodityBatch = conn.prepareStatement(
                     "INSERT INTO commoditybatch " +
                             "VALUES(?,?,?,?,?,?)");
@@ -33,6 +31,7 @@ public class CommodityDAO {
             pstmtInsertCommodityBatch.setString(5, commodityBatch.getOrderDate());
             pstmtInsertCommodityBatch.setBoolean(6, false);
             pstmtInsertCommodityBatch.executeUpdate();
+            conn.commit();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -56,19 +55,19 @@ public class CommodityDAO {
             ResultSet rs = pstmtGetCommodityBatch.executeQuery();
             while (rs.next()) {
 
-                ingredientDTO.setIngredientId(rs.getInt(6));
-                ingredientDTO.setName(rs.getString(7));
-                ingredientDTO.setType(rs.getString(8));
+                ingredientDTO.setIngredientId(rs.getInt("ingredientid"));
+                ingredientDTO.setName(rs.getString("ingredient.name"));
+                ingredientDTO.setType(rs.getString("type"));
 
-                userDTO.setUserId(rs.getInt(9));
-                userDTO.setUserName(rs.getString(10));
-                userDTO.setIni(rs.getString(11));
+                userDTO.setUserId(rs.getInt("userid"));
+                userDTO.setUserName(rs.getString("user.name"));
+                userDTO.setIni(rs.getString("ini"));
                 userDTO.setRoles(userDAO.getUserRoleList(userDTO.getUserId()));
 
                 commodityBatch.setIngredientDTO(ingredientDTO);
                 commodityBatch.setOrderedBy(userDTO);
-                commodityBatch.setAmountInKg(rs.getDouble(4));
-                commodityBatch.setOrderDate(rs.getString(5));
+                commodityBatch.setAmountInKg(rs.getDouble("amountinkg"));
+                commodityBatch.setOrderDate(rs.getString("orderdate"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
