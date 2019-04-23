@@ -7,17 +7,10 @@ import java.sql.*;
 public class ProductDAO {
     private Connection conn;
     private UserDAO userDAO;
-    private ConnectionDAO connectionDAO;
 
-    public ProductDAO(ConnectionDAO connectionDAO) {
-        this.connectionDAO = connectionDAO;
-/*
-        userDAO = new UserDAO();
-*/
-        conn = connectionDAO.getConn();
+    public ProductDAO(ConnectionDAO connectionDAO){
+        this.conn = connectionDAO.getConn();
     }
-
-
 
     /*Systemet skal således understøtte
   Oprettelse og administration af opskrifter med indholdsstoffer (Farmaceut)
@@ -40,6 +33,21 @@ public class ProductDAO {
         try {
             conn.setAutoCommit(false);
 
+            PreparedStatement pstmtInsertProduct = conn.prepareStatement(
+                    "INSERT INTO product " +
+                            "VALUES(?,?,?,?,?,?,?,?)");
+
+            pstmtInsertProduct.setInt(1, product.getProductId());
+            pstmtInsertProduct.setString(2, product.getName());
+            pstmtInsertProduct.setInt(3, product.getMadeBy().getUserId());
+            pstmtInsertProduct.setInt(4, product.getRecipe());
+            pstmtInsertProduct.setDate(5, product.getProductionDate());
+            pstmtInsertProduct.setInt(6, product.getVolume());
+            // pstmtInsertProduct.setString(7, product.getCommodityBatches());
+            pstmtInsertProduct.setDate(8, product.getExpirationDate());
+
+
+            pstmtInsertProduct.executeUpdate();
 
             conn.commit();
             System.out.println("The product was successfully created.");

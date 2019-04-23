@@ -1,19 +1,23 @@
 package dal.dto;
 
-import java.io.Serializable;
 import java.util.ArrayList;
+import java.sql.Date;
 import java.util.List;
 
-public class ProductDTO implements IProductDTO{
+public class ProductDTO implements IProductDTO {
 
-    private int	productId;
+    private int productId;
     private String name;
     private int recipe;
-    private List<String> productBatches;
+    private List<String> commodityBatches;
     private UserDTO madeBy;
+    private Date productionDate;
+    private Date expirationDate;
+    private int volume;
+
 
     public ProductDTO() {
-        this.productBatches = new ArrayList<>();
+        this.commodityBatches = new ArrayList<>();
     }
 
     public int getProductId() {
@@ -40,12 +44,43 @@ public class ProductDTO implements IProductDTO{
         this.recipe = recipe;
     }
 
-    public List<String> getProductBatches() {
-        return productBatches;
+    public List<String> getCommodityBatches() {
+        return commodityBatches;
     }
 
-    public void setProductBatches(List<String> productBatches) {
-        this.productBatches = productBatches;
+
+    @Override
+    public Date getProductionDate() {
+        return productionDate;
+    }
+
+    @Override
+    public void setProductionDate(Date productionDate) {
+        this.productionDate = productionDate;
+    }
+
+    @Override
+    public int getVolume() {
+        return volume;
+    }
+
+    @Override
+    public void setVolume(int volume) {
+        this.volume = volume;
+    }
+
+    @Override
+    public Date getExpirationDate() {
+        return expirationDate;
+    }
+
+    @Override
+    public void setExpirationDate(Date expirationDate) {
+        this.expirationDate = expirationDate;
+    }
+
+    public void setCommodityBatches(List<String> commodityBatches) {
+        this.commodityBatches = commodityBatches;
     }
 
     public UserDTO getMadeBy() {
@@ -58,6 +93,6 @@ public class ProductDTO implements IProductDTO{
 
     @Override
     public String toString() {
-        return "Product [productId=" + productId + ", type=" + name + ", productbatches=" + productBatches + ", made by: " + madeBy + "]";
+        return "Product [productId=" + productId + ", type=" + name + ", productbatches=" + commodityBatches + ", made by: " + madeBy + "]";
     }
 }
