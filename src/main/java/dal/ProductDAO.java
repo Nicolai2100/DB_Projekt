@@ -7,7 +7,7 @@ import java.sql.*;
 public class ProductDAO {
     private Connection conn;
 
-    public ProductDAO(){
+    public ProductDAO() {
         this.conn = ConnectionDAO.createConnection();
     }
 
@@ -36,17 +36,25 @@ public class ProductDAO {
                     "INSERT INTO product " +
                             "VALUES(?,?,?,?,?,?,?)");
 
+            PreparedStatement pstmtInsertCommodityRelation = conn.prepareStatement(
+                    "INSERT INTO product_commodity_relationship " +
+                            "VALUES(?,?)");
+
             pstmtInsertProduct.setInt(1, product.getProductId());
             pstmtInsertProduct.setString(2, product.getName());
             pstmtInsertProduct.setInt(3, product.getMadeBy().getUserId());
             pstmtInsertProduct.setInt(4, product.getRecipe());
             pstmtInsertProduct.setDate(5, product.getProductionDate());
             pstmtInsertProduct.setInt(6, product.getVolume());
-            // pstmtInsertProduct.setString(7, product.getCommodityBatches());
             pstmtInsertProduct.setDate(7, product.getExpirationDate());
-
-
             pstmtInsertProduct.executeUpdate();
+
+            for (ICommodityBatchDTO c : product.getCommodityBatches()) {
+                pstmtInsertCommodityRelation.setInt(1, product.getProductId());
+                pstmtInsertCommodityRelation.setInt(2, c.getBatchId());
+                pstmtInsertCommodityRelation.executeUpdate();
+            }
+
 
             conn.commit();
             System.out.println("The product was successfully created.");

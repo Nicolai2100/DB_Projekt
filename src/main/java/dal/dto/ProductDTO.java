@@ -9,7 +9,7 @@ public class ProductDTO implements IProductDTO {
     private int productId;
     private String name;
     private int recipe;
-    private List<String> commodityBatches;
+    private List<ICommodityBatchDTO> commodityBatches;
     private UserDTO madeBy;
     private Date productionDate;
     private Date expirationDate;
@@ -44,7 +44,7 @@ public class ProductDTO implements IProductDTO {
         this.recipe = recipe;
     }
 
-    public List<String> getCommodityBatches() {
+    public List<ICommodityBatchDTO> getCommodityBatches() {
         return commodityBatches;
     }
 
@@ -79,7 +79,7 @@ public class ProductDTO implements IProductDTO {
         this.expirationDate = expirationDate;
     }
 
-    public void setCommodityBatches(List<String> commodityBatches) {
+    public void setCommodityBatches(List<ICommodityBatchDTO> commodityBatches) {
         this.commodityBatches = commodityBatches;
     }
 
