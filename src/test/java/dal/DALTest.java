@@ -16,20 +16,16 @@ import static org.junit.Assert.fail;
 public class DALTest {
 
     ConnectionDAO connectionDAO = new ConnectionDAO();
-    UserDAO userDAO = new UserDAO(connectionDAO);
+    UserDAO userDAO = new UserDAO();
     ProductDAOTest productDAOTest;
 
     @Before
     public void initialize() {
         connectionDAO = new ConnectionDAO();
-        userDAO = new UserDAO(connectionDAO);
+        userDAO = new UserDAO();
         productDAOTest = new ProductDAOTest();
     }
 
-    @After
-    public void closeConn() throws SQLException {
-        connectionDAO.getConn().close();
-    }
 
     @Test
     public void deleteUser() throws IUserDAO.DALException {
@@ -38,7 +34,7 @@ public class DALTest {
 
     @Test
     public void dropAllTables() throws IUserDAO.DALException {
-        connectionDAO.dropAllTables(0);
+        connectionDAO.dropAllTables(1);
     }
 
     @Test

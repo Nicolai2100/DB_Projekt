@@ -15,10 +15,9 @@ public class IngredientListDAO {
     private IngredientDAO ingredientDAO;
     private ConnectionDAO connectionDAO;
 
-    public IngredientListDAO(ConnectionDAO connectionDAO, UserDAO userDAO, IngredientDAO ingredientDAO) {
-        this.connectionDAO = connectionDAO;
+    public IngredientListDAO(UserDAO userDAO, IngredientDAO ingredientDAO) {
         ingredientDAO = ingredientDAO;
-        conn = connectionDAO.getConn();
+        this.conn = ConnectionDAO.createConnection();
     }
 
 
@@ -99,9 +98,6 @@ public class IngredientListDAO {
 
     public void createIngredientList(IRecipeDTO recipeDTO, int edition) {
         try {
-            for (IIngredientDTO ingredient : recipeDTO.getIngredientsList()) {
-                ingredientDAO.isIngredientThere(ingredient);
-            }
             conn.setAutoCommit(false);
             PreparedStatement pstmtInsertIngredientList = conn.prepareStatement(
                     "INSERT INTO ingredientlist(ingredientlistid, edition, ingredientid, amountmg) " +

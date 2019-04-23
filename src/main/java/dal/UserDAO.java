@@ -10,12 +10,10 @@ import java.util.Collections;
 import java.util.List;
 
 public class UserDAO implements IUserDAO {
-    private ConnectionDAO connectionDAO;
     private Connection conn;
 
-    public UserDAO(ConnectionDAO connectionDAO) {
-        this.connectionDAO = connectionDAO;
-        conn = this.connectionDAO.getConn();
+    public UserDAO() {
+        this.conn = ConnectionDAO.createConnection();
     }
 
     @Override

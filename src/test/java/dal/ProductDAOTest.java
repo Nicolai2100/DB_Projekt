@@ -16,12 +16,12 @@ import static org.junit.Assert.*;
 
 public class ProductDAOTest {
     ConnectionDAO connectionDAO = new ConnectionDAO();
-    ProductDAO productDAO = new ProductDAO(connectionDAO);
-    UserDAO userDAO = new UserDAO(connectionDAO);
-    IngredientDAO ingredientDAO = new IngredientDAO(connectionDAO);
-    IngredientListDAO ingredientListDAO = new IngredientListDAO(connectionDAO, userDAO, ingredientDAO);
-    CommodityDAO commodityDAO = new CommodityDAO(connectionDAO, userDAO);
-    RecipeDAO recipeDAO = new RecipeDAO(connectionDAO, ingredientListDAO, userDAO);
+    ProductDAO productDAO = new ProductDAO();
+    UserDAO userDAO = new UserDAO();
+    IngredientDAO ingredientDAO = new IngredientDAO();
+    IngredientListDAO ingredientListDAO = new IngredientListDAO(userDAO, ingredientDAO);
+    CommodityDAO commodityDAO = new CommodityDAO(userDAO);
+    RecipeDAO recipeDAO = new RecipeDAO(ingredientListDAO, userDAO);
     OldRecipeDAO oldRecipeDAO = recipeDAO.getOldRecipeDAO();
     DALTest dalTest = new DALTest();
 
@@ -39,11 +39,6 @@ public class ProductDAOTest {
         dalTest = new DALTest();
     }
 */
-    @After
-    public void closeAll() throws SQLException {
-        connectionDAO.getConn().close();
-    }
-
 
     @Test
     public void cleanTables() {
@@ -55,8 +50,7 @@ public class ProductDAOTest {
 
 
         ProductDTO productDTO = new ProductDTO();
-        UserDTO testUser = (UserDTO) userDAO.getUser(10);
-        testUser.addRole("productionleader");
+        UserDTO testUser = (UserDTO) userDAO.getUser(56);
         productDTO.setMadeBy(testUser);
         productDTO.setName("Ost");
         productDTO.setProductId(1);
@@ -102,9 +96,9 @@ public class ProductDAOTest {
 
     @Test
     public void createTriggers() {
-/*
-        productDAO.dropTriggers();
-*/
+
+        connectionDAO.dropTriggers();
+
         connectionDAO.createTriggerOldRecipe();
         connectionDAO.createTriggerReorder();
     }
@@ -134,12 +128,12 @@ public class ProductDAOTest {
     @Test
     public void createRecipe() throws IUserDAO.DALException {
         IRecipeDTO recipeDTO = new RecipeDTO();
-        recipeDTO.setRecipeId(2);
+        recipeDTO.setRecipeId(1);
         recipeDTO.setName("Norethisteron/estrogen");
         recipeDTO.setMadeBy(userDAO.getUser(10));
-/*
-        recipeDTO.setIngredientsList(productDAO.getIngredientList(recipeDTO));
-*/
+
+        recipeDTO.setIngredientsList(ingredientListDAO.getIngredientList(recipeDTO));
+
         List<IIngredientDTO> ingredients = new ArrayList<>();
         IngredientDTO ingredientDTO = new IngredientDTO();
         ingredientDTO.setIngredientId(1);
@@ -245,9 +239,9 @@ public class ProductDAOTest {
     public void getIngredientList() throws IUserDAO.DALException {
         RecipeDTO recipeDTO = new RecipeDTO();
         recipeDTO.setRecipeId(2);
-        List<IIngredientDTO> ingrediendts = ingredientListDAO.getIngredientList(recipeDTO);
+        List<IIngredientDTO> ingredients = ingredientListDAO.getIngredientList(recipeDTO);
 
-        System.out.println(ingrediendts);
+        System.out.println(ingredients);
     }
 
     @Test

@@ -8,8 +8,8 @@ public class ProductDAO {
     private Connection conn;
     private UserDAO userDAO;
 
-    public ProductDAO(ConnectionDAO connectionDAO){
-        this.conn = connectionDAO.getConn();
+    public ProductDAO(){
+        this.conn = ConnectionDAO.createConnection();
     }
 
     /*Systemet skal således understøtte
