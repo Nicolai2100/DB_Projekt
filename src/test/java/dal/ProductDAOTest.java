@@ -312,9 +312,7 @@ public class ProductDAOTest {
         /**
          * Alt slettes
          */
-/*
         connectionDAO.cleanTables();
-*/
 
         /**
          * Brugerne oprettes
@@ -389,6 +387,7 @@ public class ProductDAOTest {
         ingredientDTO.setAmount(120);
         ingredients.add(ingredientDTO);
 
+        recipeDTO.setIngredientsList(ingredients);
         recipeDAO.createRecipe(recipeDTO);
 
         /**
@@ -432,7 +431,9 @@ public class ProductDAOTest {
 
         //      oldRecipeDAO.getAllOldRecipes();
 
+/*
         createProduct();
+*/
 
     }
 }

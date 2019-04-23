@@ -101,12 +101,13 @@ public class IngredientListDAO {
             PreparedStatement pstmtInsertIngredientList = conn.prepareStatement(
                     "INSERT INTO ingredientlist(ingredientlistid, edition, ingredientid, amountmg) " +
                             "VALUES(?,?,?,?)");
-            pstmtInsertIngredientList.setInt(1, recipeDTO.getRecipeId());
 
             for (IIngredientDTO ingredient : recipeDTO.getIngredientsList()) {
+                pstmtInsertIngredientList.setInt(1, recipeDTO.getRecipeId());
                 pstmtInsertIngredientList.setInt(2, edition);
                 pstmtInsertIngredientList.setInt(3, ingredient.getIngredientId());
                 pstmtInsertIngredientList.setDouble(4, ingredient.getAmount());
+                ingredientDAO.createIngredient(ingredient);
                 pstmtInsertIngredientList.executeUpdate();
             }
             conn.commit();

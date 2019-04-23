@@ -116,12 +116,14 @@ public class ConnectionDAO {
 
     public void cleanTables() {
         try {
+            PreparedStatement pstmtDeleteProduct = conn.prepareStatement("DELETE FROM product;");
             PreparedStatement pstmtDeleteRecipe = conn.prepareStatement("DELETE FROM recipe;");
             PreparedStatement pstmtDeleteOldRecipe = conn.prepareStatement("DELETE FROM oldrecipe;");
             PreparedStatement pstmtDeleteIngredientLists = conn.prepareStatement("DELETE FROM ingredientlist;");
             PreparedStatement pstmtDeleteIngredients = conn.prepareStatement("DELETE FROM ingredient;");
             PreparedStatement pstmtDeleteUsers = conn.prepareStatement("DELETE FROM user;");
 
+            pstmtDeleteProduct.execute();
             pstmtDeleteRecipe.execute();
             pstmtDeleteOldRecipe.execute();
             pstmtDeleteIngredientLists.execute();
@@ -178,9 +180,7 @@ public class ConnectionDAO {
                             "edition INT, " +
                             "ingredientid INT, " +
                             "amountmg FLOAT, " +
-                            "PRIMARY KEY (ingredientlistid, edition, ingredientid), " +
-                            "FOREIGN KEY (ingredientid) " +
-                            "REFERENCES ingredient (ingredientid));");
+                            "PRIMARY KEY (ingredientlistid, edition, ingredientid));");
 
             PreparedStatement createTableRecipe = conn.prepareStatement(
                     "CREATE TABLE IF NOT EXISTS recipe " +
@@ -190,8 +190,6 @@ public class ConnectionDAO {
                             "madeby INT, " +
                             "ingredientlistid INT, " +
                             "PRIMARY KEY (recipeid), " +
-                            "FOREIGN KEY (ingredientlistid) " +
-                            "REFERENCES ingredientlist (ingredientlistid), " +
                             "FOREIGN KEY (madeby) " +
                             "REFERENCES user (userid));");
 
