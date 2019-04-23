@@ -1,5 +1,6 @@
 package dal;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.jupiter.api.Test;
 
@@ -10,6 +11,11 @@ public class ConnectionDAOTest {
     @Before
     public void initialize() {
         connectionDAO = new ConnectionDAO();
+    }
+
+    @After
+    public void close() {
+        connectionDAO.closeConn();
     }
 
     @Test

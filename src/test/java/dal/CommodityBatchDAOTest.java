@@ -1,15 +1,11 @@
 package dal;
 
 import dal.dto.*;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.sql.Date;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
 
 public class CommodityBatchDAOTest {
     ConnectionDAO connectionDAO;
@@ -23,6 +19,11 @@ public class CommodityBatchDAOTest {
         userDAO = new UserDAO();
         commodityDAO = new CommodityDAO(userDAO);
         ingredientDAO = new IngredientDAO();
+    }
+
+    @After
+    public void close() {
+        connectionDAO.closeConn();
     }
 
     @Test

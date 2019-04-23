@@ -1,141 +1,196 @@
 package dal;
 
-import dal.dto.IUserDTO;
-import dal.dto.UserDTO;
+import dal.dto.*;
 import org.junit.After;
-import org.junit.Before;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-import java.sql.SQLException;
+import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
 public class DALTest {
-
     ConnectionDAO connectionDAO = new ConnectionDAO();
+    ProductDAO productDAO = new ProductDAO();
     UserDAO userDAO = new UserDAO();
+    IngredientDAO ingredientDAO = new IngredientDAO();
+    IngredientListDAO ingredientListDAO = new IngredientListDAO(ingredientDAO);
+    CommodityDAO commodityDAO = new CommodityDAO(userDAO);
+    RecipeDAO recipeDAO = new RecipeDAO(ingredientListDAO, userDAO);
+    OldRecipeDAO oldRecipeDAO = recipeDAO.getOldRecipeDAO();
+    UserDAOTest userDAOTest = new UserDAOTest();
 
-    @Before
-    public void initialize() {
-        /*connectionDAO = new ConnectionDAO();
-        userDAO = new UserDAO(connectionDAO);
-        productDAOTest = new ProductDAOTest();*/
-    }
+    /* @Before
+     public void initialize() {
+         connectionDAO = new ConnectionDAO();
+         productDAO = new ProductDAO(connectionDAO);
+         userDAO = new UserDAO(connectionDAO);
+         ingredientDAO = new IngredientDAO(connectionDAO);
+         ingredientListDAO = new IngredientListDAO(connectionDAO, userDAO, ingredientDAO);
+         commodityDAO = new CommodityDAO(connectionDAO, userDAO);
+         oldRecipeDAO = new OldRecipeDAO(connectionDAO, recipeDAO);
+         recipeDAO = new RecipeDAO(connectionDAO, ingredientListDAO, userDAO, oldRecipeDAO);
 
-
-    @Test
-    public void deleteUser() throws IUserDAO.DALException {
-        userDAO.deleteUser(10);
-    }
-
-    @Test
-    public void dropAllTables() throws IUserDAO.DALException {
-        connectionDAO.dropAllTables(0);
-    }
-
-    @Test
-    public void initializeDataBase() throws IUserDAO.DALException {
-        connectionDAO.initializeDataBase();
-    }
-
-    @Test
-    public void initializeItAll() throws IUserDAO.DALException {
-        dropAllTables();
-        initializeDataBase();
-        createUser();
+         userDAOTest = new UserDAOTest();
+     }
+ */
+    @After
+    public void close() {
+        connectionDAO.closeConn();
     }
 
     @Test
-    void createTriggers() {
-        connectionDAO.createTriggerOldRecipe();
-        connectionDAO.createTriggerReorder();
+    public void cleanTables() {
+        connectionDAO.cleanTables();
     }
 
     @Test
-    void getUser() throws IUserDAO.DALException {
-        IUserDTO testUser = userDAO.getUser(10);
-        System.out.println(testUser);
-    }
+    public void testItAll() throws IUserDAO.DALException {
 
-    @Test
-    public void createUser() throws IUserDAO.DALException {
-        IUserDTO testUser2 = new UserDTO();
-        testUser2.setUserId(5);
-        testUser2.setUserName("Pælle Hansen");
-        testUser2.setIni("PH");
-        testUser2.addRole("admin");
-        testUser2.addRole("productionleader");
-        userDAO.createUser(testUser2);
+        /**
+         * Alt slettes
+         */
+        connectionDAO.cleanTables();
 
-        UserDTO testUser = new UserDTO();
-        testUser.setUserId(10);
-        testUser.setUserName("Puk Larsen");
-        testUser.setIni("PL");
-        testUser.addRole("farmaceut");
-        testUser.setAdmin(userDAO.getUser(5));
-        userDAO.createUser(testUser);
-    }
+        /**
+         * Brugerne oprettes
+         */
+        IUserDTO testUser_2 = new UserDTO();
+        testUser_2.setUserId(2);
+        testUser_2.setUserName("Pelle Hansen");
+        testUser_2.setIni("PH");
+        ArrayList<String> roles2 = new ArrayList();
+        roles2.add("admin");
+        roles2.add("productionleader");
+        testUser_2.setRoles(roles2);
+        testUser_2.setIsActive(true);
+        userDAO.createUser(testUser_2);
 
-    @Test
-    public void test() {
-        try {
-            UserDTO testUser = new UserDTO();
-            testUser.setUserId(13);
-            testUser.setUserName("Per Hansen");
-            testUser.setIni("PH");
-            ArrayList<String> roles = new ArrayList();
-            roles.add("admin");
-            testUser.setRoles(roles);
+        UserDTO testUser_3 = new UserDTO();
+        testUser_3.setUserId(3);
+        testUser_3.setUserName("Puk Larsen");
+        testUser_3.setIni("PL");
+        testUser_3.addRole("farmaceut");
+        testUser_3.setAdmin(userDAO.getUser(2));
+        testUser_3.setIsActive(true);
+        userDAO.createUser(testUser_3);
+        /**
+         * Ingredienser og opskrift oprettes
+         */
+        IRecipeDTO recipeDTO = new RecipeDTO();
+        recipeDTO.setRecipeId(2);
+        recipeDTO.setName("Norethisteron/estrogen");
+        recipeDTO.setMadeBy(userDAO.getUser(3));
 
-            userDAO.createUser(testUser);
-            IUserDTO receivedUser = userDAO.getUser(13);
-            assertEquals(testUser.getUserName(), receivedUser.getUserName());
-            assertEquals(testUser.getIni(), receivedUser.getIni());
-            assertEquals(testUser.getRoles().get(0), receivedUser.getRoles().get(0));
-            assertEquals(testUser.getRoles().size(), receivedUser.getRoles().size());
-            List<IUserDTO> allUsers = userDAO.getUserList();
-            boolean found = false;
-            for (IUserDTO user : allUsers) {
-                if (user.getUserId() == testUser.getUserId()) {
-                    assertEquals(testUser.getUserName(), user.getUserName());
-                    assertEquals(testUser.getIni(), user.getIni());
-                    assertEquals(testUser.getRoles().get(0), user.getRoles().get(0));
-                    assertEquals(testUser.getRoles().size(), user.getRoles().size());
-                    found = true;
-                }
-            }
-            if (!found) {
-                fail();
-            }
+        List<IIngredientDTO> ingredients = new ArrayList<>();
+        IngredientDTO ingredientDTO = new IngredientDTO();
+        ingredientDTO.setIngredientId(1);
+        ingredientDTO.setName("estradiol");
+        ingredientDTO.setType("active");
+        ingredientDTO.setAmount(1);
+        ingredients.add(ingredientDTO);
+        ingredientDAO.createIngredient(ingredientDTO);
 
-            testUser.setUserName("Per petersen");
-            testUser.setIni("PP");
-            roles.remove(0);
-            roles.add("pedel");
-            testUser.setRoles(roles);
-            userDAO.updateUser(testUser);
+        ingredientDTO = new IngredientDTO();
+        ingredientDTO.setIngredientId(2);
+        ingredientDTO.setName("norethisteronacetat");
+        ingredientDTO.setType("active");
+        ingredientDTO.setAmount(0.5);
+        ingredients.add(ingredientDTO);
+        ingredientDAO.createIngredient(ingredientDTO);
 
-            receivedUser = userDAO.getUser(13);
-            assertEquals(testUser.getUserName(), receivedUser.getUserName());
-            assertEquals(testUser.getIni(), receivedUser.getIni());
-            assertEquals(testUser.getRoles().get(0), receivedUser.getRoles().get(0));
-            assertEquals(testUser.getRoles().size(), receivedUser.getRoles().size());
+        ingredientDTO = new IngredientDTO();
+        ingredientDTO.setIngredientId(3);
+        ingredientDTO.setName("opovidon");
+        ingredientDTO.setType("helper");
+        ingredientDTO.setAmount(50);
+        ingredients.add(ingredientDTO);
+        ingredientDAO.createIngredient(ingredientDTO);
 
-            userDAO.deleteUser(testUser.getUserId());
-            allUsers = userDAO.getUserList();
+        ingredientDTO = new IngredientDTO();
+        ingredientDTO.setIngredientId(4);
+        ingredientDTO.setName("laktosemonohydrat");
+        ingredientDTO.setType("helper");
+        ingredientDTO.setAmount(10);
+        ingredients.add(ingredientDTO);
+        ingredientDAO.createIngredient(ingredientDTO);
 
-            for (IUserDTO user : allUsers) {
-                if (user.getUserId() == testUser.getUserId()) {
-                    fail();
-                }
-            }
-        } catch (IUserDAO.DALException e) {
-            e.printStackTrace();
-            fail();
+        ingredientDTO = new IngredientDTO();
+        ingredientDTO.setIngredientId(5);
+        ingredientDTO.setName("magnesiumstearat");
+        ingredientDTO.setType("helper");
+        ingredientDTO.setAmount(15);
+        ingredients.add(ingredientDTO);
+        ingredientDAO.createIngredient(ingredientDTO);
+
+        ingredientDTO = new IngredientDTO();
+        ingredientDTO.setIngredientId(6);
+        ingredientDTO.setName("majsstivelse");
+        ingredientDTO.setType("helper");
+        ingredientDTO.setAmount(120);
+        ingredients.add(ingredientDTO);
+        ingredientDAO.createIngredient(ingredientDTO);
+
+        recipeDTO.setIngredientsList(ingredients);
+        ingredientListDAO.createIngredientList(recipeDTO, 1);
+        recipeDAO.createRecipe(recipeDTO);
+
+        /**
+         * Liste over råvarer der skal bestilles
+         */
+        System.out.println("To be ordered: ");
+        List<IIngredientDTO> ingredientDTOS = ingredientDAO.checkForReorder();
+
+        for (IIngredientDTO ing : ingredientDTOS) {
+            System.out.println("" + (ingredientDTOS.indexOf(ing) + 1) + " " + ing);
         }
+        /**
+         * Der bestilles et råvare batch
+         */
+        ICommodityBatchDTO commodityBatch = new CommodityBatchDTO();
+        IUserDTO testUser = userDAO.getUser(2);
+        commodityBatch.setOrderedBy(testUser);
+        commodityBatch.setBatchId(3);
+        commodityBatch.setAmountInKg(2.5);
+        commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(2));
+        commodityBatch.setOrderDate(LocalDateTime.now().toString());
+
+        commodityDAO.createCommodityBatch(commodityBatch);
+
+        /**
+         * Liste over råvarer der skal bestilles
+         */
+        System.out.println("To be ordered: ");
+        List<IIngredientDTO> ingredientDTOS2 = ingredientDAO.checkForReorder();
+
+        for (IIngredientDTO ing2 : ingredientDTOS2) {
+            System.out.println("" + (ingredientDTOS2.indexOf(ing2) + 1) + " " + ing2);
+        }
+
+        /**
+         * Der oprettes et produkt-batch
+         */
+        //todo få testUser_2 til at oprette et product-batch
+
+//        recipeDAO.deleteRecipe(2, testUser_3);
+
+        //      oldRecipeDAO.getAllOldRecipes();
+
+        ProductDTO productDTO = new ProductDTO();
+        UserDTO testUser2 = (UserDTO) userDAO.getUser(2);
+        productDTO.setMadeBy(testUser2);
+        productDTO.setName("Ost");
+        productDTO.setProductId(1);
+        productDTO.setRecipe(2);
+        productDTO.setProductionDate(new Date(System.currentTimeMillis()));
+
+        productDTO.setExpirationDate(new Date(System.currentTimeMillis()));
+
+        productDTO.setVolume(100);
+
+        /*productDTO.setCommodityBatches();
+         */
+        productDAO.createProduct(productDTO);
+        System.out.println("Product created");
     }
 }

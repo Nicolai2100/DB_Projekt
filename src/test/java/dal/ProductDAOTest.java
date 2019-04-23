@@ -2,12 +2,9 @@ package dal;
 
 import dal.dto.*;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.sql.Date;
-import java.sql.SQLException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,22 +20,26 @@ public class ProductDAOTest {
     CommodityDAO commodityDAO = new CommodityDAO(userDAO);
     RecipeDAO recipeDAO = new RecipeDAO(ingredientListDAO, userDAO);
     OldRecipeDAO oldRecipeDAO = recipeDAO.getOldRecipeDAO();
-    DALTest dalTest = new DALTest();
+    UserDAOTest userDAOTest = new UserDAOTest();
 
-   /* @Before
-    public void initialize() {
-        connectionDAO = new ConnectionDAO();
-        productDAO = new ProductDAO(connectionDAO);
-        userDAO = new UserDAO(connectionDAO);
-        ingredientDAO = new IngredientDAO(connectionDAO);
-        ingredientListDAO = new IngredientListDAO(connectionDAO, userDAO, ingredientDAO);
-        commodityDAO = new CommodityDAO(connectionDAO, userDAO);
-        oldRecipeDAO = new OldRecipeDAO(connectionDAO, recipeDAO);
-        recipeDAO = new RecipeDAO(connectionDAO, ingredientListDAO, userDAO, oldRecipeDAO);
+    /* @Before
+     public void initialize() {
+         connectionDAO = new ConnectionDAO();
+         productDAO = new ProductDAO(connectionDAO);
+         userDAO = new UserDAO(connectionDAO);
+         ingredientDAO = new IngredientDAO(connectionDAO);
+         ingredientListDAO = new IngredientListDAO(connectionDAO, userDAO, ingredientDAO);
+         commodityDAO = new CommodityDAO(connectionDAO, userDAO);
+         oldRecipeDAO = new OldRecipeDAO(connectionDAO, recipeDAO);
+         recipeDAO = new RecipeDAO(connectionDAO, ingredientListDAO, userDAO, oldRecipeDAO);
 
-        dalTest = new DALTest();
+         userDAOTest = new UserDAOTest();
+     }
+ */
+    @After
+    public void close() {
+        connectionDAO.closeConn();
     }
-*/
 
     @Test
     public void cleanTables() {
@@ -95,37 +96,6 @@ public class ProductDAOTest {
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
 
         commodityDAO.createCommodityBatch(commodityBatch);
-    }
-
-    @Test
-    public void createTriggers() {
-
-        connectionDAO.dropTriggers();
-
-        connectionDAO.createTriggerOldRecipe();
-        connectionDAO.createTriggerReorder();
-    }
-
-    @Test
-    public void deleteRecipe() throws IUserDAO.DALException {
-        IUserDTO testUser = new UserDTO();
-        testUser.addRole("farmaceut");
-        testUser.setIsActive(true);
-        recipeDAO.deleteRecipe(2, testUser);
-    }
-
-    @Test
-    public void updateRecipe() {
-        IRecipeDTO recipeDTO = recipeDAO.getRecipe(2);
-        recipeDTO.setName("snillert");
-        recipeDAO.updateRecipe(recipeDTO);
-    }
-
-
-    @Test
-    public void getRecipe() {
-        IRecipeDTO recipeDTO = recipeDAO.getRecipe(2);
-        System.out.println(recipeDTO);
     }
 
     @Test
@@ -299,12 +269,6 @@ public class ProductDAOTest {
         }
     }
 
-    @Test
-    public void getIngredient() throws IUserDAO.DALException {
-        IIngredientDTO ingredientDTO = ingredientDAO.getIngredient(1);
-        assertEquals(ingredientDTO.getType(), "active");
-        System.out.println(ingredientDTO);
-    }
 
     @Test
     public void testItAll() throws IUserDAO.DALException {
