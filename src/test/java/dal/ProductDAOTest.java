@@ -5,7 +5,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.sql.Date;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +29,7 @@ public class ProductDAOTest {
     public void initialize() {
         connectionDAO = new ConnectionDAO();
         productDAO = new ProductDAO(connectionDAO);
-        userDAO = new UserDAO();
+        userDAO = new UserDAO(connectionDAO);
         ingredientDAO = new IngredientDAO(connectionDAO);
         ingredientListDAO = new IngredientListDAO(connectionDAO, userDAO, ingredientDAO);
         commodityDAO = new CommodityDAO(connectionDAO, userDAO);
@@ -39,14 +41,12 @@ public class ProductDAOTest {
 
     @After
     public void closeAll() throws SQLException {
-        userDAO.getConn().close();
-        productDAO.getConn().close();
+        connectionDAO.getConn().close();
     }
 
     @Test
     public void closeAllTest() throws SQLException {
-        userDAO.getConn().close();
-        productDAO.getConn().close();
+        connectionDAO.getConn().close();
     }
 
     @Test
@@ -59,12 +59,16 @@ public class ProductDAOTest {
 
 
         ProductDTO productDTO = new ProductDTO();
-
-        UserDTO userDTO = (UserDTO) userDAO.getUser(10);
-        productDTO.setMadeBy(userDTO);
+        UserDTO testUser = (UserDTO) userDAO.getUser(10);
+        testUser.addRole("productionleader");
+        productDTO.setMadeBy(testUser);
         productDTO.setName("Ost");
         productDTO.setProductId(1);
         productDTO.setRecipe(1);
+        productDTO.setProductionDate(new Date(System.currentTimeMillis()));
+        productDTO.setExpirationDate(new Date(System.currentTimeMillis() + 432 * 10 ^ 7));
+        productDTO.setVolume(100);
+
         /*productDTO.setCommodityBatches();
          */
         productDAO.createProduct(productDTO);

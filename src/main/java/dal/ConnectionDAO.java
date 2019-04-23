@@ -239,6 +239,9 @@ public class ConnectionDAO {
                             "name VARCHAR(50) NOT NULL, " +
                             "madeby INT, " +
                             "recipe INT, " +
+                            "production_date DATE, " +
+                            "volume INT, " +
+                            "expiration_date DATE, " +
                             "PRIMARY KEY (productid), " +
                             "FOREIGN KEY (recipe) " +
                             "REFERENCES recipe(recipeid));");

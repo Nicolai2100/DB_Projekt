@@ -1,6 +1,8 @@
 package dal;
 
+import dal.dto.IProductDTO;
 import dal.dto.IUserDTO;
+import dal.dto.ProductDTO;
 import dal.dto.UserDTO;
 import org.junit.Before;
 import org.junit.jupiter.api.Test;
@@ -12,8 +14,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 public class DALTest {
-    UserDAO userDAO = new UserDAO();
     ConnectionDAO connectionDAO = new ConnectionDAO();
+    UserDAO userDAO = new UserDAO(connectionDAO);
     ProductDAOTest productDAOTest = new ProductDAOTest();
 
     @Before
