@@ -44,10 +44,6 @@ public class ProductDAOTest {
         connectionDAO.getConn().close();
     }
 
-    @Test
-    public void closeAllTest() throws SQLException {
-        connectionDAO.getConn().close();
-    }
 
     @Test
     public void cleanTables() {

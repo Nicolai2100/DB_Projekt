@@ -178,6 +178,7 @@ public class ConnectionDAO {
                             "(ingredientid INT, " +
                             "name VARCHAR(50), " +
                             "type VARCHAR(15), " +
+                            "minrequiredamountinkg INT," +
                             "reorder BIT, " +
                             "PRIMARY KEY (ingredientid));");
 
