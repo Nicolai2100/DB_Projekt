@@ -53,9 +53,10 @@ public class CommodityDAO {
 
             pstmtGetCommodityBatch.setInt(1, commodityBatchId);
 
+            boolean hasResult = false;
             ResultSet rs = pstmtGetCommodityBatch.executeQuery();
             while (rs.next()) {
-
+                hasResult = true;
                 ingredientDTO.setIngredientId(rs.getInt(6));
                 ingredientDTO.setName(rs.getString(7));
                 ingredientDTO.setType(rs.getString(8));
@@ -69,6 +70,10 @@ public class CommodityDAO {
                 commodityBatch.setOrderedBy(userDTO);
                 commodityBatch.setAmountInKg(rs.getDouble(4));
                 commodityBatch.setOrderDate(rs.getString(5));
+            }
+            if (!hasResult){
+                System.out.println("No commodity-batch with that batchID!");
+                return null;
             }
         } catch (SQLException e) {
             e.printStackTrace();
