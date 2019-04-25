@@ -295,7 +295,7 @@ public class UserDAO implements IUserDAO {
 
     public String getStock() throws SQLException{
         Map<String, Double> ingredientStock = new HashMap<>();
-        String batchString;
+        String batchString = "";
 
         try {
             //
