@@ -1,12 +1,12 @@
 package dal;
 
+import dal.dto.IIngredientDTO;
 import dal.dto.IUserDTO;
+import dal.dto.IngredientDTO;
 import dal.dto.UserDTO;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class UserDAO implements IUserDAO {
     private Connection conn;
@@ -291,5 +291,21 @@ public class UserDAO implements IUserDAO {
         } else {
             return true;
         }
+    }
+
+    public String getStock() throws SQLException{
+        Map<String, Double> ingredientStock = new HashMap<>();
+
+        try {
+            IngredientDAO ingredientDAO = new IngredientDAO();
+            for (IIngredientDTO ingredient : ingredientDAO.getIngredientList()) {
+                ingredientStock.put(ingredient.getName(), ingredientDAO.getTotalAmount(ingredient));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return ingredientStock.toString();
     }
 }

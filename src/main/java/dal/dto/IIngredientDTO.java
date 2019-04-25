@@ -14,14 +14,12 @@ public interface IIngredientDTO {
 
     void setType(String type);
 
-    void setAmount(double amount);
-
-    double getAmount();
+    int getMinAmountMG();
 
     void setMinAmountMG(int minAmount);
 
-    int getMinAmountMG();
+    boolean getReorder();
 
-
+    void setReorder(boolean status);
 
 }

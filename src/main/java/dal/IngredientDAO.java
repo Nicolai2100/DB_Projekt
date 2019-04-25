@@ -133,4 +133,34 @@ public class IngredientDAO {
         return totalAmount;
     }
 
+    public List<IIngredientDTO> getIngredientList() throws SQLException {
+        List<IIngredientDTO> ingredientList = new ArrayList<>();
+
+        try {
+            conn.setAutoCommit(false);
+
+            PreparedStatement preparedStatement = conn.prepareStatement(
+                    "SELECT * FROM ingredient"
+            );
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                IIngredientDTO ingredient = new IngredientDTO(
+                        resultSet.getInt("ingredientid"),
+                        resultSet.getString("ingredientname"),
+                        resultSet.getString("type"),
+                        resultSet.getInt("minamountinmg"),
+                        resultSet.getBoolean("reorder")
+                );
+                ingredientList.add(ingredient);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return ingredientList;
+    }
+
 }

@@ -4,11 +4,19 @@ public class IngredientDTO implements IIngredientDTO {
     private int ingredientId;
     private String name;
     private String type;
-    private double amountInMG;
     private int minAmountInMG;
+    private boolean reorder;
 
 
     public IngredientDTO() {
+    }
+
+    public IngredientDTO(int ingredientId, String name, String type, int minAmountInMG, boolean reorder) {
+        this.ingredientId = ingredientId;
+        this.name = name;
+        this.type = type;
+        this.minAmountInMG = minAmountInMG;
+        this.reorder = reorder;
     }
 
     @Override
@@ -42,18 +50,18 @@ public class IngredientDTO implements IIngredientDTO {
     }
 
     @Override
-    public void setAmount(double amount) {
-        this.amountInMG = amount;
-    }
-
-    @Override
-    public double getAmount() {
-        return amountInMG;
-    }
-
-    @Override
     public void setMinAmountMG(int minAmount) {
         this.minAmountInMG = minAmount;
+    }
+
+    @Override
+    public boolean getReorder() {
+        return reorder;
+    }
+
+    @Override
+    public void setReorder(boolean status) {
+        this.reorder = status;
     }
 
     @Override
@@ -63,7 +71,7 @@ public class IngredientDTO implements IIngredientDTO {
 
     @Override
     public String toString() {
-        return name + ", of type: " + type + " amount: " + amountInMG + " mg.";
+        return name + ", of type: " + type + " minamount: " + minAmountInMG + " mg.";
     }
 }
 
