@@ -19,10 +19,6 @@ public class ProductBatchDAO {
   Lagerstatus af råvarer og råvarebatches (Produktionsleder)
   */
 
-    //todo
-    // Vi kunne godt tænke os at det er muligt at udsøge produktbatches,
-    // der er hhv. bestilt, under produktion og færdiggjort.
-
     public void createProduct(ProductbatchDTO product) {
         //kontroller om han er aktiv i systemet
         if (!product.getMadeBy().getRoles().contains("productionleader") || !product.getMadeBy().getIsActive()) {
@@ -66,34 +62,39 @@ public class ProductBatchDAO {
     }
 
     public ProductbatchDTO getProductbatch(int productBatch) {
+
         ProductbatchDTO productbatchDTO = new ProductbatchDTO();
         UserDAO userDAO = new UserDAO();
+        CommoditybatchDAO commoditybatchDAO = new CommoditybatchDAO(userDAO);
 
         try {
             PreparedStatement pstmtSelectProductBatch = conn.prepareStatement(
-                    "SELECT * FROM productbatch " +
-                            "NATURAL JOIN productbatchid = ?");
+                    "SELECT productbatchid, name, madeby, recipe, production_date, volume, expiration_date, batch_state, commodity_batch_id FROM productbatch NATURAL JOIN productbatch_commodity_relationship WHERE productbatchid = ?;");
 
 
             pstmtSelectProductBatch.setInt(1, productBatch);
-            ResultSet rs = pstmtSelectProductBatch.getResultSet();
+            ResultSet rs = pstmtSelectProductBatch.executeQuery();
+            int i = 0;
             while (rs.next()) {
-                productbatchDTO.setProductId(productBatch);
-                productbatchDTO.setName(rs.getString("name"));
-                productbatchDTO.setRecipe(rs.getInt("recipe"));
-                productbatchDTO.setMadeBy((UserDTO) userDAO.getUser(rs.getInt("madeby")));
-                productbatchDTO.setProductionDate(rs.getDate("production_date"));
-                productbatchDTO.setExpirationDate(rs.getDate("expiration_date"));
-                productbatchDTO.setVolume(rs.getInt("volume"));
-                productbatchDTO.setBatchState(IProductDTO.State.valueOf(rs.getString("batch_state")));
+                if (i < 1) {
+                    productbatchDTO.setProductId(productBatch);
+                    productbatchDTO.setName(rs.getString("name"));
+                    productbatchDTO.setRecipe(rs.getInt("recipe"));
+                    productbatchDTO.setMadeBy((UserDTO) userDAO.getUser(rs.getInt("madeby")));
+                    productbatchDTO.setProductionDate(rs.getDate("production_date"));
+                    productbatchDTO.setExpirationDate(rs.getDate("expiration_date"));
+                    productbatchDTO.setVolume(rs.getInt("volume"));
+                    productbatchDTO.setBatchState(IProductDTO.State.valueOf(rs.getString("batch_state")));
+                    i++;
+                }
 
+                productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(rs.getInt("commodity_batch_id")));
             }
-
 
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        return productbatchDTO;
     }
 }

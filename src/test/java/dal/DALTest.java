@@ -156,6 +156,13 @@ public class DALTest {
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
 
         commoditybatchDAO.createCommodityBatch(commodityBatch);
+        commodityBatch.setOrderedBy(testUser);
+        commodityBatch.setBatchId(3);
+        commodityBatch.setAmountInKg(2.5);
+        commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(2));
+        commodityBatch.setOrderDate(LocalDateTime.now().toString());
+
+        commoditybatchDAO.createCommodityBatch(commodityBatch);
 
         /**
          * Liste over råvarer der skal bestilles
@@ -186,9 +193,14 @@ public class DALTest {
         productbatchDTO.setExpirationDate(new Date(System.currentTimeMillis()));
         productbatchDTO.setVolume(100);
         productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(2));
+        productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(3));
 
         productbatchDTO.setBatchState(IProductDTO.State.UNDER_PRODUCTION);
 
         productBatchDAO.createProduct(productbatchDTO);
+
+        long John = System.currentTimeMillis();
+        System.out.println(productBatchDAO.getProductbatch(1).toString());
+        System.out.println(System.currentTimeMillis()-John + "ms");
     }
 }

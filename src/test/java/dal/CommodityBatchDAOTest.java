@@ -36,7 +36,7 @@ public class CommodityBatchDAOTest {
     public void createCommodityBatch() throws IUserDAO.DALException {
 
         ICommodityBatchDTO commodityBatch = new CommodityBatchDTO();
-        IUserDTO testUser = userDAO.getUser(5);
+        IUserDTO testUser = userDAO.getUser(2);
         commodityBatch.setOrderedBy(testUser);
         commodityBatch.setBatchId(3);
         commodityBatch.setAmountInKg(2.5);

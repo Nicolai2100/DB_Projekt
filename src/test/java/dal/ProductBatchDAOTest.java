@@ -62,6 +62,8 @@ public class ProductBatchDAOTest {
         productbatchDTO.setVolume(100);
 
         productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(2));
+        productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(3));
+        productbatchDTO.setBatchState(IProductDTO.State.UNDER_PRODUCTION);
 
         productBatchDAO.createProduct(productbatchDTO);
     }
