@@ -10,14 +10,14 @@ import java.time.LocalDateTime;
 public class CommodityBatchDAOTest {
     ConnectionDAO connectionDAO;
     UserDAO userDAO;
-    CommodityDAO commodityDAO;
+    CommoditybatchDAO commoditybatchDAO;
     IngredientDAO ingredientDAO;
 
     @Before
     public void initialize() {
         connectionDAO = new ConnectionDAO();
         userDAO = new UserDAO();
-        commodityDAO = new CommodityDAO(userDAO);
+        commoditybatchDAO = new CommoditybatchDAO(userDAO);
         ingredientDAO = new IngredientDAO();
     }
 
@@ -28,7 +28,7 @@ public class CommodityBatchDAOTest {
 
     @Test
     public void getCommodityBatch() throws IUserDAO.DALException {
-        ICommodityBatchDTO batchFromDB = commodityDAO.getCommodityBatch(2);
+        ICommodityBatchDTO batchFromDB = commoditybatchDAO.getCommodityBatch(2);
         System.out.println(batchFromDB);
     }
 
@@ -43,6 +43,6 @@ public class CommodityBatchDAOTest {
         commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(2));
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
 
-        commodityDAO.createCommodityBatch(commodityBatch);
+        commoditybatchDAO.createCommodityBatch(commodityBatch);
     }
 }

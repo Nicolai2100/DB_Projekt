@@ -15,7 +15,7 @@ public class DALTest {
     UserDAO userDAO = new UserDAO();
     IngredientDAO ingredientDAO = new IngredientDAO();
     IngredientListDAO ingredientListDAO = new IngredientListDAO(ingredientDAO);
-    CommodityDAO commodityDAO = new CommodityDAO(userDAO);
+    CommoditybatchDAO commoditybatchDAO = new CommoditybatchDAO(userDAO);
     RecipeDAO recipeDAO = new RecipeDAO(ingredientListDAO, userDAO);
     OldRecipeDAO oldRecipeDAO = recipeDAO.getOldRecipeDAO();
     UserDAOTest userDAOTest = new UserDAOTest();
@@ -27,7 +27,7 @@ public class DALTest {
          userDAO = new UserDAO(connectionDAO);
          ingredientDAO = new IngredientDAO(connectionDAO);
          ingredientListDAO = new IngredientListDAO(connectionDAO, userDAO, ingredientDAO);
-         commodityDAO = new CommodityDAO(connectionDAO, userDAO);
+         commoditybatchDAO = new CommoditybatchDAO(connectionDAO, userDAO);
          oldRecipeDAO = new OldRecipeDAO(connectionDAO, recipeDAO);
          recipeDAO = new RecipeDAO(connectionDAO, ingredientListDAO, userDAO, oldRecipeDAO);
 
@@ -155,7 +155,7 @@ public class DALTest {
         commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(2));
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
 
-        commodityDAO.createCommodityBatch(commodityBatch);
+        commoditybatchDAO.createCommodityBatch(commodityBatch);
 
         /**
          * Liste over råvarer der skal bestilles
@@ -188,7 +188,7 @@ public class DALTest {
 
         productbatchDTO.setVolume(100);
 
-        productbatchDTO.getCommodityBatches().add(commodityDAO.getCommodityBatch(2));
+        productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(2));
 
         productBatchDAO.createProduct(productbatchDTO);
     }

@@ -4,11 +4,11 @@ import dal.dto.*;
 
 import java.sql.*;
 
-public class CommodityDAO {
+public class CommoditybatchDAO {
     private UserDAO userDAO;
     private Connection conn;
 
-    public CommodityDAO(UserDAO userDAO) {
+    public CommoditybatchDAO(UserDAO userDAO) {
         this.userDAO = userDAO;
         this.conn = ConnectionDAO.getConnection();
     }
@@ -82,5 +82,27 @@ public class CommodityDAO {
             e.printStackTrace();
         }
         return commodityBatch;
+    }
+
+    public double getTotalAmount(IIngredientDTO ingredient) {
+        double totalAmount = 0;
+
+        try {
+           PreparedStatement preparedStatement = conn.prepareStatement(
+                   "SELECT amountinkg FROM commoditybatch " +
+                           "WHERE ingredientid=? AND residue = 0"
+           );
+           preparedStatement.setInt(1, ingredient.getIngredientId());
+
+           ResultSet resultSet = preparedStatement.executeQuery();
+
+           while (resultSet.next()){
+               totalAmount += resultSet.getDouble("amountinkg");
+           }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return totalAmount;
     }
 }
