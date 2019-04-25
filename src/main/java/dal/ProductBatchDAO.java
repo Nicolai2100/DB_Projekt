@@ -3,6 +3,8 @@ package dal;
 import dal.dto.*;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProductBatchDAO {
     private Connection conn;
@@ -19,9 +21,9 @@ public class ProductBatchDAO {
   Lagerstatus af råvarer og råvarebatches (Produktionsleder)
   */
 
-    public void createProductbatch(ProductbatchDTO product) {
+    public void createProductbatch(ProductbatchDTO productbatch) {
         //kontroller om han er aktiv i systemet
-        if (!product.getMadeBy().getRoles().contains("productionleader") || !product.getMadeBy().getIsActive()) {
+        if (!productbatch.getMadeBy().getRoles().contains("productionleader") || !productbatch.getMadeBy().getIsActive()) {
             System.out.println("User not authorized to proceed!");
             return;
         }
@@ -32,26 +34,19 @@ public class ProductBatchDAO {
                     "INSERT INTO productbatch " +
                             "VALUES(?,?,?,?,?,?,?,?)");
 
-            PreparedStatement pstmtInsertCommodityRelation = conn.prepareStatement(
-                    "INSERT INTO productbatch_commodity_relationship " +
-                            "VALUES(?,?)");
 
-            pstmtInsertProduct.setInt(1, product.getProductId());
-            pstmtInsertProduct.setString(2, product.getName());
-            pstmtInsertProduct.setInt(3, product.getMadeBy().getUserId());
-            pstmtInsertProduct.setInt(4, product.getRecipe());
-            pstmtInsertProduct.setDate(5, product.getProductionDate());
-            pstmtInsertProduct.setInt(6, product.getVolume());
-            pstmtInsertProduct.setDate(7, product.getExpirationDate());
-            pstmtInsertProduct.setString(8, product.getBatchState());
+            pstmtInsertProduct.setInt(1, productbatch.getProductId());
+            pstmtInsertProduct.setString(2, productbatch.getName());
+            pstmtInsertProduct.setInt(3, productbatch.getMadeBy().getUserId());
+            pstmtInsertProduct.setInt(4, productbatch.getRecipe());
+            pstmtInsertProduct.setDate(5, productbatch.getProductionDate());
+            pstmtInsertProduct.setInt(6, productbatch.getVolume());
+            pstmtInsertProduct.setDate(7, productbatch.getExpirationDate());
+            pstmtInsertProduct.setString(8, productbatch.getBatchState());
             pstmtInsertProduct.executeUpdate();
 
-            for (ICommodityBatchDTO c : product.getCommodityBatches()) {
-                pstmtInsertCommodityRelation.setInt(1, product.getProductId());
-                pstmtInsertCommodityRelation.setInt(2, c.getBatchId());
-                pstmtInsertCommodityRelation.executeUpdate();
-            }
 
+            createRelations(productbatch.getCommodityBatches(), productbatch.getProductId());
 
             conn.commit();
             System.out.println("The product was successfully created.");
@@ -98,5 +93,46 @@ public class ProductBatchDAO {
         return productbatchDTO;
     }
 
+    public void updateProductBatch(ProductbatchDTO productbatch) {
+        try {
+            PreparedStatement pstmtUpdateProduct = conn.prepareStatement(
+                    "UPDATE productbatch" +
+                            "SET name = ?, madeby = ?, recipe = ?, production_date = ?, volume = ?, expiration_date = ?, batch_state = ? WHERE productbatchid = ? ");
 
+            pstmtUpdateProduct.setString(1, productbatch.getName());
+            pstmtUpdateProduct.setInt(2, productbatch.getMadeBy().getUserId());
+            pstmtUpdateProduct.setInt(3, productbatch.getRecipe());
+            pstmtUpdateProduct.setDate(4, productbatch.getProductionDate());
+            pstmtUpdateProduct.setInt(5, productbatch.getVolume());
+            pstmtUpdateProduct.setDate(6, productbatch.getExpirationDate());
+            pstmtUpdateProduct.setString(7, productbatch.getBatchState());
+            pstmtUpdateProduct.setInt(8, productbatch.getProductId());
+
+            pstmtUpdateProduct.executeUpdate();
+
+            PreparedStatement pstmtDeleteRelations = conn.prepareStatement(
+                    "DELETE FROM productbatch WHERE productbatchid = ?");
+            pstmtDeleteRelations.setInt(1, productbatch.getProductId());
+            pstmtDeleteRelations.executeUpdate();
+
+
+            createRelations(productbatch.getCommodityBatches(), productbatch.getProductId());
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void createRelations(List<ICommodityBatchDTO> commodityBatchList, int productbatchId) throws SQLException {
+        PreparedStatement pstmtInsertCommodityRelation = conn.prepareStatement(
+                "INSERT INTO productbatch_commodity_relationship " +
+                        "VALUES(?,?)");
+
+        for (ICommodityBatchDTO c : commodityBatchList) {
+            pstmtInsertCommodityRelation.setInt(1, productbatchId);
+            pstmtInsertCommodityRelation.setInt(2, c.getBatchId());
+            pstmtInsertCommodityRelation.executeUpdate();
+        }
+    }
 }
