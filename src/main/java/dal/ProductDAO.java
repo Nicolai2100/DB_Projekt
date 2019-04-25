@@ -8,7 +8,7 @@ public class ProductDAO {
     private Connection conn;
 
     public ProductDAO() {
-        this.conn = ConnectionDAO.createConnection();
+        this.conn = ConnectionDAO.getConnection();
     }
 
     /*Systemet skal således understøtte

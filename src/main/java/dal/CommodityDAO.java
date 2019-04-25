@@ -10,7 +10,7 @@ public class CommodityDAO {
 
     public CommodityDAO(UserDAO userDAO) {
         this.userDAO = userDAO;
-        this.conn = ConnectionDAO.createConnection();
+        this.conn = ConnectionDAO.getConnection();
     }
 
     public void createCommodityBatch(ICommodityBatchDTO commodityBatch) {

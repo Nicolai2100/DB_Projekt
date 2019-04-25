@@ -3,7 +3,6 @@ package dal;
 import dal.dto.IUserDTO;
 import dal.dto.UserDTO;
 
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,7 +11,7 @@ import java.util.List;
 public class UserDAO implements IUserDAO {
     private Connection conn;
     public UserDAO() {
-        this.conn = ConnectionDAO.createConnection();
+        this.conn = ConnectionDAO.getConnection();
     }
 
     @Override

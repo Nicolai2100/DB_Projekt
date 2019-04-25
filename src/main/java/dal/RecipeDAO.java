@@ -23,7 +23,7 @@ public class RecipeDAO {
         this.oldRecipeDAO = new OldRecipeDAO(this);
         this.ingredientListDAO = ingredientListDAO;
         this.userDAO = userDAO;
-        this.conn = ConnectionDAO.createConnection();
+        this.conn = ConnectionDAO.getConnection();
 
     }
 

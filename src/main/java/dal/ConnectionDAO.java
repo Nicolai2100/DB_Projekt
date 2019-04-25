@@ -12,7 +12,7 @@ public class ConnectionDAO {
         userDAO = new UserDAO();
     }
 
-    public static Connection createConnection() {
+    public static Connection getConnection() {
         try {
             if (conn == null) {
                 String dataBase = "jdbc:mysql://ec2-52-30-211-3.eu-west-1.compute.amazonaws.com/jekala";

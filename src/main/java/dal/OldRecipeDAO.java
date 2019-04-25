@@ -1,6 +1,5 @@
 package dal;
 
-import dal.dto.OldRecipeDTO;
 import dal.dto.RecipeDTO;
 
 import java.sql.Connection;
@@ -13,7 +12,7 @@ public class OldRecipeDAO {
     private RecipeDAO recipeDAO;
 
     public OldRecipeDAO(RecipeDAO recipeDAO) {
-        this.conn = ConnectionDAO.createConnection();
+        this.conn = ConnectionDAO.getConnection();
         this.recipeDAO = recipeDAO;
     }
 

@@ -16,7 +16,7 @@ public class IngredientListDAO {
 
     public IngredientListDAO(IngredientDAO ingredientDAO) {
         this.ingredientDAO = ingredientDAO;
-        this.conn = ConnectionDAO.createConnection();
+        this.conn = ConnectionDAO.getConnection();
     }
 
 

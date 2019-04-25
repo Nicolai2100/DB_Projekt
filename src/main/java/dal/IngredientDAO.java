@@ -14,7 +14,7 @@ public class IngredientDAO {
     private Connection conn;
 
     public IngredientDAO() {
-        this.conn = ConnectionDAO.createConnection();
+        this.conn = ConnectionDAO.getConnection();
     }
 
     public void createIngredient(IIngredientDTO ingredientDTO) {
