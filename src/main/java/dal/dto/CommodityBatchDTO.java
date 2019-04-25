@@ -7,6 +7,7 @@ public class CommodityBatchDTO implements ICommodityBatchDTO {
     private String orderDate;
     //User
     private IUserDTO orderedBy;
+    private boolean residue;
 
     public CommodityBatchDTO(){
     }
@@ -65,5 +66,15 @@ public class CommodityBatchDTO implements ICommodityBatchDTO {
     @Override
     public void setOrderedBy(IUserDTO userDTO) {
         this.orderedBy = userDTO;
+    }
+
+    @Override
+    public boolean getResidue() {
+        return residue;
+    }
+
+    @Override
+    public void setResidue(boolean isResidue) {
+        this.residue = isResidue;
     }
 }

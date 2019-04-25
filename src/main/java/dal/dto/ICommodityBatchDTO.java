@@ -22,5 +22,8 @@ public interface ICommodityBatchDTO {
 
     void setOrderedBy(IUserDTO userDTO);
 
+    boolean getResidue();
+
+    void setResidue(boolean isResidue);
 
 }
