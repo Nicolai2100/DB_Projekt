@@ -71,8 +71,8 @@ public class ProductBatchDAO {
 
         try {
             PreparedStatement pstmtSelectProductBatch = conn.prepareStatement(
-                    "SELCET * FROM productbatch " +
-                            "WHERE productbatchid = ?");
+                    "SELECT * FROM productbatch " +
+                            "NATURAL JOIN productbatchid = ?");
 
 
             pstmtSelectProductBatch.setInt(1, productBatch);
