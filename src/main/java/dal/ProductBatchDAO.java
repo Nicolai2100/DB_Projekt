@@ -95,9 +95,14 @@ public class ProductBatchDAO {
 
     public void updateProductBatch(ProductbatchDTO productbatch) {
         try {
+            conn.setAutoCommit(false);
+            PreparedStatement pstmtDeleteRelations = conn.prepareStatement(
+                    "DELETE FROM productbatch_commodity_relationship WHERE product_batch_id = ?");
+            pstmtDeleteRelations.setInt(1, productbatch.getProductId());
+            pstmtDeleteRelations.executeUpdate();
+
             PreparedStatement pstmtUpdateProduct = conn.prepareStatement(
-                    "UPDATE productbatch" +
-                            "SET name = ?, madeby = ?, recipe = ?, production_date = ?, volume = ?, expiration_date = ?, batch_state = ? WHERE productbatchid = ? ");
+                    "UPDATE productbatch SET name = ?, madeby = ?, recipe = ?, production_date = ?, volume = ?, expiration_date = ?, batch_state = ? WHERE productbatchid = ?");
 
             pstmtUpdateProduct.setString(1, productbatch.getName());
             pstmtUpdateProduct.setInt(2, productbatch.getMadeBy().getUserId());
@@ -110,14 +115,8 @@ public class ProductBatchDAO {
 
             pstmtUpdateProduct.executeUpdate();
 
-            PreparedStatement pstmtDeleteRelations = conn.prepareStatement(
-                    "DELETE FROM productbatch WHERE productbatchid = ?");
-            pstmtDeleteRelations.setInt(1, productbatch.getProductId());
-            pstmtDeleteRelations.executeUpdate();
-
-
             createRelations(productbatch.getCommodityBatches(), productbatch.getProductId());
-
+            conn.commit();
 
         } catch (SQLException e) {
             e.printStackTrace();

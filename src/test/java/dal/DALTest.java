@@ -199,6 +199,10 @@ public class DALTest {
 
         productBatchDAO.createProductbatch(productbatchDTO);
 
+        productbatchDTO.setName("Amfetamin");
+
+        productBatchDAO.updateProductBatch(productbatchDTO);
+
         System.out.println("Read product succesful:" + productBatchDAO.getProductbatch(1).toString());
 
     }
