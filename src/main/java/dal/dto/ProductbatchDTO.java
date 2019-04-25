@@ -14,6 +14,7 @@ public class ProductbatchDTO implements IProductDTO {
     private Date productionDate;
     private Date expirationDate;
     private int volume;
+    private State batchState;
 
 
     public ProductbatchDTO() {
@@ -89,6 +90,16 @@ public class ProductbatchDTO implements IProductDTO {
 
     public void setMadeBy(UserDTO madeBy) {
         this.madeBy = madeBy;
+    }
+
+    @Override
+    public void setBatchState(State state) {
+        batchState = state;
+    }
+
+    @Override
+    public String getBatchState() {
+        return batchState.toString();
     }
 
     @Override

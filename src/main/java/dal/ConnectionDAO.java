@@ -239,6 +239,7 @@ public class ConnectionDAO {
                             "production_date DATE, " +
                             "volume INT, " +
                             "expiration_date DATE, " +
+                            "batch_state VARCHAR(20), " +
                             "PRIMARY KEY (productbatchid), " +
                             "FOREIGN KEY (recipe) " +
                             "REFERENCES recipe(recipeid));");

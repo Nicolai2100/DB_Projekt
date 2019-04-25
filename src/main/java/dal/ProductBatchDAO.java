@@ -33,11 +33,11 @@ public class ProductBatchDAO {
             conn.setAutoCommit(false);
 
             PreparedStatement pstmtInsertProduct = conn.prepareStatement(
-                    "INSERT INTO product " +
-                            "VALUES(?,?,?,?,?,?,?)");
+                    "INSERT INTO productbatch " +
+                            "VALUES(?,?,?,?,?,?,?,?)");
 
             PreparedStatement pstmtInsertCommodityRelation = conn.prepareStatement(
-                    "INSERT INTO product_commodity_relationship " +
+                    "INSERT INTO productbatch_commodity_relationship " +
                             "VALUES(?,?)");
 
             pstmtInsertProduct.setInt(1, product.getProductId());
@@ -47,6 +47,7 @@ public class ProductBatchDAO {
             pstmtInsertProduct.setDate(5, product.getProductionDate());
             pstmtInsertProduct.setInt(6, product.getVolume());
             pstmtInsertProduct.setDate(7, product.getExpirationDate());
+            pstmtInsertProduct.setString(8, product.getBatchState());
             pstmtInsertProduct.executeUpdate();
 
             for (ICommodityBatchDTO c : product.getCommodityBatches()) {

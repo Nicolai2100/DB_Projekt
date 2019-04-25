@@ -183,12 +183,11 @@ public class DALTest {
         productbatchDTO.setProductId(1);
         productbatchDTO.setRecipe(2);
         productbatchDTO.setProductionDate(new Date(System.currentTimeMillis()));
-
         productbatchDTO.setExpirationDate(new Date(System.currentTimeMillis()));
-
         productbatchDTO.setVolume(100);
-
         productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(2));
+
+        productbatchDTO.setBatchState(IProductDTO.State.UNDER_PRODUCTION);
 
         productBatchDAO.createProduct(productbatchDTO);
     }

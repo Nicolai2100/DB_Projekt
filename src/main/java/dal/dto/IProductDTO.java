@@ -37,4 +37,12 @@ public interface IProductDTO {
 
     void setMadeBy(UserDTO madeBy);
 
+    void setBatchState(State state);
+
+    String getBatchState();
+
+    enum State {
+        ORDERED, UNDER_PRODUCTION, COMPLETED
+    }
+
 }

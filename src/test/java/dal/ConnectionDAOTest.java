@@ -6,12 +6,13 @@ import org.junit.jupiter.api.Test;
 
 public class ConnectionDAOTest {
 
-    ConnectionDAO connectionDAO;
 
-    @Before
-    public void initialize() {
-        connectionDAO = new ConnectionDAO();
-    }
+    ConnectionDAO connectionDAO = new ConnectionDAO();
+
+//    @Before
+//    public void initialize() {
+//        connectionDAO = new ConnectionDAO();
+//    }
 
     @After
     public void close() {
