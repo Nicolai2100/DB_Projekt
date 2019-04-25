@@ -19,7 +19,7 @@ public class ProductBatchDAO {
   Lagerstatus af råvarer og råvarebatches (Produktionsleder)
   */
 
-    public void createProduct(ProductbatchDTO product) {
+    public void createProductbatch(ProductbatchDTO product) {
         //kontroller om han er aktiv i systemet
         if (!product.getMadeBy().getRoles().contains("productionleader") || !product.getMadeBy().getIsActive()) {
             System.out.println("User not authorized to proceed!");
@@ -97,4 +97,6 @@ public class ProductBatchDAO {
         }
         return productbatchDTO;
     }
+
+
 }

@@ -197,10 +197,9 @@ public class DALTest {
 
         productbatchDTO.setBatchState(IProductDTO.State.UNDER_PRODUCTION);
 
-        productBatchDAO.createProduct(productbatchDTO);
+        productBatchDAO.createProductbatch(productbatchDTO);
 
-        long John = System.currentTimeMillis();
-        System.out.println(productBatchDAO.getProductbatch(1).toString());
-        System.out.println(System.currentTimeMillis()-John + "ms");
+        System.out.println("Read product succesful:" + productBatchDAO.getProductbatch(1).toString());
+
     }
 }
