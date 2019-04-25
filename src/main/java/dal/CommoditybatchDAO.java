@@ -90,7 +90,7 @@ public class CommoditybatchDAO {
             PreparedStatement preparedStatement = conn.prepareStatement(
                     "UPDATE commoditybatch " +
                             "SET commoditybatchid=?, ingredientid=?, orderedby=?, amountinkg=?, orderdate=?, residue=? " +
-                            "WHERE commoditybatchid=" + commodityBatch.getBatchId()
+                            "WHERE commoditybatchid=?"
             );
             preparedStatement.setInt(1, commodityBatch.getBatchId());
             preparedStatement.setInt(2, commodityBatch.getIngredientDTO().getIngredientId());
@@ -98,6 +98,7 @@ public class CommoditybatchDAO {
             preparedStatement.setDouble(4, commodityBatch.getAmountInKg()); //TODO er sat til int i databasen
             preparedStatement.setString(5, commodityBatch.getOrderDate());
             preparedStatement.setBoolean(6, commodityBatch.getResidue());
+            preparedStatement.setInt(7, commodityBatch.getBatchId());
 
             preparedStatement.executeUpdate();
             conn.commit();
