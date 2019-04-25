@@ -31,12 +31,14 @@ public class UserDAOTest {
 
     @Test
     public void deleteUser() throws IUserDAO.DALException {
-        userDAO.deleteUser(10);
+        IUserDTO user13 = new UserDTO();
+        user13.setUserId(13);
+        userDAO.deleteUser(user13.getUserId());
     }
 
     @Test
     void getUser() throws IUserDAO.DALException {
-        IUserDTO testUser = userDAO.getUser(10);
+        IUserDTO testUser = userDAO.getUser(13);
         System.out.println(testUser);
     }
 
@@ -104,6 +106,7 @@ public class UserDAOTest {
             assertEquals(testUser.getRoles().get(0), receivedUser.getRoles().get(0));
             assertEquals(testUser.getRoles().size(), receivedUser.getRoles().size());
 
+            System.out.println(testUser.getUserId());
             userDAO.deleteUser(testUser.getUserId());
             allUsers = userDAO.getUserList();
 
