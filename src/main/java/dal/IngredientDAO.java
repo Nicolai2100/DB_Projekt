@@ -137,8 +137,6 @@ public class IngredientDAO {
         List<IIngredientDTO> ingredientList = new ArrayList<>();
 
         try {
-            conn.setAutoCommit(false);
-
             PreparedStatement preparedStatement = conn.prepareStatement(
                     "SELECT * FROM ingredient"
             );

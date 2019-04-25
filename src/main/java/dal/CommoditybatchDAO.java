@@ -3,6 +3,8 @@ package dal;
 import dal.dto.*;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CommoditybatchDAO {
     private UserDAO userDAO;

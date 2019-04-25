@@ -295,17 +295,30 @@ public class UserDAO implements IUserDAO {
 
     public String getStock() throws SQLException{
         Map<String, Double> ingredientStock = new HashMap<>();
+        String batchString;
 
         try {
+            //
             IngredientDAO ingredientDAO = new IngredientDAO();
             for (IIngredientDTO ingredient : ingredientDAO.getIngredientList()) {
                 ingredientStock.put(ingredient.getName(), ingredientDAO.getTotalAmount(ingredient));
             }
 
+            PreparedStatement preparedStatement = conn.prepareStatement(
+                    "SELECT name, amountinkg " +
+                        "FROM ingredient, commoditybatch " +
+                        "WHERE ingredient.ingredientid=commoditybatch.ingredientid"
+            );
+
+            //
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            batchString = resultSet.toString();
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return ingredientStock.toString();
+        return ingredientStock.toString() + batchString;
     }
 }
