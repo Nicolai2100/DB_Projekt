@@ -83,26 +83,4 @@ public class CommoditybatchDAO {
         }
         return commodityBatch;
     }
-
-    public double getTotalAmount(IIngredientDTO ingredient) {
-        double totalAmount = 0;
-
-        try {
-           PreparedStatement preparedStatement = conn.prepareStatement(
-                   "SELECT amountinkg FROM commoditybatch " +
-                           "WHERE ingredientid=? AND residue = 0"
-           );
-           preparedStatement.setInt(1, ingredient.getIngredientId());
-
-           ResultSet resultSet = preparedStatement.executeQuery();
-
-           while (resultSet.next()){
-               totalAmount += resultSet.getDouble("amountinkg");
-           }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return totalAmount;
-    }
 }

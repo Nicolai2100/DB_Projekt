@@ -106,4 +106,31 @@ public class IngredientDAO {
         }
     }
 
+    /**
+     * Finds the total remaining amount af a given ingredient.
+     * @param ingredient the given ingredient.
+     * @return the total remaining amount across productbatches in kg
+     */
+    public double getTotalAmount(IIngredientDTO ingredient) {
+        double totalAmount = 0;
+
+        try {
+            PreparedStatement preparedStatement = conn.prepareStatement(
+                    "SELECT amountinkg FROM commoditybatch " +
+                            "WHERE ingredientid=? AND residue = 0"
+            );
+            preparedStatement.setInt(1, ingredient.getIngredientId());
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()){
+                totalAmount += resultSet.getDouble("amountinkg");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return totalAmount;
+    }
+
 }
