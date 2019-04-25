@@ -21,7 +21,7 @@ public class IngredientDAOTest {
     /* @Before
      public void initialize() {
          connectionDAO = new ConnectionDAO();
-         productDAO = new ProductDAO(connectionDAO);
+         productBatchDAO = new ProductBatchDAO(connectionDAO);
          userDAO = new UserDAO(connectionDAO);
          ingredientDAO = new IngredientDAO(connectionDAO);
          ingredientListDAO = new IngredientListDAO(connectionDAO, userDAO, ingredientDAO);

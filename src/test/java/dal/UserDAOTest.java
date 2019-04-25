@@ -21,7 +21,7 @@ public class UserDAOTest {
     public void initialize() {
         /*connectionDAO = new ConnectionDAO();
         userDAO = new UserDAO(connectionDAO);
-        productDAOTest = new ProductDAOTest();*/
+        productDAOTest = new ProductBatchDAOTest();*/
     }
 
     @After

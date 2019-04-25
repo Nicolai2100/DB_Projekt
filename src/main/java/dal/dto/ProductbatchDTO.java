@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.sql.Date;
 import java.util.List;
 
-public class ProductDTO implements IProductDTO {
+public class ProductbatchDTO implements IProductDTO {
 
     private int productId;
     private String name;
@@ -16,7 +16,7 @@ public class ProductDTO implements IProductDTO {
     private int volume;
 
 
-    public ProductDTO() {
+    public ProductbatchDTO() {
         this.commodityBatches = new ArrayList<>();
     }
 

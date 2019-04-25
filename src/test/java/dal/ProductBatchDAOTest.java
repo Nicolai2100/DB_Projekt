@@ -10,11 +10,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
-
-public class ProductDAOTest {
+public class ProductBatchDAOTest {
     ConnectionDAO connectionDAO = new ConnectionDAO();
-    ProductDAO productDAO = new ProductDAO();
+    ProductBatchDAO productBatchDAO = new ProductBatchDAO();
     UserDAO userDAO = new UserDAO();
     IngredientDAO ingredientDAO = new IngredientDAO();
     IngredientListDAO ingredientListDAO = new IngredientListDAO(ingredientDAO);
@@ -26,7 +24,7 @@ public class ProductDAOTest {
     /* @Before
      public void initialize() {
          connectionDAO = new ConnectionDAO();
-         productDAO = new ProductDAO(connectionDAO);
+         productBatchDAO = new ProductBatchDAO(connectionDAO);
          userDAO = new UserDAO(connectionDAO);
          ingredientDAO = new IngredientDAO(connectionDAO);
          ingredientListDAO = new IngredientListDAO(connectionDAO, userDAO, ingredientDAO);
@@ -51,21 +49,21 @@ public class ProductDAOTest {
     public void createProduct() throws IUserDAO.DALException {
 
 
-        ProductDTO productDTO = new ProductDTO();
+        ProductbatchDTO productbatchDTO = new ProductbatchDTO();
         UserDTO testUser = (UserDTO) userDAO.getUser(2);
-        productDTO.setMadeBy(testUser);
-        productDTO.setName("Ost");
-        productDTO.setProductId(1);
-        productDTO.setRecipe(2);
-        productDTO.setProductionDate(new Date(System.currentTimeMillis()));
+        productbatchDTO.setMadeBy(testUser);
+        productbatchDTO.setName("Ost");
+        productbatchDTO.setProductId(1);
+        productbatchDTO.setRecipe(2);
+        productbatchDTO.setProductionDate(new Date(System.currentTimeMillis()));
 
-        productDTO.setExpirationDate(new Date(System.currentTimeMillis()));
+        productbatchDTO.setExpirationDate(new Date(System.currentTimeMillis()));
 
-        productDTO.setVolume(100);
+        productbatchDTO.setVolume(100);
 
-        productDTO.getCommodityBatches().add(commodityDAO.getCommodityBatch(2));
+        productbatchDTO.getCommodityBatches().add(commodityDAO.getCommodityBatch(2));
 
-        productDAO.createProduct(productDTO);
+        productBatchDAO.createProduct(productbatchDTO);
     }
 
 

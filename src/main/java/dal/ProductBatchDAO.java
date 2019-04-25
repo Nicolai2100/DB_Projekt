@@ -4,10 +4,10 @@ import dal.dto.*;
 
 import java.sql.*;
 
-public class ProductDAO {
+public class ProductBatchDAO {
     private Connection conn;
 
-    public ProductDAO() {
+    public ProductBatchDAO() {
         this.conn = ConnectionDAO.getConnection();
     }
 
@@ -23,7 +23,7 @@ public class ProductDAO {
     // Vi kunne godt tænke os at det er muligt at udsøge produktbatches,
     // der er hhv. bestilt, under produktion og færdiggjort.
 
-    public void createProduct(ProductDTO product) {
+    public void createProduct(ProductbatchDTO product) {
         //kontroller om han er aktiv i systemet
         if (!product.getMadeBy().getRoles().contains("productionleader") || !product.getMadeBy().getIsActive()) {
             System.out.println("User not authorized to proceed!");
