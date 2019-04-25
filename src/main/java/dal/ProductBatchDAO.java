@@ -65,5 +65,35 @@ public class ProductBatchDAO {
         }
     }
 
+    public ProductbatchDTO getProductbatch(int productBatch) {
+        ProductbatchDTO productbatchDTO = new ProductbatchDTO();
+        UserDAO userDAO = new UserDAO();
 
+        try {
+            PreparedStatement pstmtSelectProductBatch = conn.prepareStatement(
+                    "SELCET * FROM productbatch " +
+                            "WHERE productbatchid = ?");
+
+
+            pstmtSelectProductBatch.setInt(1, productBatch);
+            ResultSet rs = pstmtSelectProductBatch.getResultSet();
+            while (rs.next()) {
+                productbatchDTO.setProductId(productBatch);
+                productbatchDTO.setName(rs.getString("name"));
+                productbatchDTO.setRecipe(rs.getInt("recipe"));
+                productbatchDTO.setMadeBy((UserDTO) userDAO.getUser(rs.getInt("madeby")));
+                productbatchDTO.setProductionDate(rs.getDate("production_date"));
+                productbatchDTO.setExpirationDate(rs.getDate("expiration_date"));
+                productbatchDTO.setVolume(rs.getInt("volume"));
+                productbatchDTO.setBatchState(IProductDTO.State.valueOf(rs.getString("batch_state")));
+
+            }
+
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
 }
