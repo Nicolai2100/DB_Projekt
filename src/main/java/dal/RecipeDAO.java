@@ -35,23 +35,16 @@ public class RecipeDAO {
         }
         try {
             conn.setAutoCommit(false);
-
-            PreparedStatement pstmtGetEdition = conn.prepareStatement(
-                    "SELECT edition " +
-                            "FROM recipe " +
-                            "WHERE recipeid = ?;");
+            String selectEditionString = "SELECT edition FROM recipe WHERE recipeid = ?;";
+            PreparedStatement pstmtGetEdition = conn.prepareStatement(selectEditionString);
             pstmtGetEdition.setInt(1, recipeDTO.getRecipeId());
             ResultSet rs = pstmtGetEdition.executeQuery();
             int edition = 1;
             if (rs.next()) {
                 edition += rs.getInt(1);
             }
-            PreparedStatement pstmtUpdateRecipe = conn.prepareStatement(
-                    "UPDATE recipe " +
-                            "SET " +
-                            "edition = ?, " +
-                            "name = ?, " +
-                            "madeby = ?;");
+            String uddateRecipeString = "UPDATE recipe SET edition = ?, name = ?, madeby = ?;";
+            PreparedStatement pstmtUpdateRecipe = conn.prepareStatement(uddateRecipeString);
 
             pstmtUpdateRecipe.setInt(1, edition);
             pstmtUpdateRecipe.setString(2, recipeDTO.getName());
@@ -84,9 +77,8 @@ public class RecipeDAO {
                 edition += returnEdition;
             }
             conn.setAutoCommit(false);
-            PreparedStatement pstmtInsertRecipe = conn.prepareStatement(
-                    "INSERT INTO recipe " +
-                            "VALUES(?,?,?,?,?)");
+            String insertRecipeString = "INSERT INTO recipe VALUES(?,?,?,?,?)";
+            PreparedStatement pstmtInsertRecipe = conn.prepareStatement(insertRecipeString);
             pstmtInsertRecipe.setInt(1, recipeDTO.getRecipeId());
             pstmtInsertRecipe.setInt(2, edition);
             pstmtInsertRecipe.setString(3, recipeDTO.getName());
@@ -105,9 +97,8 @@ public class RecipeDAO {
     public IRecipeDTO getRecipe(int recipeId) {
         IRecipeDTO recipeDTO = new RecipeDTO();
         try {
-            PreparedStatement pstmtGetRecipe = conn.prepareStatement(
-                    "SELECT * FROM recipe " +
-                            "WHERE recipeid = ?;");
+            String getRecipeString = "SELECT * FROM recipe WHERE recipeid = ?;";
+            PreparedStatement pstmtGetRecipe = conn.prepareStatement(getRecipeString);
             pstmtGetRecipe.setInt(1, recipeId);
             ResultSet rs = pstmtGetRecipe.executeQuery();
             while (rs.next()) {
@@ -130,9 +121,8 @@ public class RecipeDAO {
             return;
         }
         try {
-            PreparedStatement pstmtDeleteRecipe = conn.prepareStatement(
-                    "DELETE FROM recipe " +
-                            "WHERE recipeid = ?;");
+            String deleteRecipeString = "DELETE FROM recipe WHERE recipeid = ?;";
+            PreparedStatement pstmtDeleteRecipe = conn.prepareStatement(deleteRecipeString);
             pstmtDeleteRecipe.setInt(1, recipeId);
             int result = pstmtDeleteRecipe.executeUpdate();
             if (result < 1) {

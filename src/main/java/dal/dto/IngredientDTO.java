@@ -63,7 +63,7 @@ public class IngredientDTO implements IIngredientDTO {
 
     @Override
     public String toString() {
-        return name + ", of type: " + type + " amount: " + amountInMG + " mg.";
+        return "\n"+name + ", of type: " + type + " amount: " + amountInMG + " mg.";
     }
 }
 

@@ -16,14 +16,11 @@ public class OldRecipeDAO {
         this.recipeDAO = recipeDAO;
     }
 
-
     public int haveOldRecipe(int recipeId) {
         int edition = 0;
         try {
-            PreparedStatement pstmtHaveOldRecipe = conn.prepareStatement(
-                    "SELECT MAX(edition) " +
-                            "FROM oldrecipe " +
-                            "WHERE recipeid = ?;");
+            String haveOldRecipeString = "SELECT MAX(edition) FROM oldrecipe WHERE recipeid = ?;";
+            PreparedStatement pstmtHaveOldRecipe = conn.prepareStatement(haveOldRecipeString);
             pstmtHaveOldRecipe.setInt(1, recipeId);
             ResultSet rs = pstmtHaveOldRecipe.executeQuery();
             if (rs.next()) {
@@ -39,8 +36,8 @@ public class OldRecipeDAO {
     public void getAllOldRecipes() {
         PreparedStatement pstmtGetAllOld = null;
         try {
-            pstmtGetAllOld = conn.prepareStatement(
-                    "SELECT * FROM oldrecipe;");
+            String getAllOldString = "SELECT * FROM oldrecipe;";
+            pstmtGetAllOld = conn.prepareStatement(getAllOldString);
 
             ResultSet rs = pstmtGetAllOld.executeQuery();
             while (rs.next()) {

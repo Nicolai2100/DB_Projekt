@@ -20,9 +20,8 @@ public class IngredientDAO {
     public void createIngredient(IIngredientDTO ingredientDTO) {
         try {
             conn.setAutoCommit(false);
-            PreparedStatement pstmtInsertIngredient = conn.prepareStatement(
-                    "INSERT INTO ingredient " +
-                            "VALUES(?,?,?,?,?)");
+            String insertIngString = "INSERT INTO ingredient VALUES(?,?,?,?,?);";
+            PreparedStatement pstmtInsertIngredient = conn.prepareStatement(insertIngString);
             pstmtInsertIngredient.setInt(1, ingredientDTO.getIngredientId());
             pstmtInsertIngredient.setString(2, ingredientDTO.getName());
             pstmtInsertIngredient.setString(3, ingredientDTO.getType());
@@ -40,9 +39,8 @@ public class IngredientDAO {
     public IIngredientDTO getIngredient(int ingredientId) {
         IIngredientDTO ingredientDTO = new IngredientDTO();
         try {
-            PreparedStatement pstmtGetIngredient = conn.prepareStatement(
-                    "SELECT * FROM ingredient " +
-                            "WHERE ingredientid = ?;");
+            String getIngString = "SELECT * FROM ingredient WHERE ingredientid = ?;";
+            PreparedStatement pstmtGetIngredient = conn.prepareStatement(getIngString);
             pstmtGetIngredient.setInt(1, ingredientId);
             ResultSet rs = pstmtGetIngredient.executeQuery();
 
@@ -60,10 +58,8 @@ public class IngredientDAO {
     public List<IIngredientDTO> checkForReorder() {
         List<IIngredientDTO> toBeOrdered = new ArrayList<>();
         try {
-            PreparedStatement pstmtGetReorder = conn.prepareStatement(
-                    "SELECT * " +
-                            "FROM ingredient " +
-                            "WHERE reorder = 1;");
+            String getReorderString = "SELECT * FROM ingredient WHERE reorder = 1;";
+            PreparedStatement pstmtGetReorder = conn.prepareStatement(getReorderString);
             ResultSet rs = pstmtGetReorder.executeQuery();
 
             while (rs.next()) {
@@ -72,7 +68,6 @@ public class IngredientDAO {
                 ingredientDTO.setName(rs.getString(2));
                 ingredientDTO.setType(rs.getString(3));
                 toBeOrdered.add(ingredientDTO);
-
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -89,10 +84,8 @@ public class IngredientDAO {
      */
     public void isIngredientThere(IIngredientDTO ingredient) {
         try {
-            PreparedStatement pstmtIsIngThere = conn.prepareStatement(
-                    "SELECT COUNT(*) " +
-                            "FROM ingredient " +
-                            "WHERE ingredientid = ?;");
+            String isIngThere = "SELECT COUNT(*) FROM ingredient WHERE ingredientid = ?;";
+            PreparedStatement pstmtIsIngThere = conn.prepareStatement(isIngThere);
             pstmtIsIngThere.setInt(1, ingredient.getIngredientId());
             ResultSet rs = pstmtIsIngThere.executeQuery();
             if (rs.next()) {
@@ -108,6 +101,7 @@ public class IngredientDAO {
 
     /**
      * Finds the total remaining amount af a given ingredient.
+     *
      * @param ingredient the given ingredient.
      * @return the total remaining amount across productbatches in kg
      */
@@ -115,15 +109,13 @@ public class IngredientDAO {
         double totalAmount = 0;
 
         try {
-            PreparedStatement preparedStatement = conn.prepareStatement(
-                    "SELECT amountinkg FROM commoditybatch " +
-                            "WHERE ingredientid=? AND residue = 0"
-            );
+            String totalAmountString = "SELECT amountinkg FROM commoditybatch WHERE ingredientid=? AND residue = 0";
+            PreparedStatement preparedStatement = conn.prepareStatement(totalAmountString);
             preparedStatement.setInt(1, ingredient.getIngredientId());
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
-            while (resultSet.next()){
+            while (resultSet.next()) {
                 totalAmount += resultSet.getDouble("amountinkg");
             }
 

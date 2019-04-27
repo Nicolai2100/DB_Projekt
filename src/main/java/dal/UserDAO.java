@@ -149,12 +149,10 @@ public class UserDAO implements IUserDAO {
     public void deleteUser(int userId) throws DALException {
         int result;
         try {
-            PreparedStatement pSmtDeleteUser = conn.prepareStatement(
-                    "DELETE FROM user " +
-                            "WHERE userid = ?;");
+            String deleteUserString = "DELETE FROM user WHERE userid = ?;";
+            PreparedStatement pSmtDeleteUser = conn.prepareStatement(deleteUserString);
             pSmtDeleteUser.setInt(1, userId);
             result = pSmtDeleteUser.executeUpdate();
-
 
             /*PreparedStatement psmtInactivateUser = conn.prepareStatement(
                     "UPDATE user " +
@@ -180,10 +178,8 @@ public class UserDAO implements IUserDAO {
     public List<String> getUserRoleList(int userID) {
         List<String> userRoleList = new ArrayList<>();
         try {
-            PreparedStatement pSmtSelectUserRoles = conn.prepareStatement(
-                    "SELECT role " +
-                            "FROM userrole " +
-                            "WHERE userid = ?");
+            String getUserRolesString = "SELECT role FROM userrole WHERE userid = ?;";
+            PreparedStatement pSmtSelectUserRoles = conn.prepareStatement(getUserRolesString);
 
             pSmtSelectUserRoles.setInt(1, userID);
             ResultSet rs = pSmtSelectUserRoles.executeQuery();
@@ -214,9 +210,8 @@ public class UserDAO implements IUserDAO {
     public void setUserRoles(Connection conn, IUserDTO user) throws DALException {
         try {
             conn.setAutoCommit(false);
-            PreparedStatement pSmtInsertUserRole = conn.prepareStatement(
-                    "INSERT INTO userrole " +
-                            "VALUES(?,?)");
+            String insertUserRoleString = "INSERT INTO userrole VALUES(?,?);";
+            PreparedStatement pSmtInsertUserRole = conn.prepareStatement(insertUserRoleString);
             pSmtInsertUserRole.setInt(1, user.getUserId());
             for (int i = 0; i < user.getRoles().size(); i++) {
                 String role = user.getRoles().get(i);
@@ -238,14 +233,12 @@ public class UserDAO implements IUserDAO {
     public void roleTransAct(IUserDTO user) {
         List<String> newUserRoles = user.getRoles();
         try {
-            PreparedStatement deleteRolesFromDB = conn.prepareStatement(
-                    "DELETE FROM userrole " +
-                            "WHERE userid = ?;");
+            String deleteRoleString = "DELETE FROM userrole WHERE userid = ?;";
+            PreparedStatement deleteRolesFromDB = conn.prepareStatement(deleteRoleString);
             deleteRolesFromDB.setInt(1, user.getUserId());
 
-            PreparedStatement insertRolesInDB = conn.prepareStatement(
-                    "INSERT INTO userrole " +
-                            "VALUES(?,?)");
+            String insertRoleString = "INSERT INTO userrole VALUES(?,?);";
+            PreparedStatement insertRolesInDB = conn.prepareStatement(insertRoleString);
             insertRolesInDB.setInt(1, user.getUserId());
 
             conn.setAutoCommit(false);
@@ -272,10 +265,8 @@ public class UserDAO implements IUserDAO {
     public boolean peekUser(int userID) throws DALException {
         int returnInt = 0;
         try {
-            PreparedStatement prep = conn.prepareStatement(
-                    "SELECT COUNT(*) AS uservalidity " +
-                            "FROM user " +
-                            "WHERE userid = ?");
+            String peekUserString = "SELECT COUNT(*) AS uservalidity FROM user WHERE userid = ?;";
+            PreparedStatement prep = conn.prepareStatement(peekUserString);
             prep.setInt(1, userID);
 
             ResultSet rs = prep.executeQuery();

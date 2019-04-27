@@ -36,15 +36,10 @@ public class ConnectionDAO {
 
     public void createTriggerReorder() {
         try {
-            PreparedStatement pstmtCreateTriggerReorder = conn.prepareStatement(
-                    "CREATE TRIGGER set_reorder " +
-                            "AFTER INSERT ON commoditybatch " +
-                            "FOR EACH ROW " +
-                            "BEGIN " +
-                            "UPDATE ingredient " +
-                            "SET ingredient.reorder = 0 " +
-                            "WHERE ingredient.ingredientid = new.ingredientid; " +
-                            "END;");
+            String createTrigReorderString = "CREATE TRIGGER set_reorder AFTER INSERT ON commoditybatch FOR EACH ROW " +
+                    "BEGIN UPDATE ingredient SET ingredient.reorder = 0 " +
+                    "WHERE ingredient.ingredientid = new.ingredientid; END;";
+            PreparedStatement pstmtCreateTriggerReorder = conn.prepareStatement(createTrigReorderString);
 
             pstmtCreateTriggerReorder.execute();
 
@@ -55,35 +50,14 @@ public class ConnectionDAO {
 
     public void createTriggerOldRecipe() {
         try {
-            PreparedStatement pstmtCreateTriggerSaveDeletedRecipe = conn.prepareStatement(
-                    "CREATE TRIGGER save_recipe_delete " +
-                            "BEFORE DELETE ON recipe " +
-                            "FOR EACH ROW " +
-                            "BEGIN " +
-                            "INSERT INTO oldrecipe " +
-                            "VALUES " +
-                            "(old.recipeid,  " +
-                            "old.edition, " +
-                            "old.name, " +
-                            "old.madeby, " +
-                            "old.ingredientlistid, " +
-                            "NOW()); " +
-                            "END;");
-
-            PreparedStatement pstmtCreateTriggerSaveUpdatedRecipe = conn.prepareStatement(
-                    "CREATE TRIGGER save_recipe_update " +
-                            "BEFORE UPDATE ON recipe " +
-                            "FOR EACH ROW " +
-                            "BEGIN " +
-                            "INSERT INTO oldrecipe " +
-                            "VALUES " +
-                            "(old.recipeid,  " +
-                            "old.edition, " +
-                            "old.name, " +
-                            "old.madeby, " +
-                            "old.ingredientlistid, " +
-                            "NOW()); " +
-                            "END;");
+            String createTrigSaveDeletedString = "CREATE TRIGGER save_recipe_delete BEFORE DELETE ON recipe " +
+                    "FOR EACH ROW BEGIN INSERT INTO oldrecipe VALUES (old.recipeid, old.edition, old.name, " +
+                    "old.madeby, old.ingredientlistid, NOW()); END;";
+            PreparedStatement pstmtCreateTriggerSaveDeletedRecipe = conn.prepareStatement(createTrigSaveDeletedString);
+            String createTrigUpdateDeletedString = "CREATE TRIGGER save_recipe_update BEFORE UPDATE ON recipe " +
+                    "FOR EACH ROW BEGIN INSERT INTO oldrecipe VALUES (old.recipeid, old.edition, " +
+                    "old.name, old.madeby, old.ingredientlistid, NOW()); END;";
+            PreparedStatement pstmtCreateTriggerSaveUpdatedRecipe = conn.prepareStatement(createTrigUpdateDeletedString);
 
             pstmtCreateTriggerSaveUpdatedRecipe.execute();
             pstmtCreateTriggerSaveDeletedRecipe.execute();

@@ -76,9 +76,9 @@ public class IngredientListDAO {
     public void updateIngredientList(IRecipeDTO recipeDTO, int edition) {
         try {
             conn.setAutoCommit(false);
-            PreparedStatement pstmtInsertIngredientList = conn.prepareStatement(
-                    "INSERT INTO ingredientlist(ingredientlistid, edition, ingredientid, amountmg) " +
-                            "VALUES(?,?,?,?)");
+            String updateIngListString = "INSERT INTO ingredientlist(ingredientlistid, edition, ingredientid, amountmg) " +
+                    "VALUES(?,?,?,?);";
+            PreparedStatement pstmtInsertIngredientList = conn.prepareStatement(updateIngListString);
             pstmtInsertIngredientList.setInt(1, recipeDTO.getRecipeId());
             pstmtInsertIngredientList.setInt(2, edition);
 
@@ -98,9 +98,9 @@ public class IngredientListDAO {
     public void createIngredientList(IRecipeDTO recipeDTO, int edition) {
         try {
             conn.setAutoCommit(false);
-            PreparedStatement pstmtInsertIngredientList = conn.prepareStatement(
-                    "INSERT INTO ingredientlist(ingredientlistid, edition, ingredientid, amountmg) " +
-                            "VALUES(?,?,?,?)");
+            String insertIngList = "INSERT INTO ingredientlist(ingredientlistid, edition, ingredientid, amountmg) " +
+                    "VALUES(?,?,?,?);";
+            PreparedStatement pstmtInsertIngredientList = conn.prepareStatement(insertIngList);
             pstmtInsertIngredientList.setInt(1, recipeDTO.getRecipeId());
 
             for (IIngredientDTO ingredient : recipeDTO.getIngredientsList()) {
