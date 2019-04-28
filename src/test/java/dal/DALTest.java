@@ -55,33 +55,27 @@ public class DALTest {
         /**
          * Brugerne oprettes
          */
-        IUserDTO admin = userDAO.getUser(1);
-        IUserDTO testUser_2 = new UserDTO();
-        testUser_2.setUserId(2);
-        testUser_2.setUserName("Pelle Hansen");
-        testUser_2.setIni("PH");
-        ArrayList<String> roles2 = new ArrayList();
-        roles2.add("admin");
-        roles2.add("productionleader");
-        testUser_2.setRoles(roles2);
-        testUser_2.setIsActive(true);
-        userDAO.createUser(admin, testUser_2);
+        IUserDTO testUser_1 = new UserDTO();
+        testUser_1.setUserId(1);
+        testUser_1.setUserName("Pelle Hansen");
+        testUser_1.setIni("PH");
+        testUser_1.addRole("admin");
+        testUser_1.addRole("productionleader");
+        userDAO.createUser(testUser_1, testUser_1);
 
-        UserDTO testUser_3 = new UserDTO();
-        testUser_3.setUserId(3);
-        testUser_3.setUserName("Puk Larsen");
-        testUser_3.setIni("PL");
-        testUser_3.addRole("farmaceut");
-        testUser_3.setAdmin(userDAO.getUser(2));
-        testUser_3.setIsActive(true);
-        userDAO.createUser(admin, testUser_3);
+        UserDTO testUser_2 = new UserDTO();
+        testUser_2.setUserId(2);
+        testUser_2.setUserName("Puk Larsen");
+        testUser_2.setIni("PL");
+        testUser_2.addRole("farmaceut");
+        userDAO.createUser(testUser_1, testUser_2);
         /**
          * Ingredienser og opskrift oprettes
          */
         IRecipeDTO recipeDTO = new RecipeDTO();
         recipeDTO.setRecipeId(2);
         recipeDTO.setName("Norethisteron/estrogen");
-        recipeDTO.setMadeBy(userDAO.getUser(3));
+        recipeDTO.setMadeBy(userDAO.getUser(2));
 
         List<IIngredientDTO> ingredients = new ArrayList<>();
         IngredientDTO ingredientDTO = new IngredientDTO();
@@ -180,12 +174,12 @@ public class DALTest {
          */
         //todo få testUser_2 til at oprette et product-batch
 
-//        recipeDAO.deleteRecipe(2, testUser_3);
+//        recipeDAO.deleteRecipe(2, testUser_2);
 
         //      oldRecipeDAO.getAllOldRecipes();
 
         ProductbatchDTO productbatchDTO = new ProductbatchDTO();
-        UserDTO testUser2 = (UserDTO) userDAO.getUser(2);
+        UserDTO testUser2 = (UserDTO) userDAO.getUser(1);
         productbatchDTO.setMadeBy(testUser2);
         productbatchDTO.setName("Ost");
         productbatchDTO.setProductId(1);

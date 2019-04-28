@@ -22,7 +22,10 @@ public class UserDAO implements IUserDAO {
         //Brugeren må kun angives som argument for metodekaldet, hvis brugeren har "admin" som rolle
         if (admin.equals(user) && !user.getRoles().contains("admin")) {
             System.out.println("Error in authorization!");
-            System.out.println("Contact administrator!");
+            return;
+        }
+        if (!admin.getIsActive()) {
+            System.out.println("Admin is not active");
             return;
         }
         user.setAdmin(admin);
@@ -44,11 +47,13 @@ public class UserDAO implements IUserDAO {
             } else {
                 pSmtInsertUser.setNull(5, Types.INTEGER);
             }
-            pSmtInsertUser.executeUpdate();
-            setUserRoles(conn, user);
+            int result = pSmtInsertUser.executeUpdate();
 
-            conn.commit();
-            System.out.println("The user was successfully created in the database system");
+            if (result > 0){
+                setUserRoles(conn, user);
+                conn.commit();
+                System.out.println("The user was successfully created in the database system");
+            }
 
         } catch (SQLException e) {
             System.out.println("Error! " + e.getMessage());
@@ -137,22 +142,37 @@ public class UserDAO implements IUserDAO {
 
     @Override
     public void updateUser(IUserDTO admin, IUserDTO user) throws DALException {
-        String updateUserString = "UPDATE user SET name = ?, ini = ? WHERE userid = ?; ";
+        if (user.getUserId() < 1) {
+            System.out.println("Error! User need to have a userID specified!");
+            return;
+        }
+        if (!admin.getIsActive()) {
+            System.out.println("Admin is not active");
+            return;
+        }
+        String updateUserString = "UPDATE user SET name = ?, ini = ?, active = ? WHERE userid = ?; ";
         try {
-            if (!peekUser(user.getUserId())) {
-                System.out.println("No such user in the database!");
-            } else {
-                conn.setAutoCommit(false);
-                PreparedStatement pSmtUpdateUser = conn.prepareStatement(
-                        "UPDATE user " +
-                                "SET " +
-                                "name = ?, " +
-                                "ini = ? " +
-                                "WHERE userid = ? ");
+            conn.setAutoCommit(false);
+            IUserDTO returnUser = getUser(user.getUserId());
+
+            PreparedStatement pSmtUpdateUser = conn.prepareStatement(updateUserString);
+            if (user.getUserName() != null) {
                 pSmtUpdateUser.setString(1, user.getUserName());
+            } else {
+                pSmtUpdateUser.setString(1, returnUser.getUserName());
+            }
+            if (user.getIni() != null) {
                 pSmtUpdateUser.setString(2, user.getIni());
-                pSmtUpdateUser.setInt(3, user.getUserId());
-                pSmtUpdateUser.executeUpdate();
+            } else {
+                pSmtUpdateUser.setString(2, returnUser.getIni());
+            }
+            pSmtUpdateUser.setBoolean(3, user.getIsActive());
+            pSmtUpdateUser.setInt(4, user.getUserId());
+
+            int result = pSmtUpdateUser.executeUpdate();
+            if (result < 1) {
+                System.out.println("Error! The user was not updated!");
+            } else {
                 roleTransAct(user);
                 System.out.println("The user was successfully updated!");
                 conn.commit();
@@ -164,22 +184,27 @@ public class UserDAO implements IUserDAO {
 
     @Override
     public void deleteUser(IUserDTO admin, int userId) throws DALException {
+        if (userId < 1) {
+            System.out.println("Error! Improper userID!");
+            return;
+        }
+        if (!admin.getIsActive()) {
+            System.out.println("Admin is not active");
+            return;
+        }
         int result;
         try {
-            String deleteUserString = "DELETE FROM user WHERE userid = ?;";
-            PreparedStatement pSmtDeleteUser = conn.prepareStatement(deleteUserString);
-            pSmtDeleteUser.setInt(1, userId);
-            result = pSmtDeleteUser.executeUpdate();
+            String inactivateString = "UPDATE user SET active = 0 WHERE userid = ? ";
+            //String deleteUserString = "DELETE FROM user WHERE userid = ?;";
+            //PreparedStatement pSmtDeleteUser = conn.prepareStatement(deleteUserString);
+            //pSmtDeleteUser.setInt(1, userId);
+            //result = pSmtDeleteUser.executeUpdate();
 
-            /*PreparedStatement psmtInactivateUser = conn.prepareStatement(
-                    "UPDATE user " +
-                            "SET " +
-                            "active = 0 " +
-                            "WHERE userid = ? ");
+            PreparedStatement psmtInactivateUser = conn.prepareStatement(inactivateString);
             psmtInactivateUser.setInt(1, userId);
-            result = psmtInactivateUser.executeUpdate();*/
+            result = psmtInactivateUser.executeUpdate();
             if (result == 1) {
-                System.out.println("The user with user-ID: " + userId + " is now deleted/inactive.");
+                System.out.println("The user with user-ID: " + userId + " have been inactivated.");
             } else {
                 System.out.println("Error no such user exists in the database!");
             }
@@ -191,7 +216,7 @@ public class UserDAO implements IUserDAO {
     /**
      * Metoden opretter og gemmer roller for en bruger i userrole.
      */
-    public void setUserRoles(Connection conn, IUserDTO user) throws DALException {
+    private void setUserRoles(Connection conn, IUserDTO user) throws DALException {
         try {
             conn.setAutoCommit(false);
             String insertUserRoleString = "INSERT INTO userrole VALUES(?,?);";
@@ -238,33 +263,8 @@ public class UserDAO implements IUserDAO {
             }
             conn.commit();
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
-    /**
-     * Metoden bruges til at undersøge om der eksisterer en bruger med et
-     * specifikt userid i user_table. Den returnerer false, hvis der ikke gør.
-     */
-    public boolean peekUser(int userID) throws DALException {
-        int returnInt = 0;
-        try {
-            String peekUserString = "SELECT COUNT(*) AS uservalidity FROM user WHERE userid = ?;";
-            PreparedStatement prep = conn.prepareStatement(peekUserString);
-            prep.setInt(1, userID);
-
-            ResultSet rs = prep.executeQuery();
-            while (rs.next()) {
-                returnInt = rs.getInt("uservalidity");
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        if (returnInt == 0) {
-            return false;
-        } else {
-            return true;
+            e.getMessage();
+            //            throw new DALException(e.getMessage())
         }
     }
 }

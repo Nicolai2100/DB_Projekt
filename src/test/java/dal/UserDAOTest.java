@@ -31,10 +31,8 @@ public class UserDAOTest {
 
     @Test
     public void deleteUser() throws IUserDAO.DALException {
-        IUserDTO user13 = new UserDTO();
-        user13.setUserId(13);
-        IUserDTO admin = userDAO.getUser(1);
-        userDAO.deleteUser(admin, user13.getUserId());
+        IUserDTO admin = userDAO.getUser(7);
+        userDAO.deleteUser(admin, 10);
     }
 
     @Test
@@ -59,13 +57,24 @@ public class UserDAOTest {
         }*/
     }
 
+    @Test
+    public void updateUser() throws IUserDAO.DALException {
+        IUserDTO testUser2 = new UserDTO();
+        testUser2.setUserId(7);
+        testUser2.setIsActive(false);
 
+        UserDTO testUser = new UserDTO();
+        testUser.setUserId(10);
+        testUser.addRole("laborant");
+
+        userDAO.updateUser(testUser2, testUser);
+    }
 
     @Test
     public void createUser() throws IUserDAO.DALException {
         IUserDTO testUser2 = new UserDTO();
         testUser2.setUserId(7);
-        testUser2.setUserName("Pælle Hansen");
+        testUser2.setUserName("Karl Mørk");
         testUser2.setIni("PH");
         testUser2.addRole("admin");
         testUser2.addRole("productionleader");

@@ -106,16 +106,30 @@ public class ConnectionDAO {
             pstmtDeleteIngredientLists.execute();
             pstmtDeleteIngredients.execute();
 
-            IUserDTO admin = userDAO.getUser(1);
-            for (IUserDTO user : userDAO.getUserList()) {
-                if (user.getAdmin() != null) ;
-                userDAO.deleteUser(admin,user.getUserId());
-            }
+            deleteUsers();
+
 
             pstmtDeleteUsers.execute();
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void deleteUsers() {
+        String deleteUserString = "DELETE FROM user WHERE userid = ?;";
+        try {
+            PreparedStatement deleteNonAdmins = conn.prepareStatement(deleteUserString);
+
+            for (IUserDTO user : userDAO.getUserList()) {
+                if (user.getUserId() != user.getAdmin().getUserId()){
+                    deleteNonAdmins.setInt(1,user.getUserId());
+                    deleteNonAdmins.executeUpdate();
+                }
+            }
+
         } catch (IUserDAO.DALException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
