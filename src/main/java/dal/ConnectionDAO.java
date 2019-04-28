@@ -69,7 +69,6 @@ public class ConnectionDAO {
 
     public void dropTriggers() {
         try {
-
             PreparedStatement pstmtDropTriggerReorder = conn.prepareStatement(
                     "DROP TRIGGER IF EXISTS set_reorder;");
 
@@ -107,9 +106,10 @@ public class ConnectionDAO {
             pstmtDeleteIngredientLists.execute();
             pstmtDeleteIngredients.execute();
 
+            IUserDTO admin = userDAO.getUser(1);
             for (IUserDTO user : userDAO.getUserList()) {
                 if (user.getAdmin() != null) ;
-                userDAO.deleteUser(user.getUserId());
+                userDAO.deleteUser(admin,user.getUserId());
             }
 
             pstmtDeleteUsers.execute();
@@ -195,7 +195,7 @@ public class ConnectionDAO {
                             "(commoditybatchid INT, " +
                             "ingredientid INT, " +
                             "orderedby INT, " +
-                            "amountinkg INT, " +
+                            "amountinkg FLOAT, " +
                             "orderdate VARCHAR(50), " +
                             "residue BIT, " +
                             "PRIMARY KEY (commoditybatchid), " +

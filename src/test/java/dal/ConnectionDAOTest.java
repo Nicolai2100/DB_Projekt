@@ -40,4 +40,10 @@ public class ConnectionDAOTest {
         dropAllTables();
         initializeDataBase();
     }
+
+    @Test
+    public void deleteFromAllTables() throws IUserDAO.DALException {
+        connectionDAO.cleanTables();
+    }
+
 }

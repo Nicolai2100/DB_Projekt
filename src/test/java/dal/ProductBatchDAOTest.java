@@ -283,6 +283,7 @@ public class ProductBatchDAOTest {
         /**
          * Brugerne oprettes
          */
+        IUserDTO admin = userDAO.getUser(1);
         IUserDTO testUser_2 = new UserDTO();
         testUser_2.setUserId(2);
         testUser_2.setUserName("Pelle Hansen");
@@ -292,7 +293,7 @@ public class ProductBatchDAOTest {
         roles2.add("productionleader");
         testUser_2.setRoles(roles2);
         testUser_2.setIsActive(true);
-        userDAO.createUser(testUser_2);
+        userDAO.createUser(admin, testUser_2);
 
         UserDTO testUser_3 = new UserDTO();
         testUser_3.setUserId(3);
@@ -301,7 +302,7 @@ public class ProductBatchDAOTest {
         testUser_3.addRole("farmaceut");
         testUser_3.setAdmin(userDAO.getUser(2));
         testUser_3.setIsActive(true);
-        userDAO.createUser(testUser_3);
+        userDAO.createUser(admin, testUser_3);
         /**
          * Ingredienser og opskrift oprettes
          */
