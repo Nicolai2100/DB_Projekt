@@ -33,37 +33,56 @@ public class UserDAOTest {
     public void deleteUser() throws IUserDAO.DALException {
         IUserDTO user13 = new UserDTO();
         user13.setUserId(13);
-        userDAO.deleteUser(user13.getUserId());
+        IUserDTO admin = userDAO.getUser(1);
+        userDAO.deleteUser(admin, user13.getUserId());
     }
 
     @Test
     void getUser() throws IUserDAO.DALException {
-        IUserDTO testUser = userDAO.getUser(13);
+        IUserDTO testUser = userDAO.getUser(7);
         System.out.println(testUser);
     }
 
     @Test
+    void getAllUsers() throws IUserDAO.DALException {
+        for (IUserDTO user : userDAO.getUserList()) {
+            System.out.println(user);
+        }
+    }
+
+
+    @Test
+    void getUserWithRoles() throws IUserDAO.DALException {
+
+       /* for (IUserDTO user:userDAO.getUserList()) {
+            System.out.println(user);
+        }*/
+    }
+
+
+
+    @Test
     public void createUser() throws IUserDAO.DALException {
         IUserDTO testUser2 = new UserDTO();
-        testUser2.setUserId(5);
+        testUser2.setUserId(7);
         testUser2.setUserName("Pælle Hansen");
         testUser2.setIni("PH");
         testUser2.addRole("admin");
         testUser2.addRole("productionleader");
-        userDAO.createUser(testUser2);
+        userDAO.createUser(testUser2, testUser2);
 
         UserDTO testUser = new UserDTO();
         testUser.setUserId(10);
         testUser.setUserName("Puk Larsen");
         testUser.setIni("PL");
         testUser.addRole("farmaceut");
-        testUser.setAdmin(userDAO.getUser(5));
-        userDAO.createUser(testUser);
+        userDAO.createUser(testUser2, testUser);
     }
 
     @Test
     public void test() {
         try {
+            IUserDTO admin = userDAO.getUser(1);
             UserDTO testUser = new UserDTO();
             testUser.setUserId(13);
             testUser.setUserName("Per Hansen");
@@ -72,7 +91,7 @@ public class UserDAOTest {
             roles.add("admin");
             testUser.setRoles(roles);
 
-            userDAO.createUser(testUser);
+            userDAO.createUser(admin, testUser);
             IUserDTO receivedUser = userDAO.getUser(13);
             assertEquals(testUser.getUserName(), receivedUser.getUserName());
             assertEquals(testUser.getIni(), receivedUser.getIni());
@@ -98,16 +117,16 @@ public class UserDAOTest {
             roles.remove(0);
             roles.add("pedel");
             testUser.setRoles(roles);
-            userDAO.updateUser(testUser);
+            userDAO.updateUser(admin, testUser);
 
-            receivedUser = userDAO.getUser(13);
+            receivedUser = userDAO.getUser(14);
             assertEquals(testUser.getUserName(), receivedUser.getUserName());
             assertEquals(testUser.getIni(), receivedUser.getIni());
             assertEquals(testUser.getRoles().get(0), receivedUser.getRoles().get(0));
             assertEquals(testUser.getRoles().size(), receivedUser.getRoles().size());
 
             System.out.println(testUser.getUserId());
-            userDAO.deleteUser(testUser.getUserId());
+            userDAO.deleteUser(admin, testUser.getUserId());
             allUsers = userDAO.getUserList();
 
             for (IUserDTO user : allUsers) {

@@ -77,8 +77,18 @@ public class UserDTO implements Serializable, IUserDTO {
     }
 
     @Override
-    public String toString() {
-        return "UserDTO [userId=" + userId + ", userName=" + userName + ", ini=" + ini + ", roles=" + roles + "]";
+    public void setAdmin(IUserDTO userDTO) {
+        this.admin = userDTO;
+    }
+
+    @Override
+    public boolean getIsActive() {
+        return active;
+    }
+
+    @Override
+    public void setIsActive(boolean active) {
+        this.active = active;
     }
 
     @Override
@@ -87,15 +97,14 @@ public class UserDTO implements Serializable, IUserDTO {
     }
 
     @Override
-    public void setAdmin(IUserDTO iUserDTO) {
-        this.admin = iUserDTO;
-    }
-
-    public boolean getIsActive() {
-        return active;
-    }
-
-    public void setIsActive(boolean active) {
-        this.active = active;
+    public String toString() {
+        if (!active){
+            return "User is deactivated! \nUserDTO [userId=" + userId + ", userName=" + userName + ", ini=" + ini + ", roles=" + roles + "]";
+        }
+        else if (admin.getUserId() == userId) {
+            return "UserDTO [userId=" + userId + ", userName=" + userName + ", ini=" + ini + ", roles=" + roles + ". Admin: Self]";
+        } else {
+            return "UserDTO [userId=" + userId + ", userName=" + userName + ", ini=" + ini + ", roles=" + roles + ". Admin: " + admin.getUserName() + ", userID: " + admin.getUserId() + "]";
+        }
     }
 }

@@ -25,9 +25,11 @@ public interface IUserDTO {
 
     IUserDTO getAdmin();
 
-    void setAdmin(IUserDTO iUserDTO);
+    void setAdmin(IUserDTO userDTO);
 
     void setIsActive(boolean active);
 
     boolean getIsActive();
 }
+
+

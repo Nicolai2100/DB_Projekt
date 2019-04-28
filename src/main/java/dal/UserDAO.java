@@ -5,7 +5,6 @@ import dal.dto.UserDTO;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class UserDAO implements IUserDAO {
@@ -15,17 +14,19 @@ public class UserDAO implements IUserDAO {
     }
 
     @Override
-    public void createUser(IUserDTO user) throws DALException {
+    public void createUser(IUserDTO admin, IUserDTO user) throws DALException {
         if (user.getUserId() < 1) {
             System.out.println("Error in userID!");
             return;
         }
-        if (!user.getRoles().contains("admin") && user.getAdmin() == null) {
+        //Brugeren må kun angives som argument for metodekaldet, hvis brugeren har "admin" som rolle
+        if (admin.equals(user) && !user.getRoles().contains("admin")) {
             System.out.println("Error in authorization!");
             System.out.println("Contact administrator!");
             return;
         }
-
+        user.setAdmin(admin);
+        String insertString = "INSERT INTO user VALUES(?,?,?,?,?);";
         try {
             conn.setAutoCommit(false);
             PreparedStatement pSmtInsertUser = conn.prepareStatement(
@@ -56,31 +57,29 @@ public class UserDAO implements IUserDAO {
 
     @Override
     public IUserDTO getUser(int userId) throws DALException {
+        String selectString = "SELECT * FROM user NATURAL JOIN userrole WHERE userid = ?;";
         boolean empty = true;
         IUserDTO returnUser = new UserDTO();
         try {
-            PreparedStatement pSmtSelectUser = conn.prepareStatement(
-                    "SELECT * FROM user " +
-                            "WHERE userid = ?;");
-
+            PreparedStatement pSmtSelectUser = conn.prepareStatement(selectString);
             pSmtSelectUser.setInt(1, userId);
             ResultSet rs = pSmtSelectUser.executeQuery();
+
             while (rs.next()) {
                 empty = false;
                 returnUser.setUserId(rs.getInt(1));
                 returnUser.setUserName(rs.getString(2));
                 returnUser.setIni(rs.getString(3));
                 returnUser.setIsActive(rs.getBoolean(4));
-
                 int adminId = rs.getInt(5);
+                returnUser.addRole(rs.getString(6));
                 IUserDTO admin;
-                if (adminId < 1) {
-                    admin = null;
+                if (returnUser.getUserId() == adminId) {
+                    returnUser.setAdmin(returnUser);
                 } else {
                     admin = getUser(adminId);
+                    returnUser.setAdmin(admin);
                 }
-                returnUser.setAdmin(admin);
-                returnUser.setRoles(getUserRoleList(userId));
             }
             if (empty) {
                 System.out.println("No such user in the database!");
@@ -104,13 +103,32 @@ public class UserDAO implements IUserDAO {
 
             while (rs.next()) {
                 returnUser = new UserDTO();
-                int userIDReturn = rs.getInt("userid");
-                returnUser.setUserId(userIDReturn);
-                returnUser.setUserName(rs.getString("name"));
-                returnUser.setIni(rs.getString("ini"));
-                userList.add(returnUser);
+                returnUser.setUserId(rs.getInt(1));
+                returnUser.setUserName(rs.getString(2));
+                returnUser.setIni(rs.getString(3));
+                returnUser.setIsActive(rs.getBoolean(4));
+                returnUser.setAdmin(getUser(rs.getInt(5)));
+                returnUser.addRole(rs.getString(6));
+
+                boolean duplicate = false;
+                for (IUserDTO user : userList) {
+                    if (user.getUserId() == returnUser.getUserId()) {
+                        duplicate = true;
+                    }
+                }
+                //Tilføjer roller til den allerede eksisterende bruger
+                if (duplicate) {
+                    for (IUserDTO user : userList) {
+                        if (user.getUserId() == returnUser.getUserId()) {
+                            if (!user.getRoles().contains(returnUser.getRoles().get(0)))
+                                user.addRole(returnUser.getRoles().get(0));
+                        }
+                    }
+                }
+                if (!duplicate) {
+                    userList.add(returnUser);
+                }
             }
-            getAllUsersRoles(userList);
         } catch (SQLException e) {
             System.out.println("Error " + e.getMessage());
         }
@@ -118,9 +136,9 @@ public class UserDAO implements IUserDAO {
     }
 
     @Override
-    public void updateUser(IUserDTO user) throws DALException {
+    public void updateUser(IUserDTO admin, IUserDTO user) throws DALException {
+        String updateUserString = "UPDATE user SET name = ?, ini = ? WHERE userid = ?; ";
         try {
-
             if (!peekUser(user.getUserId())) {
                 System.out.println("No such user in the database!");
             } else {
@@ -135,7 +153,6 @@ public class UserDAO implements IUserDAO {
                 pSmtUpdateUser.setString(2, user.getIni());
                 pSmtUpdateUser.setInt(3, user.getUserId());
                 pSmtUpdateUser.executeUpdate();
-
                 roleTransAct(user);
                 System.out.println("The user was successfully updated!");
                 conn.commit();
@@ -146,7 +163,7 @@ public class UserDAO implements IUserDAO {
     }
 
     @Override
-    public void deleteUser(int userId) throws DALException {
+    public void deleteUser(IUserDTO admin, int userId) throws DALException {
         int result;
         try {
             String deleteUserString = "DELETE FROM user WHERE userid = ?;";
@@ -166,41 +183,8 @@ public class UserDAO implements IUserDAO {
             } else {
                 System.out.println("Error no such user exists in the database!");
             }
-            //pSmtDeleteUser.close();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
-        }
-    }
-
-    /**
-     * Metoden henter en specifik brugers roller og returnerer dem i en liste.
-     */
-    public List<String> getUserRoleList(int userID) {
-        List<String> userRoleList = new ArrayList<>();
-        try {
-            String getUserRolesString = "SELECT role FROM userrole WHERE userid = ?;";
-            PreparedStatement pSmtSelectUserRoles = conn.prepareStatement(getUserRolesString);
-
-            pSmtSelectUserRoles.setInt(1, userID);
-            ResultSet rs = pSmtSelectUserRoles.executeQuery();
-            while (rs.next()) {
-                userRoleList.add(rs.getString("role"));
-            }
-            Collections.reverse(userRoleList);
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        return userRoleList;
-    }
-
-    /**
-     * Metoden henter og gemmer roller for alle brugere i en liste.
-     */
-    public void getAllUsersRoles(List<IUserDTO> userDTOList) {
-
-        for (IUserDTO user : userDTOList) {
-            List<String> userRoleList = getUserRoleList(user.getUserId());
-            user.setRoles(userRoleList);
         }
     }
 

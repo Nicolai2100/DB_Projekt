@@ -6,14 +6,14 @@ import java.util.List;
 
 public interface IUserDAO {
     //Create
-    void createUser(IUserDTO user) throws DALException;
+    void createUser(IUserDTO admin, IUserDTO user) throws DALException;
     //Read
     IUserDTO getUser(int userId) throws DALException;
     List<IUserDTO> getUserList() throws DALException;
     //Update
-    void updateUser(IUserDTO user) throws DALException;
+    void updateUser(IUserDTO admin, IUserDTO user) throws DALException;
     //Delete
-    void deleteUser(int userId) throws DALException;
+    void deleteUser(IUserDTO admin, int userId) throws DALException;
 
     public class DALException extends Exception {
         //Til Java serialisering...
