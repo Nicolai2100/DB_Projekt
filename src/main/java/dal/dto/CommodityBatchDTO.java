@@ -6,7 +6,6 @@ public class CommodityBatchDTO implements ICommodityBatchDTO {
     private IUserDTO orderedBy;
     private double amountInKg;
     private String orderDate;
-
     private boolean residue;
 
     public CommodityBatchDTO(){
