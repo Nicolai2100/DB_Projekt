@@ -51,7 +51,8 @@ public class ConnectionDAO {
     public void createTriggerOldRecipe() {
         try {
             String createTrigSaveDeletedString = "CREATE TRIGGER save_recipe_delete BEFORE DELETE ON recipe " +
-                    "FOR EACH ROW BEGIN INSERT INTO oldrecipe VALUES (old.recipeid, old.edition, old.name, " +
+                    "FOR EACH ROW BEGIN INSERT INTO oldrecipe VALUES " +
+                    "(old.recipeid, old.edition, old.name, " +
                     "old.madeby, old.ingredientlistid, NOW()); END;";
             PreparedStatement pstmtCreateTriggerSaveDeletedRecipe = conn.prepareStatement(createTrigSaveDeletedString);
             String createTrigUpdateDeletedString = "CREATE TRIGGER save_recipe_update BEFORE UPDATE ON recipe " +
@@ -69,9 +70,9 @@ public class ConnectionDAO {
 
     public void dropTriggers() {
         try {
-            PreparedStatement pstmtDropTriggerReorder = conn.prepareStatement(
+           /* PreparedStatement pstmtDropTriggerReorder = conn.prepareStatement(
                     "DROP TRIGGER IF EXISTS set_reorder;");
-
+*/
             PreparedStatement pstmtDropSaveRecipeDeleteTrigger = conn.prepareStatement(
                     "DROP TRIGGER IF EXISTS save_recipe_delete;");
 
@@ -80,7 +81,9 @@ public class ConnectionDAO {
             );
             pstmtDropSaveRecipeDeleteTrigger.execute();
             pstmtDropSaveRecipeUpdateTrigger.execute();
+/*
             pstmtDropTriggerReorder.execute();
+*/
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -178,11 +181,13 @@ public class ConnectionDAO {
 
             PreparedStatement createTableRecipe = conn.prepareStatement(
                     "CREATE TABLE IF NOT EXISTS recipe " +
-                            "(recipeid INT, " +
+                            "(recipeid INT AUTO_INCREMENT, " +
                             "edition INT, " +
                             "name VARCHAR(50), " +
                             "madeby INT, " +
                             "ingredientlistid INT, " +
+                            "in_use BIT, " +
+                            "last_used_date DATE, " +
                             "PRIMARY KEY (recipeid), " +
                             "FOREIGN KEY (ingredientlistid) " +
                             "REFERENCES ingredientlist (ingredientlistid), " +

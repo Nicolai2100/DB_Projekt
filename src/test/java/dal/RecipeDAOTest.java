@@ -4,8 +4,6 @@ import dal.dto.*;
 import org.junit.After;
 import org.junit.Test;
 
-import java.sql.Date;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,11 +36,11 @@ public class RecipeDAOTest {
    }
 
     @Test
-    public void deleteRecipe() throws IUserDAO.DALException {
+    public void archiveRecipe() throws IUserDAO.DALException {
         IUserDTO testUser = new UserDTO();
         testUser.addRole("farmaceut");
         testUser.setIsActive(true);
-        recipeDAO.deleteRecipe(2, testUser);
+        recipeDAO.archiveRecipe(2, testUser);
     }
 
     @Test

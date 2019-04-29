@@ -402,7 +402,7 @@ public class ProductBatchDAOTest {
          */
         //todo få testUser_2 til at oprette et product-batch
 
-//        recipeDAO.deleteRecipe(2, testUser_3);
+//        recipeDAO.archiveRecipe(2, testUser_3);
 
         //      oldRecipeDAO.getAllOldRecipes();
         createProduct();

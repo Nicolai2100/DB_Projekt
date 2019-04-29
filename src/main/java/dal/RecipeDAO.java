@@ -116,24 +116,24 @@ public class RecipeDAO {
         return recipeDTO;
     }
 
-    public void deleteRecipe(int recipeId, IUserDTO userDTO) {
+    public void archiveRecipe(int recipeId, IUserDTO userDTO) {
         if (!userDTO.getRoles().contains("farmaceut") || !userDTO.getIsActive()) {
             System.out.println("User not authorized to proceed!");
             return;
         }
         try {
-            String deleteRecipeString = "DELETE FROM recipe WHERE recipeid = ?;";
+            String deleteRecipeString = "UPDATE recipe SET in_use = 0 WHERE recipeid = ?;";
             PreparedStatement pstmtDeleteRecipe = conn.prepareStatement(deleteRecipeString);
             pstmtDeleteRecipe.setInt(1, recipeId);
             int result = pstmtDeleteRecipe.executeUpdate();
             if (result < 1) {
                 System.out.println("Error! No such recipe in the system!");
             } else {
-                System.out.println("The recipe with id: " + recipeId + " was successfully deleted.");
+                System.out.println("The recipe with id: " + recipeId + " was successfully archived.");
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            System.out.println("The recipe was not deleted.");
+            System.out.println("The recipe was not archived.");
         }
     }
 }

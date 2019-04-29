@@ -36,6 +36,11 @@ public class ConnectionDAOTest {
     }
 
     @Test
+    void dropTriggers() {
+        connectionDAO.dropTriggers();
+    }
+
+    @Test
     public void initializeItAll() throws IUserDAO.DALException {
         dropAllTables();
         initializeDataBase();
