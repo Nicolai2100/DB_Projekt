@@ -143,7 +143,7 @@ public class DALTest {
          * Der bestilles et råvare batch
          */
         ICommodityBatchDTO commodityBatch = new CommodityBatchDTO();
-        IUserDTO testUser = userDAO.getUser(2);
+        IUserDTO testUser = userDAO.getUser(1);
         commodityBatch.setOrderedBy(testUser);
         commodityBatch.setBatchId(2);
         commodityBatch.setAmountInKg(2.5);
