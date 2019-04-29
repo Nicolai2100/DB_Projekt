@@ -79,23 +79,25 @@ public class ConnectionDAO {
                             "UPDATE ingredient " +
                             "SET ingredient.minamountinmg = NEW.amountmg WHERE NEW.ingredientid = ingredient.ingredientid; " +
                         "ELSEIF NEW.amountmg < (SELECT min(minamountinmg) FROM ingredient, ingredientlist " +
-                            "WHERE ingredient.ingredientid = ingredientlist.ingredientid AND ingredient.ingredientid = NEW.ingredientid) THEN " +
+                            "WHERE ingredient.ingredientid = ingredientlist.ingredientid AND ingredient.ingredientid = NEW.ingredientid) " +
+                            "THEN " +
                             "UPDATE ingredient " +
                             "SET ingredient.minamountinmg = NEW.amountmg WHERE NEW.ingredientid = ingredient.ingredientid; " +
                         "END IF; " +
                     "END";
             String updatetrigger = "CREATE TRIGGER new_min_amount_check AFTER UPDATE ON ingredientlist FOR EACH ROW " +
                     "BEGIN " +
-                    "IF 0 = (SELECT min(minamountinmg) FROM ingredient, ingredientlist " +
-                    "WHERE ingredient.ingredientid = ingredientlist.ingredientid AND ingredient.ingredientid = NEW.ingredientid) " +
-                    "THEN " +
-                    "UPDATE ingredient " +
-                    "SET ingredient.minamountinmg = NEW.amountmg WHERE NEW.ingredientid = ingredient.ingredientid; " +
-                    "ELSEIF NEW.amountmg < (SELECT min(minamountinmg) FROM ingredient, ingredientlist " +
-                    "WHERE ingredient.ingredientid = ingredientlist.ingredientid AND ingredient.ingredientid = NEW.ingredientid) THEN " +
-                    "UPDATE ingredient " +
-                    "SET ingredient.minamountinmg = NEW.amountmg WHERE NEW.ingredientid = ingredient.ingredientid; " +
-                    "END IF; " +
+                        "IF 0 = (SELECT min(minamountinmg) FROM ingredient, ingredientlist " +
+                            "WHERE ingredient.ingredientid = ingredientlist.ingredientid AND ingredient.ingredientid = NEW.ingredientid) " +
+                            "THEN " +
+                            "UPDATE ingredient " +
+                            "SET ingredient.minamountinmg = NEW.amountmg WHERE NEW.ingredientid = ingredient.ingredientid; " +
+                        "ELSEIF NEW.amountmg < (SELECT min(minamountinmg) FROM ingredient, ingredientlist " +
+                            "WHERE ingredient.ingredientid = ingredientlist.ingredientid AND ingredient.ingredientid = NEW.ingredientid) " +
+                            "THEN " +
+                            "UPDATE ingredient " +
+                            "SET ingredient.minamountinmg = NEW.amountmg WHERE NEW.ingredientid = ingredient.ingredientid; " +
+                        "END IF; " +
                     "END";
 
             PreparedStatement preparedStatement1 = conn.prepareStatement(inserttrigger);
