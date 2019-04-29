@@ -134,6 +134,11 @@ public class ProductBatchDAO {
         }
     }
 
+    public void initiateProduction(ProductbatchDTO productbatch, UserDTO user){
+        productbatch.setBatchState(IProductDTO.State.UNDER_PRODUCTION);
+        updateProductBatch(productbatch, user);
+    }
+
     public void produceProductBatch(ProductbatchDTO productbatch, UserDTO user) {
         if (!user.getRoles().contains("laborant") && !user.getIsActive()) {
             System.out.println("User not authorized to proceed!");
