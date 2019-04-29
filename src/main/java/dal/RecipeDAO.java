@@ -77,13 +77,14 @@ public class RecipeDAO {
                 edition += returnEdition;
             }
             conn.setAutoCommit(false);
-            String insertRecipeString = "INSERT INTO recipe VALUES(?,?,?,?,?)";
+            String insertRecipeString = "INSERT INTO recipe (recipeid, edition, name, madeby, ingredientlistid, in_use) VALUES(?,?,?,?,?,?)";
             PreparedStatement pstmtInsertRecipe = conn.prepareStatement(insertRecipeString);
             pstmtInsertRecipe.setInt(1, recipeDTO.getRecipeId());
             pstmtInsertRecipe.setInt(2, edition);
             pstmtInsertRecipe.setString(3, recipeDTO.getName());
             pstmtInsertRecipe.setInt(4, recipeDTO.getMadeBy().getUserId());
             pstmtInsertRecipe.setInt(5, recipeDTO.getRecipeId());
+            pstmtInsertRecipe.setBoolean(6,true);
             //Opretter ingrediensliste
             ingredientListDAO.isIngredientListCreated(recipeDTO, edition);
             pstmtInsertRecipe.executeUpdate();

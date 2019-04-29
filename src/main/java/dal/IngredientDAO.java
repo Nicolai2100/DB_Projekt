@@ -25,7 +25,7 @@ public class IngredientDAO {
             pstmtInsertIngredient.setInt(1, ingredientDTO.getIngredientId());
             pstmtInsertIngredient.setString(2, ingredientDTO.getName());
             pstmtInsertIngredient.setString(3, ingredientDTO.getType());
-            pstmtInsertIngredient.setInt(4, ingredientDTO.getMinAmountMG());
+            pstmtInsertIngredient.setInt(4,0);
             pstmtInsertIngredient.setBoolean(5, true);
             pstmtInsertIngredient.executeUpdate();
             conn.commit();
