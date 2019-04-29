@@ -67,11 +67,11 @@ public class ConnectionDAO {
         }
     }
 
-    public void createTriggerNewMinamountCheck() throws SQLException {
+    public void createTriggerNewMinamountCheck() {
         try {
             conn.setAutoCommit(false);
 
-            String inserttrigger = "CREATE TRIGGER new_min_amount_check AFTER INSERT ON ingredientlist FOR EACH ROW " +
+            String inserttrigger = "CREATE TRIGGER new_min_amount_check_insert AFTER INSERT ON ingredientlist FOR EACH ROW " +
                     "BEGIN " +
                         "IF 0 = (SELECT min(minamountinmg) FROM ingredient, ingredientlist " +
                             "WHERE ingredient.ingredientid = ingredientlist.ingredientid AND ingredient.ingredientid = NEW.ingredientid) " +
@@ -85,7 +85,7 @@ public class ConnectionDAO {
                             "SET ingredient.minamountinmg = NEW.amountmg WHERE NEW.ingredientid = ingredient.ingredientid; " +
                         "END IF; " +
                     "END";
-            String updatetrigger = "CREATE TRIGGER new_min_amount_check AFTER UPDATE ON ingredientlist FOR EACH ROW " +
+            String updatetrigger = "CREATE TRIGGER new_min_amount_check_update AFTER UPDATE ON ingredientlist FOR EACH ROW " +
                     "BEGIN " +
                         "IF 0 = (SELECT min(minamountinmg) FROM ingredient, ingredientlist " +
                             "WHERE ingredient.ingredientid = ingredientlist.ingredientid AND ingredient.ingredientid = NEW.ingredientid) " +
