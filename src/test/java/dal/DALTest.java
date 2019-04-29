@@ -11,12 +11,13 @@ import java.util.List;
 
 public class DALTest {
     ConnectionDAO connectionDAO = new ConnectionDAO();
-    ProductBatchDAO productBatchDAO = new ProductBatchDAO();
     UserDAO userDAO = new UserDAO();
     IngredientDAO ingredientDAO = new IngredientDAO();
     IngredientListDAO ingredientListDAO = new IngredientListDAO(ingredientDAO);
     CommoditybatchDAO commoditybatchDAO = new CommoditybatchDAO(userDAO);
     RecipeDAO recipeDAO = new RecipeDAO(ingredientListDAO, userDAO);
+
+    ProductBatchDAO productBatchDAO = new ProductBatchDAO(recipeDAO, commoditybatchDAO);
     OldRecipeDAO oldRecipeDAO = recipeDAO.getOldRecipeDAO();
     UserDAOTest userDAOTest = new UserDAOTest();
 
@@ -69,6 +70,32 @@ public class DALTest {
         testUser_2.setIni("PL");
         testUser_2.addRole("farmaceut");
         userDAO.createUser(testUser_1, testUser_2);
+        testUser_2.setUserName("Pelle Hansen");
+        testUser_2.setIni("PH");
+        ArrayList<String> roles2 = new ArrayList();
+        roles2.add("admin");
+        roles2.add("productionleader");
+        testUser_2.setRoles(roles2);
+        testUser_2.setIsActive(true);
+        userDAO.createUser(testUser_1, testUser_2);
+
+        UserDTO testUser_3 = new UserDTO();
+        testUser_3.setUserId(3);
+        testUser_3.setUserName("Puk Larsen");
+        testUser_3.setIni("PL");
+        testUser_3.addRole("farmaceut");
+        testUser_3.setAdmin(userDAO.getUser(2));
+        testUser_3.setIsActive(true);
+        userDAO.createUser(testUser_1, testUser_3);
+
+        UserDTO testUser_4 = new UserDTO();
+        testUser_4.setUserId(4);
+        testUser_4.setUserName("John Peder");
+        testUser_4.setIni("JP");
+        testUser_4.addRole("laborant");
+        testUser_4.setAdmin(userDAO.getUser(2));
+        testUser_4.setIsActive(true);
+        userDAO.createUser(testUser_1, testUser_4);
         /**
          * Ingredienser og opskrift oprettes
          */
@@ -189,6 +216,7 @@ public class DALTest {
         productbatchDTO.setVolume(100);
         productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(2));
         productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(3));
+        productbatchDTO.setProducedBy(testUser_4);
 
         productbatchDTO.setBatchState(IProductDTO.State.UNDER_PRODUCTION);
 
@@ -196,7 +224,7 @@ public class DALTest {
 
         productbatchDTO.setName("Amfetamin");
 
-        productBatchDAO.updateProductBatch(productbatchDTO);
+        productBatchDAO.updateProductBatch(productbatchDTO, testUser_4);
 
         System.out.println("Read product succesful:" + productBatchDAO.getProductbatch(1).toString());
 

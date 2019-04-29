@@ -12,12 +12,13 @@ import java.util.List;
 
 public class ProductBatchDAOTest {
     ConnectionDAO connectionDAO = new ConnectionDAO();
-    ProductBatchDAO productBatchDAO = new ProductBatchDAO();
     UserDAO userDAO = new UserDAO();
     IngredientDAO ingredientDAO = new IngredientDAO();
     IngredientListDAO ingredientListDAO = new IngredientListDAO(ingredientDAO);
     CommoditybatchDAO commoditybatchDAO = new CommoditybatchDAO(userDAO);
     RecipeDAO recipeDAO = new RecipeDAO(ingredientListDAO, userDAO);
+
+    ProductBatchDAO productBatchDAO = new ProductBatchDAO(recipeDAO,commoditybatchDAO);
     OldRecipeDAO oldRecipeDAO = recipeDAO.getOldRecipeDAO();
     UserDAOTest userDAOTest = new UserDAOTest();
 
