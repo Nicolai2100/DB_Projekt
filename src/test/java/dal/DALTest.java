@@ -279,20 +279,46 @@ public class DALTest {
         ICommodityBatchDTO commodityBatch = new CommodityBatchDTO();
         IUserDTO testUser = userDAO.getUser(1);
         commodityBatch.setOrderedBy(testUser);
-        commodityBatch.setBatchId(2);
+        commodityBatch.setBatchId(4);
         commodityBatch.setAmountInKg(2.5);
-        commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(2));
+        commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(4));
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
 
         commoditybatchDAO.createCommodityBatch(commodityBatch);
         commodityBatch.setOrderedBy(testUser);
-        commodityBatch.setBatchId(3);
+        commodityBatch.setBatchId(12);
         commodityBatch.setAmountInKg(2.5);
-        commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(2));
+        commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(12));
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
 
         commoditybatchDAO.createCommodityBatch(commodityBatch);
+        commodityBatch.setOrderedBy(testUser);
+        commodityBatch.setBatchId(13);
+        commodityBatch.setAmountInKg(2.5);
+        commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(13));
+        commodityBatch.setOrderDate(LocalDateTime.now().toString());
 
+        commoditybatchDAO.createCommodityBatch(commodityBatch);
+        commodityBatch.setOrderedBy(testUser);
+        commodityBatch.setBatchId(14);
+        commodityBatch.setAmountInKg(2.5);
+        commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(14));
+        commodityBatch.setOrderDate(LocalDateTime.now().toString());
+
+        commoditybatchDAO.createCommodityBatch(commodityBatch);
+        commodityBatch.setOrderedBy(testUser);
+        commodityBatch.setBatchId(15);
+        commodityBatch.setAmountInKg(2.5);
+        commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(15));
+        commodityBatch.setOrderDate(LocalDateTime.now().toString());
+
+        commoditybatchDAO.createCommodityBatch(commodityBatch);
+        commodityBatch.setOrderedBy(testUser);
+        commodityBatch.setBatchId(16);
+        commodityBatch.setAmountInKg(2.5);
+        commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(16));
+        commodityBatch.setOrderDate(LocalDateTime.now().toString());
+        commoditybatchDAO.createCommodityBatch(commodityBatch);
         /**
          * Liste over råvarer der skal bestilles
          */
@@ -320,9 +346,13 @@ public class DALTest {
         productbatchDTO.setRecipe(2);
         productbatchDTO.setProductionDate(new Date(System.currentTimeMillis()));
         productbatchDTO.setExpirationDate(new Date(System.currentTimeMillis()));
-        productbatchDTO.setVolume(100);
-        productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(2));
-        productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(3));
+        productbatchDTO.setVolume(10000);
+        productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(4));
+        productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(12));
+        productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(13));
+        productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(14));
+        productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(15));
+        productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(16));
         productbatchDTO.setProducedBy(testUser_4);
 
         productbatchDTO.setBatchState(IProductDTO.State.UNDER_PRODUCTION);
@@ -331,7 +361,7 @@ public class DALTest {
 
         productbatchDTO.setName("Amfetamin");
 
-        productBatchDAO.updateProductBatch(productbatchDTO, testUser_4);
+        productBatchDAO.produceProductBatch(productbatchDTO, testUser_4);
 
         System.out.println("Read product succesful:" + productBatchDAO.getProductbatch(1).toString());
 

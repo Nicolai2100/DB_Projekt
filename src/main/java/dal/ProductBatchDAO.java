@@ -144,9 +144,17 @@ public class ProductBatchDAO {
         productbatch.setBatchState(IProductDTO.State.COMPLETED);
         productbatch.setProductionDate(new Date(System.currentTimeMillis()));
 
+
         for (IIngredientDTO i : recipeDAO.getRecipe(productbatch.getRecipe()).getIngredientsList()) {
             ICommodityBatchDTO commoditybatch = commoditybatchDAO.getCommodityBatch(i.getIngredientId());
-            commoditybatch.setAmountInKg(commoditybatch.getAmountInKg() - i.getAmount() * productbatch.getVolume());
+            double newamount = (commoditybatch.getAmountInKg() - i.getAmount()/1000000*productbatch.getVolume());
+            System.out.println(newamount);
+            commoditybatch.setAmountInKg(newamount);
+            try {
+                commoditybatchDAO.updateCommodityBatch(commoditybatch);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
 
 
