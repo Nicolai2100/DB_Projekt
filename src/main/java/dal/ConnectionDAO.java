@@ -68,6 +68,56 @@ public class ConnectionDAO {
         }
     }
 
+    /**
+     * Creates triggers that constantly update the minimum required amount af a given raw material (commodity)
+     * in the recipe that uses the smallest amount. The triggers activate every time a row is inserted or deleted in the
+     * ingredientlist-table.
+     */
+    public void createTriggerNewMinamountCheck() {
+        try {
+            conn.setAutoCommit(false);
+
+            String inserttrigger = "CREATE TRIGGER new_min_amount_check_insert AFTER INSERT ON ingredientlist FOR EACH ROW " +
+                    "BEGIN " +
+                        "IF 0 = (SELECT min(minamountinmg) FROM ingredient, ingredientlist " +
+                            "WHERE ingredient.ingredientid = ingredientlist.ingredientid AND ingredient.ingredientid = NEW.ingredientid) " +
+                            "THEN " +
+                            "UPDATE ingredient " +
+                            "SET ingredient.minamountinmg = NEW.amountmg WHERE NEW.ingredientid = ingredient.ingredientid; " +
+                        "ELSEIF NEW.amountmg < (SELECT min(minamountinmg) FROM ingredient, ingredientlist " +
+                            "WHERE ingredient.ingredientid = ingredientlist.ingredientid AND ingredient.ingredientid = NEW.ingredientid) " +
+                            "THEN " +
+                            "UPDATE ingredient " +
+                            "SET ingredient.minamountinmg = NEW.amountmg WHERE NEW.ingredientid = ingredient.ingredientid; " +
+                        "END IF; " +
+                    "END";
+            String updatetrigger = "CREATE TRIGGER new_min_amount_check_update AFTER UPDATE ON ingredientlist FOR EACH ROW " +
+                    "BEGIN " +
+                        "IF 0 = (SELECT min(minamountinmg) FROM ingredient, ingredientlist " +
+                            "WHERE ingredient.ingredientid = ingredientlist.ingredientid AND ingredient.ingredientid = NEW.ingredientid) " +
+                            "THEN " +
+                            "UPDATE ingredient " +
+                            "SET ingredient.minamountinmg = NEW.amountmg WHERE NEW.ingredientid = ingredient.ingredientid; " +
+                        "ELSEIF NEW.amountmg < (SELECT min(minamountinmg) FROM ingredient, ingredientlist " +
+                            "WHERE ingredient.ingredientid = ingredientlist.ingredientid AND ingredient.ingredientid = NEW.ingredientid) " +
+                            "THEN " +
+                            "UPDATE ingredient " +
+                            "SET ingredient.minamountinmg = NEW.amountmg WHERE NEW.ingredientid = ingredient.ingredientid; " +
+                        "END IF; " +
+                    "END";
+
+            PreparedStatement preparedStatement1 = conn.prepareStatement(inserttrigger);
+            PreparedStatement preparedStatement2 = conn.prepareStatement(updatetrigger);
+            preparedStatement1.execute();
+            preparedStatement2.execute();
+            conn.commit();
+            conn.setAutoCommit(true);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void dropTriggers() {
         try {
            /* PreparedStatement pstmtDropTriggerReorder = conn.prepareStatement(

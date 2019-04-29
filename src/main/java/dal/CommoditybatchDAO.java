@@ -75,4 +75,46 @@ public class CommoditybatchDAO {
         }
         return commodityBatch;
     }
+
+    public void deleteCommodityBatch (int commodityBatchId) throws SQLException {
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement preparedStatement = conn.prepareStatement(
+                    "DELETE FROM commoditybatch WHERE commoditybatchid=?"
+            );
+            preparedStatement.setInt(1, commodityBatchId);
+
+            preparedStatement.executeUpdate();
+            conn.commit();
+            conn.setAutoCommit(true);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updateCommodityBatch (ICommodityBatchDTO commodityBatch) throws SQLException {
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement preparedStatement = conn.prepareStatement(
+                    "UPDATE commoditybatch " +
+                            "SET commoditybatchid=?, ingredientid=?, orderedby=?, amountinkg=?, orderdate=?, residue=? " +
+                            "WHERE commoditybatchid=?"
+            );
+            preparedStatement.setInt(1, commodityBatch.getBatchId());
+            preparedStatement.setInt(2, commodityBatch.getIngredientDTO().getIngredientId());
+            preparedStatement.setInt(3, commodityBatch.getOrderedBy().getUserId());
+            preparedStatement.setDouble(4, commodityBatch.getAmountInKg()); //TODO er sat til int i databasen
+            preparedStatement.setString(5, commodityBatch.getOrderDate());
+            preparedStatement.setBoolean(6, commodityBatch.isResidue());
+            preparedStatement.setInt(7, commodityBatch.getBatchId());
+
+            preparedStatement.executeUpdate();
+            conn.commit();
+            conn.setAutoCommit(true);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

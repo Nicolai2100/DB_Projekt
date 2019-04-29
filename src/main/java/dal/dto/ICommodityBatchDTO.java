@@ -17,10 +17,13 @@ public interface ICommodityBatchDTO {
     String getOrderDate();
 
     void setOrderDate(String orderData);
-    //User
+
     IUserDTO getOrderedBy();
 
     void setOrderedBy(IUserDTO userDTO);
 
+    boolean isResidue();
+
+    void setResidue(boolean status);
 
 }
