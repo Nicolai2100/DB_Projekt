@@ -37,6 +37,10 @@ public interface IProductDTO {
 
     void setMadeBy(UserDTO madeBy);
 
+    UserDTO getProducedBy();
+
+    void setProducedBy(UserDTO producedBy);
+
     void setBatchState(State state);
 
     String getBatchState();

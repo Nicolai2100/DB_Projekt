@@ -8,9 +8,13 @@ import java.util.List;
 
 public class ProductBatchDAO {
     private Connection conn;
+    private RecipeDAO recipeDAO;
+    private CommoditybatchDAO commoditybatchDAO;
 
-    public ProductBatchDAO() {
+    public ProductBatchDAO(RecipeDAO recipeDAO, CommoditybatchDAO commoditybatchDAO) {
         this.conn = ConnectionDAO.getConnection();
+        this.commoditybatchDAO = commoditybatchDAO;
+        this.recipeDAO = recipeDAO;
     }
 
     /*Systemet skal således understøtte
@@ -32,7 +36,7 @@ public class ProductBatchDAO {
 
             PreparedStatement pstmtInsertProduct = conn.prepareStatement(
                     "INSERT INTO productbatch " +
-                            "VALUES(?,?,?,?,?,?,?,?)");
+                            "VALUES(?,?,?,?,?,?,?,?,?)");
 
 
             pstmtInsertProduct.setInt(1, productbatch.getProductId());
@@ -43,6 +47,7 @@ public class ProductBatchDAO {
             pstmtInsertProduct.setInt(6, productbatch.getVolume());
             pstmtInsertProduct.setDate(7, productbatch.getExpirationDate());
             pstmtInsertProduct.setString(8, productbatch.getBatchState());
+            pstmtInsertProduct.setInt(9, productbatch.getProducedBy().getUserId());
             pstmtInsertProduct.executeUpdate();
 
 
@@ -93,7 +98,12 @@ public class ProductBatchDAO {
         return productbatchDTO;
     }
 
-    public void updateProductBatch(ProductbatchDTO productbatch) {
+    public void updateProductBatch(ProductbatchDTO productbatch, UserDTO user) {
+        if ((!user.getRoles().contains("laborant") || !user.getRoles().contains("productionleader")) && !user.getIsActive()) {
+            System.out.println("User not authorized to proceed!");
+            return;
+        }
+
         try {
             conn.setAutoCommit(false);
             PreparedStatement pstmtDeleteRelations = conn.prepareStatement(
@@ -102,7 +112,7 @@ public class ProductBatchDAO {
             pstmtDeleteRelations.executeUpdate();
 
             PreparedStatement pstmtUpdateProduct = conn.prepareStatement(
-                    "UPDATE productbatch SET name = ?, madeby = ?, recipe = ?, production_date = ?, volume = ?, expiration_date = ?, batch_state = ? WHERE productbatchid = ?");
+                    "UPDATE productbatch SET name = ?, madeby = ?, recipe = ?, production_date = ?, volume = ?, expiration_date = ?, batch_state = ?, producedby = ? WHERE productbatchid = ?");
 
             pstmtUpdateProduct.setString(1, productbatch.getName());
             pstmtUpdateProduct.setInt(2, productbatch.getMadeBy().getUserId());
@@ -112,15 +122,35 @@ public class ProductBatchDAO {
             pstmtUpdateProduct.setDate(6, productbatch.getExpirationDate());
             pstmtUpdateProduct.setString(7, productbatch.getBatchState());
             pstmtUpdateProduct.setInt(8, productbatch.getProductId());
+            pstmtUpdateProduct.setInt(9, productbatch.getProducedBy().getUserId());
 
             pstmtUpdateProduct.executeUpdate();
 
             createRelations(productbatch.getCommodityBatches(), productbatch.getProductId());
             conn.commit();
-
+            System.out.println("The product was successfully updated.");
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public void produceProductBatch(ProductbatchDTO productbatch, UserDTO user) {
+        if (!user.getRoles().contains("laborant") && !user.getIsActive()) {
+            System.out.println("User not authorized to proceed!");
+            return;
+        }
+
+        productbatch.setProducedBy(user);
+        productbatch.setBatchState(IProductDTO.State.COMPLETED);
+        productbatch.setProductionDate(new Date(System.currentTimeMillis()));
+
+        for (IIngredientDTO i : recipeDAO.getRecipe(productbatch.getRecipe()).getIngredientsList()) {
+            ICommodityBatchDTO commoditybatch = commoditybatchDAO.getCommodityBatch(i.getIngredientId());
+            commoditybatch.setAmountInKg(commoditybatch.getAmountInKg() - i.getAmount() * productbatch.getVolume());
+        }
+
+
+        updateProductBatch(productbatch, user);
     }
 
     private void createRelations(List<ICommodityBatchDTO> commodityBatchList, int productbatchId) throws SQLException {
