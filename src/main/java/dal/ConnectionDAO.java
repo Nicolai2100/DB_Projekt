@@ -67,6 +67,11 @@ public class ConnectionDAO {
         }
     }
 
+    /**
+     * Creates triggers that constantly update the minimum required amount af a given raw material (commodity)
+     * in the recipe that uses the smallest amount. The triggers activate every time a row is inserted or deleted in the
+     * ingredientlist-table.
+     */
     public void createTriggerNewMinamountCheck() {
         try {
             conn.setAutoCommit(false);
