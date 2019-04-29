@@ -3,10 +3,11 @@ package dal.dto;
 public class CommodityBatchDTO implements ICommodityBatchDTO {
     private int batchId;
     private IIngredientDTO ingredientDTO;
+    private IUserDTO orderedBy;
     private double amountInKg;
     private String orderDate;
-    //User
-    private IUserDTO orderedBy;
+
+    private boolean residue;
 
     public CommodityBatchDTO(){
     }
@@ -66,5 +67,14 @@ public class CommodityBatchDTO implements ICommodityBatchDTO {
     @Override
     public void setOrderedBy(IUserDTO userDTO) {
         this.orderedBy = userDTO;
+    }
+
+    public boolean isResidue() {
+        return residue;
+    }
+
+    @Override
+    public void setResidue(boolean residue) {
+        this.residue = residue;
     }
 }
