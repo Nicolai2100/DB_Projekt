@@ -27,64 +27,6 @@ public class ConnectionDAO implements IConnectionDAO{
     }
 
     @Override
-    public void closeConn() throws DALException {
-        try {
-            conn.close();
-        } catch (SQLException e) {
-            throw new DALException("An error occurred in the database at ConnectionDAO.");
-        }
-    }
-
-    @Override
-    public void deleteTables() throws DALException {
-        try {
-            PreparedStatement pstmtDeleteProductbatchCommodityRelation = conn.prepareStatement("delete from productbatch_commodity_relationship;");
-            PreparedStatement pstmtDeleteCommodityBatch = conn.prepareStatement("delete from commoditybatch;");
-            PreparedStatement pstmtDeleteProductbatch = conn.prepareStatement("delete from productbatch;");
-            PreparedStatement pstmtDeleteRecipe = conn.prepareStatement("delete from recipe;");
-            PreparedStatement pstmtDeleteIngredientLists = conn.prepareStatement("delete from ingredientlist;");
-            PreparedStatement pstmtDeleteIngredients = conn.prepareStatement("delete from ingredient;");
-            PreparedStatement pstmtDeleteUsers = conn.prepareStatement("delete from user;");
-
-            pstmtDeleteProductbatchCommodityRelation.execute();
-            pstmtDeleteProductbatch.execute();
-            pstmtDeleteCommodityBatch.execute();
-            pstmtDeleteRecipe.execute();
-            pstmtDeleteIngredientLists.execute();
-            pstmtDeleteIngredients.execute();
-
-            deleteUsers();
-
-            pstmtDeleteUsers.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new DALException("An error occurred in the database at ConnectionDAO.");
-        }
-    }
-
-    @Override
-    public void deleteUsers() throws DALException {
-        String deleteUserString = "DELETE FROM user WHERE userid = ?;";
-        try {
-            PreparedStatement deleteNonAdmins = conn.prepareStatement(deleteUserString);
-
-            for (IUserDTO user : userDAO.getUserList()) {
-                if (user.getUserId() != user.getAdmin().getUserId()){
-                    deleteNonAdmins.setInt(1,user.getUserId());
-                    deleteNonAdmins.executeUpdate();
-                }
-            }
-        } catch (SQLException e) {
-            throw new DALException("An error occurred in the database at ConnectionDAO.");
-        }
-    }
-
-    @Override
-    public void createTriggers() throws DALException {
-
-    }
-
-    @Override
     public void initializeDataBase() throws DALException {
         try {
             conn.setAutoCommit(false);
@@ -135,7 +77,7 @@ public class ConnectionDAO implements IConnectionDAO{
                             "madeby INT, " +
                             "ingredientlistid INT, " +
                             "in_use BIT, " +
-                            "last_used_date DATE, " +
+                            "last_used_date DATETIME, " +
                             "minbatchsize int, " +
                             "PRIMARY KEY (recipeid), " +
                             "FOREIGN KEY (ingredientlistid) " +
@@ -201,6 +143,89 @@ public class ConnectionDAO implements IConnectionDAO{
         }
     }
 
+    @Override
+    public void closeConn() throws DALException {
+        try {
+            conn.close();
+        } catch (SQLException e) {
+            throw new DALException("An error occurred in the database at ConnectionDAO.");
+        }
+    }
+
+    @Override
+    public void deleteTables() throws DALException {
+        try {
+            PreparedStatement pstmtDeleteProductbatchCommodityRelation = conn.prepareStatement("delete from productbatch_commodity_relationship;");
+            PreparedStatement pstmtDeleteCommodityBatch = conn.prepareStatement("delete from commoditybatch;");
+            PreparedStatement pstmtDeleteProductbatch = conn.prepareStatement("delete from productbatch;");
+            PreparedStatement pstmtDeleteRecipe = conn.prepareStatement("delete from recipe;");
+            PreparedStatement pstmtDeleteIngredientLists = conn.prepareStatement("delete from ingredientlist;");
+            PreparedStatement pstmtDeleteIngredients = conn.prepareStatement("delete from ingredient;");
+            PreparedStatement pstmtDeleteUsers = conn.prepareStatement("delete from user;");
+
+            pstmtDeleteProductbatchCommodityRelation.execute();
+            pstmtDeleteProductbatch.execute();
+            pstmtDeleteCommodityBatch.execute();
+            pstmtDeleteRecipe.execute();
+            pstmtDeleteIngredientLists.execute();
+            pstmtDeleteIngredients.execute();
+
+            deleteUsers();
+
+            pstmtDeleteUsers.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DALException("An error occurred in the database at ConnectionDAO.");
+        }
+    }
+
+    @Override
+    public void deleteUsers() throws DALException {
+        String deleteUserString = "DELETE FROM user WHERE userid = ?;";
+        try {
+            PreparedStatement deleteNonAdmins = conn.prepareStatement(deleteUserString);
+
+            for (IUserDTO user : userDAO.getUserList()) {
+                if (user.getUserId() != user.getAdmin().getUserId()){
+                    deleteNonAdmins.setInt(1,user.getUserId());
+                    deleteNonAdmins.executeUpdate();
+                }
+            }
+        } catch (SQLException e) {
+            throw new DALException("An error occurred in the database at ConnectionDAO.");
+        }
+    }
+
+    @Override
+    public void createTriggers() throws DALException {
+
+    }
+
+   /* public void createTriggerArchiveRecipe() throws DALException {
+        try {
+            String createTrigSaveDeletedString = "CREATE TRIGGER save_recipe_delete AFTER DELETE ON recipe " +
+                    "FOR EACH ROW " +
+                    "BEGIN " +
+                    "INSERT INTO recipe VALUES " +
+                    "(old.recipeid, old.edition, old.name, " +
+                    "old.madeby, old.ingredientlistid, 0, NOW(), old.minbatchsize); " +
+                    "END;";
+            PreparedStatement pstmtCreateTriggerSaveDeletedRecipe = conn.prepareStatement(createTrigSaveDeletedString);
+            String createTrigUpdateDeletedString = "CREATE TRIGGER save_recipe_update AFTER UPDATE ON recipe " +
+                    "FOR EACH ROW " +
+                    "BEGIN " +
+                    "INSERT INTO recipe VALUES (old.recipeid, old.edition, " +
+                    "old.name, old.madeby, old.ingredientlistid, 0, NOW(), old.minbatchsize); " +
+                    "END;";
+            PreparedStatement pstmtCreateTriggerSaveUpdatedRecipe = conn.prepareStatement(createTrigUpdateDeletedString);
+            pstmtCreateTriggerSaveUpdatedRecipe.execute();
+            pstmtCreateTriggerSaveDeletedRecipe.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DALException("An error occurred in the database at ConnectionDAO.");
+        }
+    }
+*/
     public void dropAllTables(int deleteTable) throws DALException {
         try {
             PreparedStatement dropTableUser = conn.prepareStatement(

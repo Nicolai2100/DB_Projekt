@@ -7,8 +7,6 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-
 public class RecipeDAOTest {
     ConnectionDAO connectionDAO = new ConnectionDAO();
     UserDAO userDAO = new UserDAO();
@@ -48,8 +46,8 @@ public class RecipeDAOTest {
 
     @Test
     public void updateRecipe() throws DALException {
-        IRecipeDTO recipeDTO = recipeDAO.getRecipe(2);
-        recipeDTO.setName("snillert");
+        IRecipeDTO recipeDTO = recipeDAO.getRecipe(3);
+        recipeDTO.setName("Opdateret 2 " + recipeDTO.getName());
         recipeDAO.updateRecipe(recipeDTO);
     }
 

@@ -41,4 +41,9 @@ public class ConnectionDAOTest {
     public void deleteFromAllTables() throws DALException {
         connectionDAO.deleteTables();
     }
+
+    @Test
+    void createTriggers() throws DALException {
+        connectionDAO.createTriggers();
+    }
 }

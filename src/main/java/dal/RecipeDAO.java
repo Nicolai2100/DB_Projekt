@@ -88,7 +88,7 @@ public class RecipeDAO implements IRecipeDAO{
             return;
         }
         try {
-            conn.setAutoCommit(false);
+            conn.setAutoCommit(true);
             String selectEditionString = "SELECT edition FROM recipe WHERE recipeid = ?;";
             PreparedStatement pstmtGetEdition = conn.prepareStatement(selectEditionString);
             pstmtGetEdition.setInt(1, recipeDTO.getRecipeId());
@@ -97,18 +97,19 @@ public class RecipeDAO implements IRecipeDAO{
             if (rs.next()) {
                 edition += rs.getInt(1);
             }
-            String uddateRecipeString = "UPDATE recipe SET edition = ?, name = ?, madeby = ?;";
-            PreparedStatement pstmtUpdateRecipe = conn.prepareStatement(uddateRecipeString);
-
+            String updateRecipeString = "UPDATE recipe SET edition = ?, name = ?, madeby = ? WHERE recipeid = ?;";
+            PreparedStatement pstmtUpdateRecipe = conn.prepareStatement(updateRecipeString);
             pstmtUpdateRecipe.setInt(1, edition);
             pstmtUpdateRecipe.setString(2, recipeDTO.getName());
             pstmtUpdateRecipe.setInt(3, recipeDTO.getMadeBy().getUserId());
+            pstmtUpdateRecipe.setInt(4,recipeDTO.getRecipeId());
 
             pstmtUpdateRecipe.executeUpdate();
             //Hver liste af ingredienser bliver oprettet med opskriftens id som id... !?
             ingredientListDAO.updateIngredientList(recipeDTO, edition);
             conn.commit();
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new DALException("An error occurred in the database at RecipeDAO.");
         }
     }
