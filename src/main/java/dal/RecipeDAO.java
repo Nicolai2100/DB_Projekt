@@ -1,6 +1,5 @@
 package dal;
 
-import dal.dto.IIngredientDTO;
 import dal.dto.IRecipeDTO;
 import dal.dto.IUserDTO;
 import dal.dto.RecipeDTO;
@@ -56,6 +55,9 @@ public class RecipeDAO {
             //Hver liste af ingredienser bliver oprettet med opskriftens id som id... !?
             ingredientListDAO.updateIngredientList(recipeDTO, edition);
             conn.commit();
+
+            updateMinAmounts();
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -93,6 +95,9 @@ public class RecipeDAO {
             pstmtInsertRecipe.executeUpdate();
             conn.commit();
             System.out.println("The recipe was successfully created.");
+
+            updateMinAmounts();
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -135,20 +140,51 @@ public class RecipeDAO {
             } else {
                 System.out.println("The recipe with id: " + recipeId + " was successfully archived.");
             }
+
+            updateMinAmounts();
+
         } catch (SQLException e) {
             e.printStackTrace();
             System.out.println("The recipe was not archived.");
         }
     }
 
-    private void updateMinAmount (IRecipeDTO recipe) {
+    private void updateMinAmounts() throws SQLException {
 
+        try {
+            conn.setAutoCommit(false);
 
-        for (IIngredientDTO ingredient : recipe.getIngredientsList()) {
-            PreparedStatement preparedStatement = conn.prepareStatement(
-                    ""
-            )
-            //ingredientlist.amountmg * recipe.minbatchsize
+            //Dette query returnerer ingredientid, mindste mængde forekommende(ingrediens) og minimumamount
+            PreparedStatement preparedStatementAmounts = conn.prepareStatement(
+                    "SELECT ingredientlist.ingredientid, min(amountmg*minbatchsize) AS amount, minamountinmg " +
+                            "FROM ingredientlist JOIN recipe ON ingredientlist.ingredientlistid = recipe.ingredientlistid " +
+                            "JOIN ingredient ON ingredient.ingredientid = ingredientlist.ingredientid WHERE in_use = 1 " +
+                            "GROUP BY ingredientid ASC"
+            );
+
+            ResultSet resultSet = preparedStatementAmounts.executeQuery();
+
+            while (resultSet.next()) {
+                if (resultSet.getDouble("amount") < resultSet.getDouble("minamountinmg")) {
+                    PreparedStatement preparedStatementNewMin = conn.prepareStatement(
+                            "UPDATE ingredient " +
+                                    "SET minamountinmg = ? " +
+                                    "WHERE ingredientid = ?"
+                    );
+                    preparedStatementNewMin.setInt(1, resultSet.getInt("amount"));
+                    preparedStatementNewMin.setInt(2, resultSet.getInt("ingredientid"));
+
+                    preparedStatementNewMin.executeUpdate();
+
+                }
+            }
+
+            conn.commit();
+            conn.setAutoCommit(true);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+
     }
 }

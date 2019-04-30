@@ -114,7 +114,7 @@ public class CommoditybatchDAO {
             preparedStatementUpdate.executeUpdate();
             conn.commit();
 
-            if (checkForReorder(commodityBatch)) {
+            if (checkForReorder(commodityBatch)) { //TODO Skal egentlig køre for alle batches
                 PreparedStatement preparedStatementReorder = conn.prepareStatement(
                         "UPDATE ingredient " +
                                 "SET reorder=1, " +
@@ -123,16 +123,6 @@ public class CommoditybatchDAO {
                 preparedStatementReorder.setInt(1, commodityBatch.getIngredientDTO().getIngredientId());
 
                 preparedStatementReorder.executeUpdate();
-                conn.commit(); //TODO ikke atomic, men kan det nogensinde blive det?
-            }
-
-            if (checkIsResidue(commodityBatch)) {
-                PreparedStatement preparedStatementResidue = conn.prepareStatement(
-                        "UPDATE commoditybatch " +
-                                "SET residue=?, " +
-                                "WHERE ingredientid=?"
-                );
-                preparedStatementResidue.setInt(1, commodityBatch.getIngredientDTO().getIngredientId());
                 conn.commit(); //TODO ikke atomic, men kan det nogensinde blive det?
             }
 
@@ -209,7 +199,7 @@ public class CommoditybatchDAO {
                     "SELECT amountmg, minbatchsize " +
                             "FROM ingredientlist, recipe " +
                             "WHERE ingredientlist.ingredientlistid = recipe.ingredientlistid " +
-                            "AND ingredientlist.ingredientlistid = ?;"
+                            "AND ingredientlist.ingredientid = ?;"
             );
             preparedStatement.setInt(1, commodityBatch.getIngredientDTO().getIngredientId());
 
@@ -231,29 +221,4 @@ public class CommoditybatchDAO {
 
         return reorder;
     }
-
-    private boolean checkIsResidue (ICommodityBatchDTO commodityBatch) throws IUserDAO.DALException {
-        boolean isResidue = false;
-
-        try {
-            PreparedStatement preparedStatement = conn.prepareStatement(
-                    "SELECT residue " +
-                            "FROM commoditybatch " +
-                            "WHERE ingredientid = ?"
-            );
-            preparedStatement.setInt(1, commodityBatch.getIngredientDTO().getIngredientId());
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            resultSet.next();
-
-            if (resultSet.getBoolean("residue")) {
-                isResidue = true;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return isResidue;
-    }
-
 }
