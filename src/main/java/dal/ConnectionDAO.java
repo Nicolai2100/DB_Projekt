@@ -71,15 +71,15 @@ public class ConnectionDAO implements IConnectionDAO{
 
             PreparedStatement createTableRecipe = conn.prepareStatement(
                     "CREATE TABLE IF NOT EXISTS recipe " +
-                            "(recipeid INT AUTO_INCREMENT, " +
-                            "edition INT, " +
+                            "(recipeid INT, " +
+                            "version INT, " +
                             "name VARCHAR(50), " +
                             "madeby INT, " +
                             "ingredientlistid INT, " +
                             "in_use BIT, " +
                             "last_used_date DATETIME, " +
                             "minbatchsize int, " +
-                            "PRIMARY KEY (recipeid), " +
+                            "PRIMARY KEY (recipeid, version), " +
                             "FOREIGN KEY (ingredientlistid) " +
                             "REFERENCES ingredientlist (ingredientlistid), " +
                             "FOREIGN KEY (madeby) " +
@@ -105,6 +105,7 @@ public class ConnectionDAO implements IConnectionDAO{
                             "name VARCHAR(50) NOT NULL, " +
                             "madeby INT, " +
                             "recipe INT, " +
+                            "recipeversion INT, " +
                             "production_date DATE, " +
                             "volume INT, " +
                             "expiration_date DATE, " +
@@ -112,7 +113,7 @@ public class ConnectionDAO implements IConnectionDAO{
                             "producedby INT, " +
                             "PRIMARY KEY (productbatchid), " +
                             "FOREIGN KEY (recipe) " +
-                            "REFERENCES recipe(recipeid));");
+                            "REFERENCES recipe (recipeid));");
 
             PreparedStatement createTableProductbatchCommodityRelationship = conn.prepareStatement(
                     "CREATE TABLE IF NOT EXISTS productbatch_commodity_relationship " +

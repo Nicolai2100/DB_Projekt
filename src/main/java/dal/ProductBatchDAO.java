@@ -25,6 +25,18 @@ public class ProductBatchDAO implements IProductBatchDAO {
         try {
             conn.setAutoCommit(false);
 
+            PreparedStatement pstmtSelectVersionNum = conn.prepareStatement("SELECT version from recipe where " +
+                    "recipeid = ? AND in_use = 1");
+            pstmtSelectVersionNum.setInt(1,productbatch.getRecipe());
+
+            ResultSet rs = pstmtSelectVersionNum.executeQuery();
+            int versionNum = 0;
+
+            if (rs.next()) {
+                versionNum = rs.getInt(1);
+            }
+            System.out.println(versionNum);
+
             PreparedStatement pstmtInsertProduct = conn.prepareStatement(
                     "INSERT INTO productbatch " +
                             "VALUES(?,?,?,?,?,?,?,?,?)");
@@ -33,11 +45,12 @@ public class ProductBatchDAO implements IProductBatchDAO {
             pstmtInsertProduct.setString(2, productbatch.getName());
             pstmtInsertProduct.setInt(3, productbatch.getMadeBy().getUserId());
             pstmtInsertProduct.setInt(4, productbatch.getRecipe());
-            pstmtInsertProduct.setDate(5, productbatch.getProductionDate());
-            pstmtInsertProduct.setInt(6, productbatch.getVolume());
-            pstmtInsertProduct.setDate(7, productbatch.getExpirationDate());
-            pstmtInsertProduct.setString(8, productbatch.getBatchState());
-            pstmtInsertProduct.setInt(9, productbatch.getProducedBy().getUserId());
+            pstmtInsertProduct.setInt(5, versionNum);
+            pstmtInsertProduct.setDate(6, productbatch.getProductionDate());
+            pstmtInsertProduct.setInt(7, productbatch.getVolume());
+            pstmtInsertProduct.setDate(8, productbatch.getExpirationDate());
+            pstmtInsertProduct.setString(9, productbatch.getBatchState());
+            pstmtInsertProduct.setInt(10, productbatch.getProducedBy().getUserId());
             pstmtInsertProduct.executeUpdate();
             createRelations(productbatch.getCommodityBatches(), productbatch.getProductId());
             conn.commit();
