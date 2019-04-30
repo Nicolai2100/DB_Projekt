@@ -102,7 +102,7 @@ public class UserDAO implements IUserDAO {
         try {
             PreparedStatement pSmtSelectAllTable = conn.prepareStatement(
                     "SELECT * " +
-                            "FROM user");
+                            "FROM user NATURAL JOIN userrole");
             UserDTO returnUser;
             ResultSet rs = pSmtSelectAllTable.executeQuery();
 

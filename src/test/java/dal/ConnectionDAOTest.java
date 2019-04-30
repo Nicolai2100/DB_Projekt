@@ -32,6 +32,7 @@ public class ConnectionDAOTest {
     void createTriggers() {
         connectionDAO.createTriggerOldRecipe();
         connectionDAO.createTriggerReorder();
+        connectionDAO.createTriggerNewMinamountCheck();
     }
 
     @Test

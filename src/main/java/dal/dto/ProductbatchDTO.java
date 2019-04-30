@@ -11,6 +11,7 @@ public class ProductbatchDTO implements IProductDTO {
     private int recipe;
     private List<ICommodityBatchDTO> commodityBatches;
     private UserDTO madeBy;
+    private UserDTO producedBy;
     private Date productionDate;
     private Date expirationDate;
     private int volume;
@@ -90,6 +91,16 @@ public class ProductbatchDTO implements IProductDTO {
 
     public void setMadeBy(UserDTO madeBy) {
         this.madeBy = madeBy;
+    }
+
+    @Override
+    public UserDTO getProducedBy() {
+        return producedBy;
+    }
+
+    @Override
+    public void setProducedBy(UserDTO producedBy) {
+            this.producedBy = producedBy;
     }
 
     @Override
