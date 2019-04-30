@@ -129,17 +129,33 @@ public class ConnectionDAO implements IConnectionDAO{
 
             PreparedStatement createTableRecipe = conn.prepareStatement(
                     "CREATE TABLE IF NOT EXISTS recipe " +
-                            "(recipeid INT AUTO_INCREMENT, " +
+                            "(recipeid INT, " +
                             "edition INT, " +
                             "name VARCHAR(50), " +
                             "madeby INT, " +
                             "ingredientlistid INT, " +
                             "in_use BIT, " +
                             "last_used_date DATE, " +
-                            "minbatchsize int, " +
+                            "minbatchsize INT, " +
                             "PRIMARY KEY (recipeid), " +
                             "FOREIGN KEY (ingredientlistid) " +
                             "REFERENCES ingredientlist (ingredientlistid), " +
+                            "FOREIGN KEY (madeby) " +
+                            "REFERENCES user (userid));");
+
+            PreparedStatement createTableOldRecipe = conn.prepareStatement(
+                    "CREATE TABLE IF NOT EXISTS oldrecipe " +
+                            "(recipeid INT, " +
+                            "edition INT, " +
+                            "name VARCHAR(50) NOT NULL, " +
+                            "madeby INT, " +
+                            "ingredientlistid INT, " +
+                            "minbatchsize INT, " +
+                            "outdated TIMESTAMP NOT NULL, " +
+                            "PRIMARY KEY (recipeid, edition), " +
+                            "FOREIGN KEY (ingredientlistid) " +
+                            "REFERENCES ingredientlist (ingredientlistid) " +
+                            "ON DELETE CASCADE, " +
                             "FOREIGN KEY (madeby) " +
                             "REFERENCES user (userid));");
 

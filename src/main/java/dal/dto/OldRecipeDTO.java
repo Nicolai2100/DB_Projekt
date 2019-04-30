@@ -9,6 +9,7 @@ public class OldRecipeDTO implements IOldrecipeDTO{
     private int madeBy;
     private String outDated;
     private List<IngredientDTO> ingredients;
+    private int minBatchSize;
 
     public String getName() {
         return name;
@@ -56,4 +57,11 @@ public class OldRecipeDTO implements IOldrecipeDTO{
         "foreign key (recipeid) " +
         "references ingredientlist(ingredie*/
 
+    public int getMinBatchSize() {
+        return minBatchSize;
+    }
+
+    public void setMinBatchSize(int minBatchSize) {
+        this.minBatchSize = minBatchSize;
+    }
 }
