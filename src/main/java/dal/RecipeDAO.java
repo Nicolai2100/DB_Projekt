@@ -19,7 +19,7 @@ public class RecipeDAO {
         return oldRecipeDAO;
     }
 
-    public RecipeDAO(IngredientListDAO ingredientListDAO, UserDAO userDAO) {
+    public RecipeDAO(IngredientListDAO ingredientListDAO, UserDAO userDAO) throws DALException {
         this.oldRecipeDAO = new OldRecipeDAO(this);
         this.ingredientListDAO = ingredientListDAO;
         this.userDAO = userDAO;

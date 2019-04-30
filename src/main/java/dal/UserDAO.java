@@ -9,7 +9,7 @@ import java.util.List;
 
 public class UserDAO implements IUserDAO {
     private Connection conn;
-    public UserDAO() {
+    public UserDAO() throws DALException {
         this.conn = ConnectionDAO.getConnection();
     }
 

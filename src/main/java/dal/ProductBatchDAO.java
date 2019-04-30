@@ -11,7 +11,7 @@ public class ProductBatchDAO {
     private RecipeDAO recipeDAO;
     private CommoditybatchDAO commoditybatchDAO;
 
-    public ProductBatchDAO(RecipeDAO recipeDAO, CommoditybatchDAO commoditybatchDAO) {
+    public ProductBatchDAO(RecipeDAO recipeDAO, CommoditybatchDAO commoditybatchDAO) throws DALException {
         this.conn = ConnectionDAO.getConnection();
         this.commoditybatchDAO = commoditybatchDAO;
         this.recipeDAO = recipeDAO;
@@ -25,7 +25,7 @@ public class ProductBatchDAO {
   Lagerstatus af råvarer og råvarebatches (Produktionsleder)
   */
 
-    public void createProductbatch(ProductbatchDTO productbatch) {
+    public void createProductbatch(ProductbatchDTO productbatch) throws DALException {
         //kontroller om han er aktiv i systemet
         if (!productbatch.getMadeBy().getRoles().contains("productionleader") || !productbatch.getMadeBy().getIsActive()) {
             System.out.println("User not authorized to proceed!");
@@ -38,7 +38,6 @@ public class ProductBatchDAO {
                     "INSERT INTO productbatch " +
                             "VALUES(?,?,?,?,?,?,?,?,?)");
 
-
             pstmtInsertProduct.setInt(1, productbatch.getProductId());
             pstmtInsertProduct.setString(2, productbatch.getName());
             pstmtInsertProduct.setInt(3, productbatch.getMadeBy().getUserId());
@@ -49,19 +48,16 @@ public class ProductBatchDAO {
             pstmtInsertProduct.setString(8, productbatch.getBatchState());
             pstmtInsertProduct.setInt(9, productbatch.getProducedBy().getUserId());
             pstmtInsertProduct.executeUpdate();
-
-
             createRelations(productbatch.getCommodityBatches(), productbatch.getProductId());
-
             conn.commit();
             System.out.println("The product was successfully created.");
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at ProductBatchDAO.");
         }
     }
 
-    public ProductbatchDTO getProductbatch(int productBatch) {
+    public ProductbatchDTO getProductbatch(int productBatch) throws DALException {
 
         ProductbatchDTO productbatchDTO = new ProductbatchDTO();
         UserDAO userDAO = new UserDAO();
@@ -70,7 +66,6 @@ public class ProductBatchDAO {
         try {
             PreparedStatement pstmtSelectProductBatch = conn.prepareStatement(
                     "SELECT productbatchid, name, madeby, recipe, production_date, volume, expiration_date, batch_state, commodity_batch_id FROM productbatch NATURAL JOIN productbatch_commodity_relationship WHERE productbatchid = ?;");
-
 
             pstmtSelectProductBatch.setInt(1, productBatch);
             ResultSet rs = pstmtSelectProductBatch.executeQuery();
@@ -87,18 +82,16 @@ public class ProductBatchDAO {
                     productbatchDTO.setBatchState(IProductDTO.State.valueOf(rs.getString("batch_state")));
                     i++;
                 }
-
                 productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(rs.getInt("commodity_batch_id")));
             }
 
-
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at ProductBatchDAO.");
         }
         return productbatchDTO;
     }
 
-    public void updateProductBatch(ProductbatchDTO productbatch, UserDTO user) {
+    public void updateProductBatch(ProductbatchDTO productbatch, UserDTO user) throws DALException {
         if ((!user.getRoles().contains("laborant") || !user.getRoles().contains("productionleader")) && !user.getIsActive()) {
             System.out.println("User not authorized to proceed!");
             return;
@@ -130,29 +123,27 @@ public class ProductBatchDAO {
             conn.commit();
             System.out.println("The product was successfully updated.");
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at ProductBatchDAO.");
         }
     }
 
-    public void initiateProduction(ProductbatchDTO productbatch, UserDTO user){
+    public void initiateProduction(ProductbatchDTO productbatch, UserDTO user) throws DALException {
         productbatch.setBatchState(IProductDTO.State.UNDER_PRODUCTION);
         updateProductBatch(productbatch, user);
     }
 
-    public void produceProductBatch(ProductbatchDTO productbatch, UserDTO user) {
+    public void produceProductBatch(ProductbatchDTO productbatch, UserDTO user) throws DALException {
         if (!user.getRoles().contains("laborant") && !user.getIsActive()) {
             System.out.println("User not authorized to proceed!");
             return;
         }
-
         productbatch.setProducedBy(user);
         productbatch.setBatchState(IProductDTO.State.COMPLETED);
         productbatch.setProductionDate(new Date(System.currentTimeMillis()));
 
-
         for (IIngredientDTO i : recipeDAO.getRecipe(productbatch.getRecipe()).getIngredientsList()) {
             ICommodityBatchDTO commoditybatch = commoditybatchDAO.getCommodityBatch(i.getIngredientId());
-            double newamount = (commoditybatch.getAmountInKg() - i.getAmount()/1000000*productbatch.getVolume());
+            double newamount = (commoditybatch.getAmountInKg() - i.getAmount() / 1000000 * productbatch.getVolume());
             System.out.println(newamount);
             commoditybatch.setAmountInKg(newamount);
             try {
@@ -161,8 +152,6 @@ public class ProductBatchDAO {
                 e.printStackTrace();
             }
         }
-
-
         updateProductBatch(productbatch, user);
     }
 
