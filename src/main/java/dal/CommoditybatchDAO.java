@@ -117,13 +117,22 @@ public class CommoditybatchDAO {
             if (checkForReorder(commodityBatch)) {
                 PreparedStatement preparedStatementReorder = conn.prepareStatement(
                         "UPDATE ingredient " +
-                                "SET reorder=?, " +
+                                "SET reorder=1, " +
                                 "WHERE ingredientid=?"
                 );
-                preparedStatementReorder.setInt(1, 1); //set reorder status to true
-                preparedStatementReorder.setInt(2, commodityBatch.getIngredientDTO().getIngredientId());
+                preparedStatementReorder.setInt(1, commodityBatch.getIngredientDTO().getIngredientId());
 
                 preparedStatementReorder.executeUpdate();
+                conn.commit(); //TODO ikke atomic, men kan det nogensinde blive det?
+            }
+
+            if (checkIsResidue(commodityBatch)) {
+                PreparedStatement preparedStatementResidue = conn.prepareStatement(
+                        "UPDATE commoditybatch " +
+                                "SET residue=?, " +
+                                "WHERE ingredientid=?"
+                );
+                preparedStatementResidue.setInt(1, commodityBatch.getIngredientDTO().getIngredientId());
                 conn.commit(); //TODO ikke atomic, men kan det nogensinde blive det?
             }
 
@@ -186,12 +195,12 @@ public class CommoditybatchDAO {
     }
 
     /**
-     * Check whether or not the batch now contains less than the amount required to produce two
+     * Checks whether or not the batch now contains less than the amount required to produce two
      * product batches of the most "expensive" recipe
      * @return true if the batch is smaller, false if it is still larger
      * @throws IUserDAO.DALException
      */
-    public boolean checkForReorder (ICommodityBatchDTO commodityBatch) throws IUserDAO.DALException {
+    private boolean checkForReorder (ICommodityBatchDTO commodityBatch) throws IUserDAO.DALException {
         double maxAmount = 0;
         boolean reorder = false;
 
@@ -221,6 +230,30 @@ public class CommoditybatchDAO {
         }
 
         return reorder;
+    }
+
+    private boolean checkIsResidue (ICommodityBatchDTO commodityBatch) throws IUserDAO.DALException {
+        boolean isResidue = false;
+
+        try {
+            PreparedStatement preparedStatement = conn.prepareStatement(
+                    "SELECT residue " +
+                            "FROM commoditybatch " +
+                            "WHERE ingredientid = ?"
+            );
+            preparedStatement.setInt(1, commodityBatch.getIngredientDTO().getIngredientId());
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet.next();
+
+            if (resultSet.getBoolean("residue")) {
+                isResidue = true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return isResidue;
     }
 
 }
