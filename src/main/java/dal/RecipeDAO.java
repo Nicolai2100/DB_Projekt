@@ -158,7 +158,7 @@ public class RecipeDAO {
             PreparedStatement preparedStatementAmounts = conn.prepareStatement(
                     "SELECT ingredientlist.ingredientid, min(amountmg*minbatchsize) AS amount, minamountinmg " +
                             "FROM ingredientlist JOIN recipe ON ingredientlist.ingredientlistid = recipe.ingredientlistid " +
-                            "JOIN ingredient ON ingredient.ingredientid = ingredientlist.ingredientid WHERE in_use = 1 " +
+                            "JOIN ingredient ON ingredient.ingredientid = ingredientlist.ingredientid WHERE in_use = 1 " + //TODO in_use skal slettes, når nicolai er færdig med lege
                             "GROUP BY ingredientid ASC"
             );
 
