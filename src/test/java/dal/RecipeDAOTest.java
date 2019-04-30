@@ -25,7 +25,7 @@ public class RecipeDAOTest {
          ingredientDAO = new IngredientDAO(connectionDAO);
          ingredientListDAO = new IngredientListDAO(connectionDAO, userDAO, ingredientDAO);
          commoditybatchDAO = new CommodityBatchDAO(connectionDAO, userDAO);
-         oldRecipeDAO = new OldRecipeDAO(connectionDAO, recipeDAO);
+         oldRecipeDAO = new dal.OldRecipeDAO(connectionDAO, recipeDAO);
          recipeDAO = new RecipeDAO(connectionDAO, ingredientListDAO, userDAO, oldRecipeDAO);
 
          userDAOTest = new UserDAOTest();

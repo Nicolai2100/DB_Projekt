@@ -4,7 +4,7 @@ import dal.dto.*;
 
 import java.sql.*;
 
-public class ConnectionDAO implements IConnectionDAO{
+public class ConnectionDAO implements IConnectionDAO {
     private static Connection conn;
     private UserDAO userDAO;
 
@@ -77,13 +77,28 @@ public class ConnectionDAO implements IConnectionDAO{
                             "madeby INT, " +
                             "ingredientlistid INT, " +
                             "in_use BIT, " +
-                            "last_used_date DATETIME, " +
-                            "minbatchsize int, " +
+                            "last_used_date DATE, " +
                             "PRIMARY KEY (recipeid), " +
                             "FOREIGN KEY (ingredientlistid) " +
                             "REFERENCES ingredientlist (ingredientlistid), " +
                             "FOREIGN KEY (madeby) " +
                             "REFERENCES user (userid));");
+
+            PreparedStatement createTableOldRecipe = conn.prepareStatement(
+                    "CREATE TABLE IF NOT EXISTS oldrecipe " +
+                            "(recipeid INT, " +
+                            "edition INT, " +
+                            "name VARCHAR(50) NOT NULL, " +
+                            "madeby INT, " +
+                            "ingredientlistid INT, " +
+                            "outdated TIMESTAMP NOT NULL, " +
+                            "PRIMARY KEY (recipeid, edition), " +
+                            "FOREIGN KEY (ingredientlistid) " +
+                            "REFERENCES ingredientlist (ingredientlistid) " +
+                            "ON DELETE CASCADE, " +
+                            "FOREIGN KEY (madeby) " +
+                            "REFERENCES user (userid));");
+
 
             PreparedStatement createTableCommodityBatch = conn.prepareStatement(
                     "CREATE TABLE if NOT EXISTS commoditybatch " +
@@ -105,14 +120,13 @@ public class ConnectionDAO implements IConnectionDAO{
                             "name VARCHAR(50) NOT NULL, " +
                             "madeby INT, " +
                             "recipe INT, " +
+                            "recipeversion int, " +
                             "production_date DATE, " +
                             "volume INT, " +
                             "expiration_date DATE, " +
                             "batch_state VARCHAR(20), " +
                             "producedby INT, " +
-                            "PRIMARY KEY (productbatchid), " +
-                            "FOREIGN KEY (recipe) " +
-                            "REFERENCES recipe(recipeid));");
+                            "PRIMARY KEY (productbatchid));");
 
             PreparedStatement createTableProductbatchCommodityRelationship = conn.prepareStatement(
                     "CREATE TABLE IF NOT EXISTS productbatch_commodity_relationship " +
@@ -132,6 +146,7 @@ public class ConnectionDAO implements IConnectionDAO{
             createTableingredient.execute();
             createTableingredientlist.execute();
             createTableRecipe.execute();
+            createTableOldRecipe.execute();
             createTableCommodityBatch.execute();
             createTableProductBatch.execute();
             createTableProductbatchCommodityRelationship.execute();
@@ -158,6 +173,7 @@ public class ConnectionDAO implements IConnectionDAO{
             PreparedStatement pstmtDeleteProductbatchCommodityRelation = conn.prepareStatement("delete from productbatch_commodity_relationship;");
             PreparedStatement pstmtDeleteCommodityBatch = conn.prepareStatement("delete from commoditybatch;");
             PreparedStatement pstmtDeleteProductbatch = conn.prepareStatement("delete from productbatch;");
+            PreparedStatement pstmtDeleteOldRecipe = conn.prepareStatement("DELETE FROM oldrecipe;");
             PreparedStatement pstmtDeleteRecipe = conn.prepareStatement("delete from recipe;");
             PreparedStatement pstmtDeleteIngredientLists = conn.prepareStatement("delete from ingredientlist;");
             PreparedStatement pstmtDeleteIngredients = conn.prepareStatement("delete from ingredient;");
@@ -166,6 +182,7 @@ public class ConnectionDAO implements IConnectionDAO{
             pstmtDeleteProductbatchCommodityRelation.execute();
             pstmtDeleteProductbatch.execute();
             pstmtDeleteCommodityBatch.execute();
+            pstmtDeleteOldRecipe.execute();
             pstmtDeleteRecipe.execute();
             pstmtDeleteIngredientLists.execute();
             pstmtDeleteIngredients.execute();
@@ -186,8 +203,8 @@ public class ConnectionDAO implements IConnectionDAO{
             PreparedStatement deleteNonAdmins = conn.prepareStatement(deleteUserString);
 
             for (IUserDTO user : userDAO.getUserList()) {
-                if (user.getUserId() != user.getAdmin().getUserId()){
-                    deleteNonAdmins.setInt(1,user.getUserId());
+                if (user.getUserId() != user.getAdmin().getUserId()) {
+                    deleteNonAdmins.setInt(1, user.getUserId());
                     deleteNonAdmins.executeUpdate();
                 }
             }
@@ -198,34 +215,48 @@ public class ConnectionDAO implements IConnectionDAO{
 
     @Override
     public void createTriggers() throws DALException {
-
+        createTriggerOldRecipe();
     }
 
-   /* public void createTriggerArchiveRecipe() throws DALException {
+    public void dropTriggers() throws DALException {
         try {
-            String createTrigSaveDeletedString = "CREATE TRIGGER save_recipe_delete AFTER DELETE ON recipe " +
-                    "FOR EACH ROW " +
-                    "BEGIN " +
-                    "INSERT INTO recipe VALUES " +
-                    "(old.recipeid, old.edition, old.name, " +
-                    "old.madeby, old.ingredientlistid, 0, NOW(), old.minbatchsize); " +
-                    "END;";
-            PreparedStatement pstmtCreateTriggerSaveDeletedRecipe = conn.prepareStatement(createTrigSaveDeletedString);
-            String createTrigUpdateDeletedString = "CREATE TRIGGER save_recipe_update AFTER UPDATE ON recipe " +
-                    "FOR EACH ROW " +
-                    "BEGIN " +
-                    "INSERT INTO recipe VALUES (old.recipeid, old.edition, " +
-                    "old.name, old.madeby, old.ingredientlistid, 0, NOW(), old.minbatchsize); " +
-                    "END;";
-            PreparedStatement pstmtCreateTriggerSaveUpdatedRecipe = conn.prepareStatement(createTrigUpdateDeletedString);
-            pstmtCreateTriggerSaveUpdatedRecipe.execute();
-            pstmtCreateTriggerSaveDeletedRecipe.execute();
+
+            PreparedStatement pstmtDropSaveRecipeDeleteTrigger = conn.prepareStatement(
+                    "DROP TRIGGER IF EXISTS save_recipe_delete;");
+
+            PreparedStatement pstmtDropSaveRecipeUpdateTrigger = conn.prepareStatement(
+                    "DROP TRIGGER IF EXISTS save_recipe_update"
+            );
+            pstmtDropSaveRecipeDeleteTrigger.execute();
+            pstmtDropSaveRecipeUpdateTrigger.execute();
+
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DALException("An error occurred in the database at ConnectionDAO.");
         }
     }
-*/
+
+    public void createTriggerOldRecipe() throws DALException {
+        try {
+            String createTrigSaveDeletedString = "CREATE TRIGGER save_recipe_delete BEFORE DELETE ON recipe " +
+                    "FOR EACH ROW BEGIN INSERT INTO oldrecipe VALUES " +
+                    "(old.recipeid, old.edition, old.name, " +
+                    "old.madeby, old.ingredientlistid, NOW()); END;";
+            PreparedStatement pstmtCreateTriggerSaveDeletedRecipe = conn.prepareStatement(createTrigSaveDeletedString);
+            String createTrigUpdateDeletedString = "CREATE TRIGGER save_recipe_update BEFORE UPDATE ON recipe " +
+                    "FOR EACH ROW BEGIN INSERT INTO oldrecipe VALUES (old.recipeid, old.edition, " +
+                    "old.name, old.madeby, old.ingredientlistid, NOW()); END;";
+            PreparedStatement pstmtCreateTriggerSaveUpdatedRecipe = conn.prepareStatement(createTrigUpdateDeletedString);
+
+            pstmtCreateTriggerSaveUpdatedRecipe.execute();
+            pstmtCreateTriggerSaveDeletedRecipe.execute();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DALException("An error occurred in the database at ConnectionDAO.");
+        }
+    }
+
     public void dropAllTables(int deleteTable) throws DALException {
         try {
             PreparedStatement dropTableUser = conn.prepareStatement(
@@ -236,8 +267,12 @@ public class ConnectionDAO implements IConnectionDAO{
                     "DROP TABLE IF EXISTS ingredientlist;");
             PreparedStatement dropTableIngredient = conn.prepareStatement(
                     "DROP TABLE IF EXISTS ingredient;");
+            PreparedStatement dropTableOldRecipe = conn.prepareStatement(
+                    "DROP TABLE IF EXISTS oldrecipe;");
+
             PreparedStatement dropTableRecipe = conn.prepareStatement(
                     "DROP TABLE IF EXISTS recipe;");
+
             PreparedStatement dropTableProductbatch = conn.prepareStatement(
                     "DROP TABLE IF EXISTS productbatch;");
             PreparedStatement dropTableCommodityBatch = conn.prepareStatement(
@@ -249,6 +284,7 @@ public class ConnectionDAO implements IConnectionDAO{
                 dropTableProductbatchCommodityRelation.execute();
                 dropTableProductbatch.execute();
                 dropTableCommodityBatch.execute();
+                dropTableOldRecipe.execute();
                 dropTableRecipe.execute();
                 dropTableIngredientList.execute();
                 dropTableIngredient.execute();
