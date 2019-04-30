@@ -238,7 +238,7 @@ public class ConnectionDAO {
                             "ingredientlistid INT, " +
                             "in_use BIT, " +
                             "last_used_date DATE, " +
-                            "minbatchsize INT " +
+                            "minbatchsize INT, " +
                             "PRIMARY KEY (recipeid), " +
                             "FOREIGN KEY (ingredientlistid) " +
                             "REFERENCES ingredientlist (ingredientlistid), " +
@@ -252,7 +252,7 @@ public class ConnectionDAO {
                             "name VARCHAR(50) NOT NULL, " +
                             "madeby INT, " +
                             "ingredientlistid INT, " +
-                            "minbatchsize INT " +
+                            "minbatchsize INT, " +
                             "outdated TIMESTAMP NOT NULL, " +
                             "PRIMARY KEY (recipeid, edition), " +
                             "FOREIGN KEY (ingredientlistid) " +
