@@ -14,12 +14,13 @@ public class DALTest {
     UserDAO userDAO = new UserDAO();
     IngredientDAO ingredientDAO = new IngredientDAO();
     IngredientListDAO ingredientListDAO = new IngredientListDAO(ingredientDAO);
-    CommoditybatchDAO commoditybatchDAO = new CommoditybatchDAO(userDAO);
+    CommodityBatchDAO commoditybatchDAO = new CommodityBatchDAO(userDAO);
     RecipeDAO recipeDAO = new RecipeDAO(ingredientListDAO, userDAO);
-
     ProductBatchDAO productBatchDAO = new ProductBatchDAO(recipeDAO, commoditybatchDAO);
-    OldRecipeDAO oldRecipeDAO = recipeDAO.getOldRecipeDAO();
     UserDAOTest userDAOTest = new UserDAOTest();
+
+    public DALTest() throws DALException {
+    }
 
     /* @Before
      public void initialize() {
@@ -28,30 +29,29 @@ public class DALTest {
          userDAO = new UserDAO(connectionDAO);
          ingredientDAO = new IngredientDAO(connectionDAO);
          ingredientListDAO = new IngredientListDAO(connectionDAO, userDAO, ingredientDAO);
-         commoditybatchDAO = new CommoditybatchDAO(connectionDAO, userDAO);
-         oldRecipeDAO = new OldRecipeDAO(connectionDAO, recipeDAO);
+         commoditybatchDAO = new CommodityBatchDAO(connectionDAO, userDAO);
          recipeDAO = new RecipeDAO(connectionDAO, ingredientListDAO, userDAO, oldRecipeDAO);
 
          userDAOTest = new UserDAOTest();
      }
  */
     @After
-    public void close() {
+    public void close() throws DALException {
         connectionDAO.closeConn();
     }
 
     @Test
-    public void cleanTables() {
-        connectionDAO.cleanTables();
+    public void cleanTables() throws DALException {
+        connectionDAO.deleteTables();
     }
 
     @Test
-    public void testItAll() throws IUserDAO.DALException {
+    public void testItAll() throws DALException {
 
         /**
          * Alt slettes
          */
-        connectionDAO.cleanTables();
+        connectionDAO.deleteTables();
 
         /**
          * Brugerne oprettes
@@ -69,14 +69,6 @@ public class DALTest {
         testUser_2.setUserName("Puk Larsen");
         testUser_2.setIni("PL");
         testUser_2.addRole("farmaceut");
-        userDAO.createUser(testUser_1, testUser_2);
-        testUser_2.setUserName("Pelle Hansen");
-        testUser_2.setIni("PH");
-        ArrayList<String> roles2 = new ArrayList();
-        roles2.add("admin");
-        roles2.add("productionleader");
-        testUser_2.setRoles(roles2);
-        testUser_2.setIsActive(true);
         userDAO.createUser(testUser_1, testUser_2);
 
         UserDTO testUser_3 = new UserDTO();
@@ -340,24 +332,25 @@ public class DALTest {
 
         ProductbatchDTO productbatchDTO = new ProductbatchDTO();
         UserDTO testUser2 = (UserDTO) userDAO.getUser(1);
-        productbatchDTO.setMadeBy(testUser2);
-        productbatchDTO.setName("Ost");
-        productbatchDTO.setProductId(1);
-        productbatchDTO.setRecipe(2);
-        productbatchDTO.setProductionDate(new Date(System.currentTimeMillis()));
-        productbatchDTO.setExpirationDate(new Date(System.currentTimeMillis()));
-        productbatchDTO.setVolume(10000);
-        productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(4));
+        productbatchDTO.setMadeBy(testUser2); //Produktionslederen indsættes som et bruger-objekt.
+        productbatchDTO.setName("Sildenafil"); //Produktets navn indsættes.
+        productbatchDTO.setProductId(1); //Et unikt id vælges.
+        productbatchDTO.setRecipe(2); //Id'et til opskriften, som produktet skal produceres ud fra, indsættes.
+        productbatchDTO.setProductionDate(new Date(System.currentTimeMillis())); //Produktionsdatoen indsættes i formatet java.sql.Date.
+        productbatchDTO.setExpirationDate(new Date(System.currentTimeMillis())); //Udløbsdatoen indsættes i formatet java.sql.Date.
+        productbatchDTO.setVolume(10000); //Mængden af piller indsættes.
+        productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(4)); //Råvare-batches tilknyttes. De skal have samme id, som den tilsvarende ingrediens i opskriften.
         productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(12));
         productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(13));
         productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(14));
         productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(15));
         productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(16));
-        productbatchDTO.setProducedBy(testUser_4);
-
-        productbatchDTO.setBatchState(IProductDTO.State.UNDER_PRODUCTION);
+        productbatchDTO.setProducedBy(testUser_4); //Laboranten, som producerer produktet, indsættes.
+        productbatchDTO.setBatchState(IProductDTO.State.ORDERED); //Stadiet indsættes som ENUM. Det kan være enten ORDERED, UNDER_PRODUCTION eller COMPLETED.
 
         productBatchDAO.createProductbatch(productbatchDTO);
+
+        productBatchDAO.initiateProduction(productbatchDTO, testUser_2);
 
         productbatchDTO.setName("Amfetamin");
 

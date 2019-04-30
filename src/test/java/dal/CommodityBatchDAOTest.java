@@ -10,30 +10,30 @@ import java.time.LocalDateTime;
 public class CommodityBatchDAOTest {
     ConnectionDAO connectionDAO;
     UserDAO userDAO;
-    CommoditybatchDAO commoditybatchDAO;
+    CommodityBatchDAO commoditybatchDAO;
     IngredientDAO ingredientDAO;
 
     @Before
-    public void initialize() {
+    public void initialize() throws DALException {
         connectionDAO = new ConnectionDAO();
         userDAO = new UserDAO();
-        commoditybatchDAO = new CommoditybatchDAO(userDAO);
+        commoditybatchDAO = new CommodityBatchDAO(userDAO);
         ingredientDAO = new IngredientDAO();
     }
 
     @After
-    public void close() {
+    public void close() throws DALException {
         connectionDAO.closeConn();
     }
 
     @Test
-    public void getCommodityBatch() throws IUserDAO.DALException {
+    public void getCommodityBatch() throws DALException {
         ICommodityBatchDTO batchFromDB = commoditybatchDAO.getCommodityBatch(4);
         System.out.println(batchFromDB);
     }
 
     @Test
-    public void createCommodityBatch() throws IUserDAO.DALException {
+    public void createCommodityBatch() throws DALException {
 
         ICommodityBatchDTO commodityBatch = new CommodityBatchDTO();
         IUserDTO testUser = userDAO.getUser(2);

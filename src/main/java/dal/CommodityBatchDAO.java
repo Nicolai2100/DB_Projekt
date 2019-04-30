@@ -6,16 +6,17 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CommoditybatchDAO {
+public class CommodityBatchDAO implements ICommodityBatchDAO {
     private UserDAO userDAO;
     private Connection conn;
 
-    public CommoditybatchDAO(UserDAO userDAO) {
+    public CommodityBatchDAO(UserDAO userDAO) throws DALException {
         this.userDAO = userDAO;
         this.conn = ConnectionDAO.getConnection();
     }
 
-    public void createCommodityBatch(ICommodityBatchDTO commodityBatch) {
+    @Override
+    public void createCommodityBatch(ICommodityBatchDTO commodityBatch) throws DALException {
         IUserDTO userDTO = commodityBatch.getOrderedBy();
         if (!userDTO.getRoles().contains("productionleader")) {
             System.out.println("User not authorized to proceed!");
@@ -34,11 +35,12 @@ public class CommoditybatchDAO {
             pstmtInsertCommodityBatch.executeUpdate();
             conn.commit();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at CommodityBatchDAO.");
         }
     }
 
-    public ICommodityBatchDTO getCommodityBatch(int commodityBatchId) {
+    @Override
+    public ICommodityBatchDTO getCommodityBatch(int commodityBatchId) throws DALException {
         ICommodityBatchDTO commodityBatch = new CommodityBatchDTO();
         commodityBatch.setBatchId(commodityBatchId);
         IIngredientDTO ingredientDTO = new IngredientDTO();
@@ -71,31 +73,13 @@ public class CommoditybatchDAO {
                 return null;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (IUserDAO.DALException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at CommodityBatchDAO.");
         }
         return commodityBatch;
     }
 
-    public void deleteCommodityBatch (int commodityBatchId) throws SQLException {
-        try {
-            conn.setAutoCommit(false);
-            PreparedStatement preparedStatement = conn.prepareStatement(
-                    "DELETE FROM commoditybatch WHERE commoditybatchid=?"
-            );
-            preparedStatement.setInt(1, commodityBatchId);
-
-            preparedStatement.executeUpdate();
-            conn.commit();
-            conn.setAutoCommit(true);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void updateCommodityBatch (ICommodityBatchDTO commodityBatch) throws SQLException {
+    @Override
+    public void updateCommodityBatch(ICommodityBatchDTO commodityBatch) throws DALException {
         try {
             conn.setAutoCommit(false);
             PreparedStatement preparedStatement = conn.prepareStatement(
@@ -110,13 +94,30 @@ public class CommoditybatchDAO {
             preparedStatement.setString(5, commodityBatch.getOrderDate());
             preparedStatement.setBoolean(6, commodityBatch.isResidue());
             preparedStatement.setInt(7, commodityBatch.getBatchId());
+            preparedStatement.executeUpdate();
+            conn.commit();
+            conn.setAutoCommit(true);
+
+        } catch (SQLException e) {
+            throw new DALException("An error occurred in the database at CommodityBatchDAO.");
+        }
+    }
+
+    @Override
+    public void deleteCommodityBatch(int commodityBatchId) throws DALException {
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement preparedStatement = conn.prepareStatement(
+                    "DELETE FROM commoditybatch WHERE commoditybatchid=?"
+            );
+            preparedStatement.setInt(1, commodityBatchId);
 
             preparedStatement.executeUpdate();
             conn.commit();
             conn.setAutoCommit(true);
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at CommodityBatchDAO.");
         }
     }
 
