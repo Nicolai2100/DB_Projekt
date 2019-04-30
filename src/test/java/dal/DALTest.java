@@ -358,8 +358,8 @@ public class DALTest {
 
         System.out.println("Read product succesful:" + productBatchDAO.getProductbatch(1).toString());
 
-        IRecipeDTO recipeDTO = recipeDAO.getRecipe(3);
+        IRecipeDTO recipeDTO = recipeDAO.getActiveRecipe(3);
         recipeDTO.setName("Opdateret 2 " + recipeDTO.getName());
-        recipeDAO.updateRecipe(recipeDTO);
+      //  recipeDAO.updateRecipe(recipeDTO);
     }
 }

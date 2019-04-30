@@ -31,10 +31,10 @@ public class RecipeDAOTest {
          userDAOTest = new UserDAOTest();
      }
  */
-   @After
-   public void close() throws DALException {
-       connectionDAO.closeConn();
-   }
+    @After
+    public void close() throws DALException {
+        connectionDAO.closeConn();
+    }
 
     @Test
     public void archiveRecipe() throws DALException {
@@ -45,15 +45,23 @@ public class RecipeDAOTest {
     }
 
     @Test
+    public void getOldRecipes() throws DALException {
+        for (IRecipeDTO oldRecipe : recipeDAO.getListOfOldRecipes()) {
+            System.out.println(oldRecipe);
+        }
+
+    }
+
+    @Test
     public void updateRecipe() throws DALException {
-        IRecipeDTO recipeDTO = recipeDAO.getRecipe(3);
+        IRecipeDTO recipeDTO = recipeDAO.getActiveRecipe(3);
         recipeDTO.setName("Opdateret 2 " + recipeDTO.getName());
         recipeDAO.updateRecipe(recipeDTO);
     }
 
     @Test
     public void getRecipe() throws DALException {
-        IRecipeDTO recipeDTO = recipeDAO.getRecipe(2);
+        IRecipeDTO recipeDTO = recipeDAO.getActiveRecipe(2);
         System.out.println(recipeDTO);
     }
 

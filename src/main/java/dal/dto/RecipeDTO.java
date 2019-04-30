@@ -1,15 +1,16 @@
 package dal.dto;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.*;
 
 public class RecipeDTO implements IRecipeDTO {
     private int recipeId;
     private String name;
     private IUserDTO madeBy;
-    private int edition;
+    private int version;
     private List<IIngredientDTO> ingredientsList;
-    Date outDated;
+    private Timestamp expired;
     private int minBatchSize;
 
     public RecipeDTO() {
@@ -18,18 +19,20 @@ public class RecipeDTO implements IRecipeDTO {
 
     @Override
     public String toString() {
-        String returnString = "RecipeID " + recipeId + " of type " + name + " made by: " + madeBy + ". " +
-                "\nIngredients: \n";
-
-        for (IIngredientDTO ingredient : ingredientsList) {
-            returnString += "[" + ingredient + "]\n";
+        String returnString = "";
+        if (expired == null) {
+            returnString = "RecipeID " + recipeId + ", version: " + version + ", of type " + name + " made by: " + madeBy + ". " +
+                    "\nIngredients: \n";
+            for (IIngredientDTO ingredient : ingredientsList) {
+                returnString += "[" + ingredient + "]\n";
+            }
+        } else {
+            returnString = "Expired recipe - RecipeID " + recipeId + ", version: " + version + ", of type " + name + " made by: " + madeBy + ". " +
+                    "\nIngredients: \n";
+            for (IIngredientDTO ingredient : ingredientsList) {
+                returnString += "[" + ingredient + "]\n";
+            }
         }
-      /*  Iterator it = ingredients.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry) it.next();
-            returnString += "[" + pair.getValue() + "]\n";
-            it.remove(); // avoids a ConcurrentModificationException
-        }*/
         return returnString;
     }
 
@@ -66,12 +69,13 @@ public class RecipeDTO implements IRecipeDTO {
     }
 
     @Override
-    public int getEdition() {
-        return edition;
+    public int getVersion() {
+        return version;
     }
+
     @Override
-    public void setEdition(int edition){
-        this.edition = edition;
+    public void setVersion(int version) {
+        this.version = version;
     }
 
     @Override
@@ -82,5 +86,13 @@ public class RecipeDTO implements IRecipeDTO {
     @Override
     public void setMinBatchSize(int minBatchSize) {
         this.minBatchSize = minBatchSize;
+    }
+
+    public Timestamp getExpired() {
+        return expired;
+    }
+
+    public void setExpired(Timestamp expired) {
+        this.expired = expired;
     }
 }

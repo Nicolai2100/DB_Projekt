@@ -62,10 +62,10 @@ public class ConnectionDAO implements IConnectionDAO{
             PreparedStatement createTableingredientlist = conn.prepareStatement(
                     "CREATE TABLE IF NOT EXISTS ingredientlist " +
                             "(ingredientlistid INT, " +
-                            "edition INT, " +
+                            "version INT, " +
                             "ingredientid INT, " +
                             "amountmg FLOAT, " +
-                            "PRIMARY KEY (ingredientlistid, edition, ingredientid), " +
+                            "PRIMARY KEY (ingredientlistid, version, ingredientid), " +
                             "FOREIGN KEY (ingredientid) " +
                             "REFERENCES ingredient (ingredientid));");
 

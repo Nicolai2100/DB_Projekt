@@ -20,9 +20,9 @@ public interface IRecipeDTO {
 
     void setIngredientsList(List<IIngredientDTO> ingredientsList);
 
-    int getEdition();
+    int getVersion();
 
-    void setEdition(int edition);
+    void setVersion(int version);
 
     int getMinBatchSize();
 

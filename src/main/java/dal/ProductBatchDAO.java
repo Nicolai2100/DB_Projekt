@@ -39,7 +39,7 @@ public class ProductBatchDAO implements IProductBatchDAO {
 
             PreparedStatement pstmtInsertProduct = conn.prepareStatement(
                     "INSERT INTO productbatch " +
-                            "VALUES(?,?,?,?,?,?,?,?,?)");
+                            "VALUES(?,?,?,?,?,?,?,?,?,?)");
 
             pstmtInsertProduct.setInt(1, productbatch.getProductId());
             pstmtInsertProduct.setString(2, productbatch.getName());
@@ -150,7 +150,7 @@ public class ProductBatchDAO implements IProductBatchDAO {
         productbatch.setBatchState(IProductDTO.State.COMPLETED);
         productbatch.setProductionDate(new Date(System.currentTimeMillis()));
 
-        for (IIngredientDTO i : recipeDAO.getRecipe(productbatch.getRecipe()).getIngredientsList()) {
+        for (IIngredientDTO i : recipeDAO.getActiveRecipe(productbatch.getRecipe()).getIngredientsList()) {
             ICommodityBatchDTO commoditybatch = commoditybatchDAO.getCommodityBatch(i.getIngredientId());
             double newamount = (commoditybatch.getAmountInKg() - i.getAmount() / 1000000 * productbatch.getVolume());
             System.out.println(newamount);

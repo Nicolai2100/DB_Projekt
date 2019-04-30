@@ -12,6 +12,6 @@ public interface IIngredientListDAO {
 
     void isIngredientListCreated(IRecipeDTO recipeDTO, int edition) throws DALException;
 
-    void updateIngredientList(IRecipeDTO recipeDTO, int edition) throws DALException;
+    void updateIngredientList(IRecipeDTO recipeDTO) throws DALException;
 }
 
