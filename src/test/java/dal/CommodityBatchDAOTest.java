@@ -14,7 +14,7 @@ public class CommodityBatchDAOTest {
     IngredientDAO ingredientDAO;
 
     @Before
-    public void initialize() {
+    public void initialize() throws DALException {
         connectionDAO = new ConnectionDAO();
         userDAO = new UserDAO();
         commoditybatchDAO = new CommodityBatchDAO(userDAO);
@@ -22,18 +22,18 @@ public class CommodityBatchDAOTest {
     }
 
     @After
-    public void close() {
+    public void close() throws DALException {
         connectionDAO.closeConn();
     }
 
     @Test
-    public void getCommodityBatch() throws IUserDAO.DALException {
+    public void getCommodityBatch() throws DALException {
         ICommodityBatchDTO batchFromDB = commoditybatchDAO.getCommodityBatch(4);
         System.out.println(batchFromDB);
     }
 
     @Test
-    public void createCommodityBatch() throws IUserDAO.DALException {
+    public void createCommodityBatch() throws DALException {
 
         ICommodityBatchDTO commodityBatch = new CommodityBatchDTO();
         IUserDTO testUser = userDAO.getUser(2);

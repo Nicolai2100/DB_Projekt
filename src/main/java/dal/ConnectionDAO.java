@@ -35,78 +35,21 @@ public class ConnectionDAO implements IConnectionDAO{
         }
     }
 
-    public void createTriggerReorder() throws DALException {
-        try {
-            String createTrigReorderString = "CREATE TRIGGER set_reorder AFTER INSERT ON commoditybatch FOR EACH ROW " +
-                    "BEGIN UPDATE ingredient SET ingredient.reorder = 0 " +
-                    "WHERE ingredient.ingredientid = new.ingredientid; END;";
-            PreparedStatement pstmtCreateTriggerReorder = conn.prepareStatement(createTrigReorderString);
-
-            pstmtCreateTriggerReorder.execute();
-
-        } catch (SQLException e) {
-            throw new DALException("An error occurred in the database at ConnectionDAO.");
-        }
-    }
-
-    public void createTriggerOldRecipe() throws DALException {
-        try {
-            String createTrigSaveDeletedString = "CREATE TRIGGER save_recipe_delete BEFORE DELETE ON recipe " +
-                    "FOR EACH ROW BEGIN INSERT INTO oldrecipe VALUES " +
-                    "(old.recipeid, old.edition, old.name, " +
-                    "old.madeby, old.ingredientlistid, NOW()); END;";
-            PreparedStatement pstmtCreateTriggerSaveDeletedRecipe = conn.prepareStatement(createTrigSaveDeletedString);
-            String createTrigUpdateDeletedString = "CREATE TRIGGER save_recipe_update BEFORE UPDATE ON recipe " +
-                    "FOR EACH ROW BEGIN INSERT INTO oldrecipe VALUES (old.recipeid, old.edition, " +
-                    "old.name, old.madeby, old.ingredientlistid, NOW()); END;";
-            PreparedStatement pstmtCreateTriggerSaveUpdatedRecipe = conn.prepareStatement(createTrigUpdateDeletedString);
-
-            pstmtCreateTriggerSaveUpdatedRecipe.execute();
-            pstmtCreateTriggerSaveDeletedRecipe.execute();
-
-        } catch (SQLException e) {
-            throw new DALException("An error occurred in the database at ConnectionDAO.");
-        }
-    }
-
-    public void dropTriggers() throws DALException {
-        try {
-           /* PreparedStatement pstmtDropTriggerReorder = conn.prepareStatement(
-                    "DROP TRIGGER IF EXISTS set_reorder;");
-*/
-            PreparedStatement pstmtDropSaveRecipeDeleteTrigger = conn.prepareStatement(
-                    "DROP TRIGGER IF EXISTS save_recipe_delete;");
-
-            PreparedStatement pstmtDropSaveRecipeUpdateTrigger = conn.prepareStatement(
-                    "DROP TRIGGER IF EXISTS save_recipe_update"
-            );
-            pstmtDropSaveRecipeDeleteTrigger.execute();
-            pstmtDropSaveRecipeUpdateTrigger.execute();
-/*
-            pstmtDropTriggerReorder.execute();
-*/
-        } catch (SQLException e) {
-            throw new DALException("An error occurred in the database at ConnectionDAO.");
-        }
-    }
-
     @Override
     public void deleteTables() throws DALException {
         try {
-            PreparedStatement pstmtDeleteProductbatchCommodityRelation = conn.prepareStatement("DELETE FROM productbatch_commodity_relationship;");
-            PreparedStatement pstmtDeleteCommodityBatch = conn.prepareStatement("DELETE FROM commoditybatch;");
-            PreparedStatement pstmtDeleteProductbatch = conn.prepareStatement("DELETE FROM productbatch;");
-            PreparedStatement pstmtDeleteRecipe = conn.prepareStatement("DELETE FROM recipe;");
-            PreparedStatement pstmtDeleteOldRecipe = conn.prepareStatement("DELETE FROM oldrecipe;");
-            PreparedStatement pstmtDeleteIngredientLists = conn.prepareStatement("DELETE FROM ingredientlist;");
-            PreparedStatement pstmtDeleteIngredients = conn.prepareStatement("DELETE FROM ingredient;");
-            PreparedStatement pstmtDeleteUsers = conn.prepareStatement("DELETE FROM user;");
+            PreparedStatement pstmtDeleteProductbatchCommodityRelation = conn.prepareStatement("delete from productbatch_commodity_relationship;");
+            PreparedStatement pstmtDeleteCommodityBatch = conn.prepareStatement("delete from commoditybatch;");
+            PreparedStatement pstmtDeleteProductbatch = conn.prepareStatement("delete from productbatch;");
+            PreparedStatement pstmtDeleteRecipe = conn.prepareStatement("delete from recipe;");
+            PreparedStatement pstmtDeleteIngredientLists = conn.prepareStatement("delete from ingredientlist;");
+            PreparedStatement pstmtDeleteIngredients = conn.prepareStatement("delete from ingredient;");
+            PreparedStatement pstmtDeleteUsers = conn.prepareStatement("delete from user;");
 
             pstmtDeleteProductbatchCommodityRelation.execute();
-            pstmtDeleteCommodityBatch.execute();
             pstmtDeleteProductbatch.execute();
+            pstmtDeleteCommodityBatch.execute();
             pstmtDeleteRecipe.execute();
-            pstmtDeleteOldRecipe.execute();
             pstmtDeleteIngredientLists.execute();
             pstmtDeleteIngredients.execute();
 
@@ -114,6 +57,7 @@ public class ConnectionDAO implements IConnectionDAO{
 
             pstmtDeleteUsers.execute();
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new DALException("An error occurred in the database at ConnectionDAO.");
         }
     }
@@ -192,24 +136,10 @@ public class ConnectionDAO implements IConnectionDAO{
                             "ingredientlistid INT, " +
                             "in_use BIT, " +
                             "last_used_date DATE, " +
+                            "minbatchsize int, " +
                             "PRIMARY KEY (recipeid), " +
                             "FOREIGN KEY (ingredientlistid) " +
                             "REFERENCES ingredientlist (ingredientlistid), " +
-                            "FOREIGN KEY (madeby) " +
-                            "REFERENCES user (userid));");
-
-            PreparedStatement createTableOldRecipe = conn.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS oldrecipe " +
-                            "(recipeid INT, " +
-                            "edition INT, " +
-                            "name VARCHAR(50) NOT NULL, " +
-                            "madeby INT, " +
-                            "ingredientlistid INT, " +
-                            "outdated TIMESTAMP NOT NULL, " +
-                            "PRIMARY KEY (recipeid, edition), " +
-                            "FOREIGN KEY (ingredientlistid) " +
-                            "REFERENCES ingredientlist (ingredientlistid) " +
-                            "ON DELETE CASCADE, " +
                             "FOREIGN KEY (madeby) " +
                             "REFERENCES user (userid));");
 
@@ -237,6 +167,7 @@ public class ConnectionDAO implements IConnectionDAO{
                             "volume INT, " +
                             "expiration_date DATE, " +
                             "batch_state VARCHAR(20), " +
+                            "producedby INT, " +
                             "PRIMARY KEY (productbatchid), " +
                             "FOREIGN KEY (recipe) " +
                             "REFERENCES recipe(recipeid));");
@@ -247,9 +178,11 @@ public class ConnectionDAO implements IConnectionDAO{
                             "commodity_batch_id INT, " +
                             "PRIMARY KEY (product_batch_id, commodity_batch_id), " +
                             "FOREIGN KEY (product_batch_id) " +
-                            "REFERENCES productbatch(productbatchid)," +
+                            "REFERENCES productbatch(productbatchid)" +
+                            "ON DELETE CASCADE, " +
                             "FOREIGN KEY (commodity_batch_id) " +
-                            "REFERENCES commoditybatch(commoditybatchid));");
+                            "REFERENCES commoditybatch(commoditybatchid) " +
+                            "ON DELETE CASCADE);");
 
             //rækkefølgen er vigtig!
             createTableUser.execute();
@@ -259,11 +192,11 @@ public class ConnectionDAO implements IConnectionDAO{
             createTableRecipe.execute();
             createTableCommodityBatch.execute();
             createTableProductBatch.execute();
-            createTableOldRecipe.execute();
             createTableProductbatchCommodityRelationship.execute();
             conn.commit();
 
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new DALException("An error occurred in the database at ConnectionDAO.");
         }
     }
@@ -271,17 +204,15 @@ public class ConnectionDAO implements IConnectionDAO{
     public void dropAllTables(int deleteTable) throws DALException {
         try {
             PreparedStatement dropTableUser = conn.prepareStatement(
-                    "drop table IF EXISTS user;");
+                    "DROP table IF EXISTS user;");
             PreparedStatement dropTableUserRole = conn.prepareStatement(
-                    "drop table IF EXISTS userrole;");
+                    "DROP table IF EXISTS userrole;");
             PreparedStatement dropTableIngredientList = conn.prepareStatement(
                     "DROP TABLE IF EXISTS ingredientlist;");
             PreparedStatement dropTableIngredient = conn.prepareStatement(
                     "DROP TABLE IF EXISTS ingredient;");
             PreparedStatement dropTableRecipe = conn.prepareStatement(
                     "DROP TABLE IF EXISTS recipe;");
-            PreparedStatement dropTableOldRecipe = conn.prepareStatement(
-                    "DROP TABLE IF EXISTS oldrecipe;");
             PreparedStatement dropTableProductbatch = conn.prepareStatement(
                     "DROP TABLE IF EXISTS productbatch;");
             PreparedStatement dropTableCommodityBatch = conn.prepareStatement(
@@ -291,7 +222,6 @@ public class ConnectionDAO implements IConnectionDAO{
 
             if (deleteTable == 0) {
                 dropTableProductbatchCommodityRelation.execute();
-                dropTableOldRecipe.execute();
                 dropTableProductbatch.execute();
                 dropTableCommodityBatch.execute();
                 dropTableRecipe.execute();
@@ -299,7 +229,6 @@ public class ConnectionDAO implements IConnectionDAO{
                 dropTableIngredient.execute();
                 dropTableUserRole.execute();
                 dropTableUser.execute();
-
             }
         } catch (SQLException e) {
             throw new DALException("An error occurred in the database at ConnectionDAO.");

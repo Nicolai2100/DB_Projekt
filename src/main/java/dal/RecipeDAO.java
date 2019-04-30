@@ -13,14 +13,8 @@ public class RecipeDAO implements IRecipeDAO{
     private Connection conn;
     private IngredientListDAO ingredientListDAO;
     private UserDAO userDAO;
-    private OldRecipeDAO oldRecipeDAO;
-
-    public OldRecipeDAO getOldRecipeDAO() {
-        return oldRecipeDAO;
-    }
 
     public RecipeDAO(IngredientListDAO ingredientListDAO, UserDAO userDAO) throws DALException {
-        this.oldRecipeDAO = new OldRecipeDAO(this);
         this.ingredientListDAO = ingredientListDAO;
         this.userDAO = userDAO;
         this.conn = ConnectionDAO.getConnection();
@@ -40,10 +34,13 @@ public class RecipeDAO implements IRecipeDAO{
             //Hvis en opskriften oprettes med det samme id som ligger i oldrecipe,
             //må man gå ud fra at den nye opskrift er en ny udgave af den fra oldrecipe.
             //Derfor får den automatisk et korrekt edition-nummer.
+/* todo ret dette
             int returnEdition = oldRecipeDAO.haveOldRecipe(recipeDTO.getRecipeId());
             if (returnEdition != 0) {
                 edition += returnEdition;
+
             }
+*/
             conn.setAutoCommit(false);
             String insertRecipeString = "INSERT INTO recipe (recipeid, edition, name, madeby, ingredientlistid, in_use) VALUES(?,?,?,?,?,?)";
             PreparedStatement pstmtInsertRecipe = conn.prepareStatement(insertRecipeString);

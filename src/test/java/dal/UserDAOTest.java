@@ -17,6 +17,9 @@ public class UserDAOTest {
     ConnectionDAO connectionDAO = new ConnectionDAO();
     UserDAO userDAO = new UserDAO();
 
+    public UserDAOTest() throws DALException {
+    }
+
     @Before
     public void initialize() {
         /*connectionDAO = new ConnectionDAO();
@@ -25,24 +28,24 @@ public class UserDAOTest {
     }
 
     @After
-    public void close() {
+    public void close() throws DALException {
         connectionDAO.closeConn();
     }
 
     @Test
-    public void deleteUser() throws IUserDAO.DALException {
+    public void deleteUser() throws DALException {
         IUserDTO admin = userDAO.getUser(7);
         userDAO.deleteUser(admin, 10);
     }
 
     @Test
-    void getUser() throws IUserDAO.DALException {
+    void getUser() throws DALException {
         IUserDTO testUser = userDAO.getUser(7);
         System.out.println(testUser);
     }
 
     @Test
-    void getAllUsers() throws IUserDAO.DALException {
+    void getAllUsers() throws DALException {
         for (IUserDTO user : userDAO.getUserList()) {
             System.out.println(user);
         }
@@ -50,7 +53,7 @@ public class UserDAOTest {
 
 
     @Test
-    void getUserWithRoles() throws IUserDAO.DALException {
+    void getUserWithRoles() throws DALException {
 
        /* for (IUserDTO user:userDAO.getUserList()) {
             System.out.println(user);
@@ -58,7 +61,7 @@ public class UserDAOTest {
     }
 
     @Test
-    public void updateUser() throws IUserDAO.DALException {
+    public void updateUser() throws DALException {
         IUserDTO testUser2 = new UserDTO();
         testUser2.setUserId(7);
         testUser2.setIsActive(false);
@@ -66,12 +69,11 @@ public class UserDAOTest {
         UserDTO testUser = new UserDTO();
         testUser.setUserId(10);
         testUser.addRole("laborant");
-
         userDAO.updateUser(testUser2, testUser);
     }
 
     @Test
-    public void createUser() throws IUserDAO.DALException {
+    public void createUser() throws DALException {
         IUserDTO testUser2 = new UserDTO();
         testUser2.setUserId(7);
         testUser2.setUserName("Karl Mørk");
@@ -143,7 +145,7 @@ public class UserDAOTest {
                     fail();
                 }
             }
-        } catch (IUserDAO.DALException e) {
+        } catch (DALException e) {
             e.printStackTrace();
             fail();
         }

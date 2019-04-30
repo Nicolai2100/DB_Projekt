@@ -17,6 +17,9 @@ public class IngredientDAOTest {
     IngredientDAO ingredientDAO = new IngredientDAO();
     IngredientListDAO ingredientListDAO = new IngredientListDAO(ingredientDAO);
 
+    public IngredientDAOTest() throws DALException {
+    }
+
 
     /* @Before
      public void initialize() {
@@ -26,19 +29,17 @@ public class IngredientDAOTest {
          ingredientDAO = new IngredientDAO(connectionDAO);
          ingredientListDAO = new IngredientListDAO(connectionDAO, userDAO, ingredientDAO);
          commoditybatchDAO = new CommodityBatchDAO(connectionDAO, userDAO);
-         oldRecipeDAO = new OldRecipeDAO(connectionDAO, recipeDAO);
          recipeDAO = new RecipeDAO(connectionDAO, ingredientListDAO, userDAO, oldRecipeDAO);
-
          userDAOTest = new UserDAOTest();
      }
  */
     @After
-    public void close() {
+    public void close() throws DALException {
         connectionDAO.closeConn();
     }
 
     @Test
-    public void checkForReorder() {
+    public void checkForReorder() throws DALException {
         List<IIngredientDTO> ingredientDTOS = ingredientDAO.checkForReorder();
 
         for (IIngredientDTO ing : ingredientDTOS) {
@@ -47,7 +48,7 @@ public class IngredientDAOTest {
     }
 
     @Test
-    public void createIngredientList() throws IUserDAO.DALException {
+    public void createIngredientList() throws DALException {
         RecipeDTO recipeDTO = new RecipeDTO();
         recipeDTO.setName("norethisteron/estrogen");
         recipeDTO.setRecipeId(2);
@@ -101,7 +102,7 @@ public class IngredientDAOTest {
     }
 
     @Test
-    public void getIngredientList() throws IUserDAO.DALException {
+    public void getIngredientList() throws DALException {
         RecipeDTO recipeDTO = new RecipeDTO();
         recipeDTO.setRecipeId(2);
         List<IIngredientDTO> ingredients = ingredientListDAO.getIngredientList(recipeDTO);
@@ -110,7 +111,7 @@ public class IngredientDAOTest {
     }
 
     @Test
-    public void createIngredient() throws IUserDAO.DALException {
+    public void createIngredient() throws DALException {
         List<IngredientDTO> ingredients = new ArrayList<>();
 
         IngredientDTO ingredientDTO = new IngredientDTO();
@@ -162,7 +163,7 @@ public class IngredientDAOTest {
     }
 
     @Test
-    public void getIngredient() throws IUserDAO.DALException {
+    public void getIngredient() throws DALException {
         IIngredientDTO ingredientDTO = ingredientDAO.getIngredient(1);
         assertEquals(ingredientDTO.getType(), "active");
         System.out.println(ingredientDTO);

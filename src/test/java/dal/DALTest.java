@@ -16,10 +16,11 @@ public class DALTest {
     IngredientListDAO ingredientListDAO = new IngredientListDAO(ingredientDAO);
     CommodityBatchDAO commoditybatchDAO = new CommodityBatchDAO(userDAO);
     RecipeDAO recipeDAO = new RecipeDAO(ingredientListDAO, userDAO);
-
     ProductBatchDAO productBatchDAO = new ProductBatchDAO(recipeDAO, commoditybatchDAO);
-    OldRecipeDAO oldRecipeDAO = recipeDAO.getOldRecipeDAO();
     UserDAOTest userDAOTest = new UserDAOTest();
+
+    public DALTest() throws DALException {
+    }
 
     /* @Before
      public void initialize() {
@@ -29,24 +30,23 @@ public class DALTest {
          ingredientDAO = new IngredientDAO(connectionDAO);
          ingredientListDAO = new IngredientListDAO(connectionDAO, userDAO, ingredientDAO);
          commoditybatchDAO = new CommodityBatchDAO(connectionDAO, userDAO);
-         oldRecipeDAO = new OldRecipeDAO(connectionDAO, recipeDAO);
          recipeDAO = new RecipeDAO(connectionDAO, ingredientListDAO, userDAO, oldRecipeDAO);
 
          userDAOTest = new UserDAOTest();
      }
  */
     @After
-    public void close() {
+    public void close() throws DALException {
         connectionDAO.closeConn();
     }
 
     @Test
-    public void cleanTables() {
+    public void cleanTables() throws DALException {
         connectionDAO.deleteTables();
     }
 
     @Test
-    public void testItAll() throws IUserDAO.DALException {
+    public void testItAll() throws DALException {
 
         /**
          * Alt slettes
@@ -350,7 +350,7 @@ public class DALTest {
 
         productBatchDAO.createProductbatch(productbatchDTO);
 
-        productBatchDAO.initiateProduction(productbatchDTO,testUser_2);
+        productBatchDAO.initiateProduction(productbatchDTO, testUser_2);
 
         productbatchDTO.setName("Amfetamin");
 

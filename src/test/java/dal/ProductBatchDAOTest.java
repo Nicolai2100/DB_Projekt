@@ -17,10 +17,11 @@ public class ProductBatchDAOTest {
     IngredientListDAO ingredientListDAO = new IngredientListDAO(ingredientDAO);
     CommodityBatchDAO commoditybatchDAO = new CommodityBatchDAO(userDAO);
     RecipeDAO recipeDAO = new RecipeDAO(ingredientListDAO, userDAO);
-
-    ProductBatchDAO productBatchDAO = new ProductBatchDAO(recipeDAO,commoditybatchDAO);
-    OldRecipeDAO oldRecipeDAO = recipeDAO.getOldRecipeDAO();
+    ProductBatchDAO productBatchDAO = new ProductBatchDAO(recipeDAO, commoditybatchDAO);
     UserDAOTest userDAOTest = new UserDAOTest();
+
+    public ProductBatchDAOTest() throws DALException {
+    }
 
     /* @Before
      public void initialize() {
@@ -37,19 +38,17 @@ public class ProductBatchDAOTest {
      }
  */
     @After
-    public void close() {
+    public void close() throws DALException {
         connectionDAO.closeConn();
     }
 
     @Test
-    public void cleanTables() {
+    public void cleanTables() throws DALException {
         connectionDAO.deleteTables();
     }
 
     @Test
-    public void createProduct() throws IUserDAO.DALException {
-
-
+    public void createProduct() throws DALException {
         ProductbatchDTO productbatchDTO = new ProductbatchDTO();
         UserDTO testUser = (UserDTO) userDAO.getUser(2);
         productbatchDTO.setMadeBy(testUser);
@@ -57,21 +56,17 @@ public class ProductBatchDAOTest {
         productbatchDTO.setProductId(1);
         productbatchDTO.setRecipe(2);
         productbatchDTO.setProductionDate(new Date(System.currentTimeMillis()));
-
         productbatchDTO.setExpirationDate(new Date(System.currentTimeMillis()));
-
         productbatchDTO.setVolume(100);
-
         productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(2));
         productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(3));
         productbatchDTO.setBatchState(IProductDTO.State.UNDER_PRODUCTION);
-
         productBatchDAO.createProductbatch(productbatchDTO);
     }
 
 
     @Test
-    public void checkForReorder() {
+    public void checkForReorder() throws DALException {
         List<IIngredientDTO> ingredientDTOS = ingredientDAO.checkForReorder();
 
         for (IIngredientDTO ing : ingredientDTOS) {
@@ -80,13 +75,13 @@ public class ProductBatchDAOTest {
     }
 
     @Test
-    public void getCommodityBatch() throws IUserDAO.DALException {
+    public void getCommodityBatch() throws DALException {
         ICommodityBatchDTO batchFromDB = commoditybatchDAO.getCommodityBatch(2);
         System.out.println(batchFromDB);
     }
 
     @Test
-    public void createCommodityBatch() throws IUserDAO.DALException {
+    public void createCommodityBatch() throws DALException {
 
         ICommodityBatchDTO commodityBatch = new CommodityBatchDTO();
         IUserDTO testUser = userDAO.getUser(2);
@@ -100,12 +95,11 @@ public class ProductBatchDAOTest {
     }
 
     @Test
-    public void createRecipe() throws IUserDAO.DALException {
+    public void createRecipe() throws DALException {
         IRecipeDTO recipeDTO = new RecipeDTO();
         recipeDTO.setRecipeId(1);
         recipeDTO.setName("Norethisteron/estrogen");
         recipeDTO.setMadeBy(userDAO.getUser(10));
-
         recipeDTO.setIngredientsList(ingredientListDAO.getIngredientList(recipeDTO));
 
         List<IIngredientDTO> ingredients = new ArrayList<>();
@@ -156,7 +150,7 @@ public class ProductBatchDAOTest {
     }
 
     @Test
-    public void createIngredientList() throws IUserDAO.DALException {
+    public void createIngredientList() throws DALException {
         RecipeDTO recipeDTO = new RecipeDTO();
         recipeDTO.setName("norethisteron/estrogen");
         recipeDTO.setRecipeId(2);
@@ -210,7 +204,7 @@ public class ProductBatchDAOTest {
     }
 
     @Test
-    public void getIngredientList() throws IUserDAO.DALException {
+    public void getIngredientList() throws DALException {
         RecipeDTO recipeDTO = new RecipeDTO();
         recipeDTO.setRecipeId(2);
         List<IIngredientDTO> ingredients = ingredientListDAO.getIngredientList(recipeDTO);
@@ -219,7 +213,7 @@ public class ProductBatchDAOTest {
     }
 
     @Test
-    public void createIngredient() throws IUserDAO.DALException {
+    public void createIngredient() throws DALException {
         List<IngredientDTO> ingredients = new ArrayList<>();
 
         IngredientDTO ingredientDTO = new IngredientDTO();
@@ -270,9 +264,8 @@ public class ProductBatchDAOTest {
         }
     }
 
-
     @Test
-    public void testItAll() throws IUserDAO.DALException {
+    public void testItAll() throws DALException {
 
         /**
          * Alt slettes
@@ -403,9 +396,9 @@ public class ProductBatchDAOTest {
          */
         //todo få testUser_2 til at oprette et product-batch
 
-//        recipeDAO.archiveRecipe(2, testUser_3);
-
-        //      oldRecipeDAO.getAllOldRecipes();
+/*
+        recipeDAO.archiveRecipe(2, testUser_3);
+*/
         createProduct();
 
     }

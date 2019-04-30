@@ -16,27 +16,30 @@ public class RecipeDAOTest {
     IngredientListDAO ingredientListDAO = new IngredientListDAO(ingredientDAO);
     RecipeDAO recipeDAO = new RecipeDAO(ingredientListDAO, userDAO);
 
-   /* @Before
-    public void initialize() {
-        connectionDAO = new ConnectionDAO();
-        productBatchDAO = new ProductBatchDAO(connectionDAO);
-        userDAO = new UserDAO(connectionDAO);
-        ingredientDAO = new IngredientDAO(connectionDAO);
-        ingredientListDAO = new IngredientListDAO(connectionDAO, userDAO, ingredientDAO);
-        commoditybatchDAO = new CommodityBatchDAO(connectionDAO, userDAO);
-        oldRecipeDAO = new OldRecipeDAO(connectionDAO, recipeDAO);
-        recipeDAO = new RecipeDAO(connectionDAO, ingredientListDAO, userDAO, oldRecipeDAO);
-
-        userDAOTest = new UserDAOTest();
+    public RecipeDAOTest() throws DALException {
     }
-*/
+
+    /* @Before
+     public void initialize() {
+         connectionDAO = new ConnectionDAO();
+         productBatchDAO = new ProductBatchDAO(connectionDAO);
+         userDAO = new UserDAO(connectionDAO);
+         ingredientDAO = new IngredientDAO(connectionDAO);
+         ingredientListDAO = new IngredientListDAO(connectionDAO, userDAO, ingredientDAO);
+         commoditybatchDAO = new CommodityBatchDAO(connectionDAO, userDAO);
+         oldRecipeDAO = new OldRecipeDAO(connectionDAO, recipeDAO);
+         recipeDAO = new RecipeDAO(connectionDAO, ingredientListDAO, userDAO, oldRecipeDAO);
+
+         userDAOTest = new UserDAOTest();
+     }
+ */
    @After
-   public void close() {
+   public void close() throws DALException {
        connectionDAO.closeConn();
    }
 
     @Test
-    public void archiveRecipe() throws IUserDAO.DALException {
+    public void archiveRecipe() throws DALException {
         IUserDTO testUser = new UserDTO();
         testUser.addRole("farmaceut");
         testUser.setIsActive(true);
@@ -44,20 +47,20 @@ public class RecipeDAOTest {
     }
 
     @Test
-    public void updateRecipe() {
+    public void updateRecipe() throws DALException {
         IRecipeDTO recipeDTO = recipeDAO.getRecipe(2);
         recipeDTO.setName("snillert");
         recipeDAO.updateRecipe(recipeDTO);
     }
 
     @Test
-    public void getRecipe() {
+    public void getRecipe() throws DALException {
         IRecipeDTO recipeDTO = recipeDAO.getRecipe(2);
         System.out.println(recipeDTO);
     }
 
     @Test
-    public void createRecipe() throws IUserDAO.DALException {
+    public void createRecipe() throws DALException {
         IRecipeDTO recipeDTO = new RecipeDTO();
         recipeDTO.setRecipeId(1);
         recipeDTO.setName("Norethisteron/estrogen");
@@ -111,5 +114,4 @@ public class RecipeDAOTest {
         recipeDTO.setIngredientsList(ingredients);
         recipeDAO.createRecipe(recipeDTO);
     }
-
 }

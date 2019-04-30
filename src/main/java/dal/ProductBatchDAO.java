@@ -44,6 +44,7 @@ public class ProductBatchDAO implements IProductBatchDAO {
             System.out.println("The product was successfully created.");
 
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new DALException("An error occurred in the database at ProductBatchDAO.");
         }
     }
@@ -141,11 +142,7 @@ public class ProductBatchDAO implements IProductBatchDAO {
             double newamount = (commoditybatch.getAmountInKg() - i.getAmount() / 1000000 * productbatch.getVolume());
             System.out.println(newamount);
             commoditybatch.setAmountInKg(newamount);
-            try {
-                commoditybatchDAO.updateCommodityBatch(commoditybatch);
-            } catch (SQLException e) {
-                throw new DALException("An error occurred in the database at ProductBatchDAO.");
-            }
+            commoditybatchDAO.updateCommodityBatch(commoditybatch);
         }
         updateProductBatch(productbatch, user);
     }
