@@ -23,4 +23,8 @@ public interface IRecipeDTO {
     int getEdition();
 
     void setEdition(int edition);
+
+    int getMinBatchSize();
+
+    void setMinBatchSize(int size);
 }

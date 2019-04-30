@@ -10,6 +10,7 @@ public class RecipeDTO implements IRecipeDTO {
     private int edition;
     private List<IIngredientDTO> ingredientsList;
     Date outDated;
+    private int minBatchSize;
 
     public RecipeDTO() {
         ingredientsList = new ArrayList<>();
@@ -73,4 +74,13 @@ public class RecipeDTO implements IRecipeDTO {
         this.edition = edition;
     }
 
+    @Override
+    public int getMinBatchSize() {
+        return minBatchSize;
+    }
+
+    @Override
+    public void setMinBatchSize(int minBatchSize) {
+        this.minBatchSize = minBatchSize;
+    }
 }

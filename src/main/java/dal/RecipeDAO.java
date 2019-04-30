@@ -43,12 +43,13 @@ public class RecipeDAO {
             if (rs.next()) {
                 edition += rs.getInt(1);
             }
-            String uddateRecipeString = "UPDATE recipe SET edition = ?, name = ?, madeby = ?;";
+            String uddateRecipeString = "UPDATE recipe SET edition = ?, name = ?, madeby = ?, minbatchsize = ?;";
             PreparedStatement pstmtUpdateRecipe = conn.prepareStatement(uddateRecipeString);
 
             pstmtUpdateRecipe.setInt(1, edition);
             pstmtUpdateRecipe.setString(2, recipeDTO.getName());
             pstmtUpdateRecipe.setInt(3, recipeDTO.getMadeBy().getUserId());
+            pstmtUpdateRecipe.setInt(4, recipeDTO.getMinBatchSize());
 
             pstmtUpdateRecipe.executeUpdate();
             //Hver liste af ingredienser bliver oprettet med opskriftens id som id... !?
@@ -77,7 +78,7 @@ public class RecipeDAO {
                 edition += returnEdition;
             }
             conn.setAutoCommit(false);
-            String insertRecipeString = "INSERT INTO recipe (recipeid, edition, name, madeby, ingredientlistid, in_use) VALUES(?,?,?,?,?,?)";
+            String insertRecipeString = "INSERT INTO recipe (recipeid, edition, name, madeby, ingredientlistid, in_use, minbatchsize) VALUES(?,?,?,?,?,?,?)";
             PreparedStatement pstmtInsertRecipe = conn.prepareStatement(insertRecipeString);
             pstmtInsertRecipe.setInt(1, recipeDTO.getRecipeId());
             pstmtInsertRecipe.setInt(2, edition);
@@ -85,6 +86,7 @@ public class RecipeDAO {
             pstmtInsertRecipe.setInt(4, recipeDTO.getMadeBy().getUserId());
             pstmtInsertRecipe.setInt(5, recipeDTO.getRecipeId());
             pstmtInsertRecipe.setBoolean(6,true);
+            pstmtInsertRecipe.setInt(7, recipeDTO.getMinBatchSize());
             //Opretter ingrediensliste
             ingredientListDAO.isIngredientListCreated(recipeDTO, edition);
             pstmtInsertRecipe.executeUpdate();
@@ -107,6 +109,7 @@ public class RecipeDAO {
                 recipeDTO.setName(rs.getString(3));
                 recipeDTO.setMadeBy(userDAO.getUser(rs.getInt(4)));
                 recipeDTO.setIngredientsList(ingredientListDAO.getIngredientList(recipeDTO));
+                recipeDTO.setMinBatchSize(rs.getInt("minbatchsize"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
