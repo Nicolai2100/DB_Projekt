@@ -9,7 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class RecipeDAO {
+public class RecipeDAO implements IRecipeDAO{
     private Connection conn;
     private IngredientListDAO ingredientListDAO;
     private UserDAO userDAO;
@@ -26,38 +26,7 @@ public class RecipeDAO {
         this.conn = ConnectionDAO.getConnection();
     }
 
-    public void updateRecipe(IRecipeDTO recipeDTO) throws DALException {
-        IUserDTO userDTO = recipeDTO.getMadeBy();
-        if (!userDTO.getRoles().contains("farmaceut") || !userDTO.getIsActive()) {
-            System.out.println("User not authorized to proceed!");
-            return;
-        }
-        try {
-            conn.setAutoCommit(false);
-            String selectEditionString = "SELECT edition FROM recipe WHERE recipeid = ?;";
-            PreparedStatement pstmtGetEdition = conn.prepareStatement(selectEditionString);
-            pstmtGetEdition.setInt(1, recipeDTO.getRecipeId());
-            ResultSet rs = pstmtGetEdition.executeQuery();
-            int edition = 1;
-            if (rs.next()) {
-                edition += rs.getInt(1);
-            }
-            String uddateRecipeString = "UPDATE recipe SET edition = ?, name = ?, madeby = ?;";
-            PreparedStatement pstmtUpdateRecipe = conn.prepareStatement(uddateRecipeString);
-
-            pstmtUpdateRecipe.setInt(1, edition);
-            pstmtUpdateRecipe.setString(2, recipeDTO.getName());
-            pstmtUpdateRecipe.setInt(3, recipeDTO.getMadeBy().getUserId());
-
-            pstmtUpdateRecipe.executeUpdate();
-            //Hver liste af ingredienser bliver oprettet med opskriftens id som id... !?
-            ingredientListDAO.updateIngredientList(recipeDTO, edition);
-            conn.commit();
-        } catch (SQLException e) {
-            throw new DALException("An error occurred in the database at RecipeDAO.");
-        }
-    }
-
+    @Override
     public void createRecipe(IRecipeDTO recipeDTO) throws DALException {
         //Først undersøges det om brugeren, der står på til at have oprettet opskriften har
         //den rette rolle til at kunne gøre det.
@@ -94,6 +63,7 @@ public class RecipeDAO {
         }
     }
 
+    @Override
     public IRecipeDTO getRecipe(int recipeId) throws DALException {
         IRecipeDTO recipeDTO = new RecipeDTO();
         try {
@@ -113,6 +83,40 @@ public class RecipeDAO {
         return recipeDTO;
     }
 
+    @Override
+    public void updateRecipe(IRecipeDTO recipeDTO) throws DALException {
+        IUserDTO userDTO = recipeDTO.getMadeBy();
+        if (!userDTO.getRoles().contains("farmaceut") || !userDTO.getIsActive()) {
+            System.out.println("User not authorized to proceed!");
+            return;
+        }
+        try {
+            conn.setAutoCommit(false);
+            String selectEditionString = "SELECT edition FROM recipe WHERE recipeid = ?;";
+            PreparedStatement pstmtGetEdition = conn.prepareStatement(selectEditionString);
+            pstmtGetEdition.setInt(1, recipeDTO.getRecipeId());
+            ResultSet rs = pstmtGetEdition.executeQuery();
+            int edition = 1;
+            if (rs.next()) {
+                edition += rs.getInt(1);
+            }
+            String uddateRecipeString = "UPDATE recipe SET edition = ?, name = ?, madeby = ?;";
+            PreparedStatement pstmtUpdateRecipe = conn.prepareStatement(uddateRecipeString);
+
+            pstmtUpdateRecipe.setInt(1, edition);
+            pstmtUpdateRecipe.setString(2, recipeDTO.getName());
+            pstmtUpdateRecipe.setInt(3, recipeDTO.getMadeBy().getUserId());
+
+            pstmtUpdateRecipe.executeUpdate();
+            //Hver liste af ingredienser bliver oprettet med opskriftens id som id... !?
+            ingredientListDAO.updateIngredientList(recipeDTO, edition);
+            conn.commit();
+        } catch (SQLException e) {
+            throw new DALException("An error occurred in the database at RecipeDAO.");
+        }
+    }
+
+    @Override
     public void archiveRecipe(int recipeId, IUserDTO userDTO) throws DALException {
         if (!userDTO.getRoles().contains("farmaceut") || !userDTO.getIsActive()) {
             System.out.println("User not authorized to proceed!");

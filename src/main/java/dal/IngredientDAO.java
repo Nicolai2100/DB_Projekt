@@ -10,13 +10,14 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class IngredientDAO {
+public class IngredientDAO implements IIngredientDAO {
     private Connection conn;
 
-    public IngredientDAO() {
+    public IngredientDAO() throws DALException {
         this.conn = ConnectionDAO.getConnection();
     }
 
+    @Override
     public void createIngredient(IIngredientDTO ingredientDTO) throws DALException {
         try {
             conn.setAutoCommit(false);
@@ -36,6 +37,7 @@ public class IngredientDAO {
         }
     }
 
+    @Override
     public IIngredientDTO getIngredient(int ingredientId) throws DALException {
         IIngredientDTO ingredientDTO = new IngredientDTO();
         try {
@@ -55,6 +57,7 @@ public class IngredientDAO {
         return ingredientDTO;
     }
 
+    @Override
     public List<IIngredientDTO> checkForReorder() throws DALException {
         List<IIngredientDTO> toBeOrdered = new ArrayList<>();
         try {
@@ -82,6 +85,7 @@ public class IngredientDAO {
      *
      * @param ingredient
      */
+    @Override
     public void isIngredientThere(IIngredientDTO ingredient) throws DALException {
         try {
             String isIngThere = "SELECT COUNT(*) FROM ingredient WHERE ingredientid = ?;";
@@ -105,6 +109,7 @@ public class IngredientDAO {
      * @param ingredient the given ingredient.
      * @return the total remaining amount across productbatches in kg
      */
+    @Override
     public double getTotalAmount(IIngredientDTO ingredient) throws DALException {
         double totalAmount = 0;
 
@@ -124,5 +129,4 @@ public class IngredientDAO {
         }
         return totalAmount;
     }
-
 }

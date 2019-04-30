@@ -10,14 +10,14 @@ import java.time.LocalDateTime;
 public class CommodityBatchDAOTest {
     ConnectionDAO connectionDAO;
     UserDAO userDAO;
-    CommoditybatchDAO commoditybatchDAO;
+    CommodityBatchDAO commoditybatchDAO;
     IngredientDAO ingredientDAO;
 
     @Before
     public void initialize() {
         connectionDAO = new ConnectionDAO();
         userDAO = new UserDAO();
-        commoditybatchDAO = new CommoditybatchDAO(userDAO);
+        commoditybatchDAO = new CommodityBatchDAO(userDAO);
         ingredientDAO = new IngredientDAO();
     }
 

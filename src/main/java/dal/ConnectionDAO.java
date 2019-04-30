@@ -4,11 +4,11 @@ import dal.dto.*;
 
 import java.sql.*;
 
-public class ConnectionDAO {
+public class ConnectionDAO implements IConnectionDAO{
     private static Connection conn;
     private UserDAO userDAO;
 
-    public ConnectionDAO() {
+    public ConnectionDAO() throws DALException {
         userDAO = new UserDAO();
     }
 
@@ -26,6 +26,7 @@ public class ConnectionDAO {
         return conn;
     }
 
+    @Override
     public void closeConn() throws DALException {
         try {
             conn.close();
@@ -89,6 +90,7 @@ public class ConnectionDAO {
         }
     }
 
+    @Override
     public void deleteTables() throws DALException {
         try {
             PreparedStatement pstmtDeleteProductbatchCommodityRelation = conn.prepareStatement("DELETE FROM productbatch_commodity_relationship;");
@@ -116,7 +118,8 @@ public class ConnectionDAO {
         }
     }
 
-    private void deleteUsers() throws DALException {
+    @Override
+    public void deleteUsers() throws DALException {
         String deleteUserString = "DELETE FROM user WHERE userid = ?;";
         try {
             PreparedStatement deleteNonAdmins = conn.prepareStatement(deleteUserString);
@@ -132,6 +135,12 @@ public class ConnectionDAO {
         }
     }
 
+    @Override
+    public void createTriggers() throws DALException {
+
+    }
+
+    @Override
     public void initializeDataBase() throws DALException {
         try {
             conn.setAutoCommit(false);

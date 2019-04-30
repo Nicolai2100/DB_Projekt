@@ -10,16 +10,39 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class IngredientListDAO {
+public class IngredientListDAO implements IIngredientListDAO{
     private Connection conn;
     private IngredientDAO ingredientDAO;
 
-    public IngredientListDAO(IngredientDAO ingredientDAO) {
+    public IngredientListDAO(IngredientDAO ingredientDAO) throws DALException {
         this.ingredientDAO = ingredientDAO;
         this.conn = ConnectionDAO.getConnection();
     }
 
+    @Override
+    public void createIngredientList(IRecipeDTO recipeDTO, int edition) throws DALException {
+        try {
+            conn.setAutoCommit(false);
+            String insertIngList = "INSERT INTO ingredientlist(ingredientlistid, edition, ingredientid, amountmg) " +
+                    "VALUES(?,?,?,?);";
+            PreparedStatement pstmtInsertIngredientList = conn.prepareStatement(insertIngList);
+            pstmtInsertIngredientList.setInt(1, recipeDTO.getRecipeId());
 
+            for (IIngredientDTO ingredient : recipeDTO.getIngredientsList()) {
+                pstmtInsertIngredientList.setInt(2, edition);
+                pstmtInsertIngredientList.setInt(3, ingredient.getIngredientId());
+                pstmtInsertIngredientList.setDouble(4, ingredient.getAmount());
+                pstmtInsertIngredientList.executeUpdate();
+            }
+            conn.commit();
+            System.out.println("The ingredientlist was successfully created.");
+
+        } catch (SQLException e) {
+            throw new DALException("An error occurred in the database at IngredientListDAO.");
+        }
+    }
+
+    @Override
     public List<IIngredientDTO> getIngredientList(IRecipeDTO recipeDTO) throws DALException {
         List<IIngredientDTO> ingredientList = new ArrayList<>();
 
@@ -42,36 +65,7 @@ public class IngredientListDAO {
         return ingredientList;
     }
 
-    /**
-     * Metoden undersøger om der allerede er en ingrediensliste, hvis ikke bliver der skabt en og hvis der er
-     * gør der ikke.
-     *
-     * @param recipeDTO
-     */
-    public void isIngredientListCreated(IRecipeDTO recipeDTO, int edition) throws DALException {
-        try {
-            PreparedStatement pstmtGetIngredientList = conn.prepareStatement(
-                    "SELECT COUNT(*) FROM ingredientlist " +
-                            "WHERE ingredientlistid = ? " +
-                            "AND edition = ?;");
-            pstmtGetIngredientList.setInt(1, recipeDTO.getRecipeId());
-            pstmtGetIngredientList.setInt(2, edition);
-
-            ResultSet rs = pstmtGetIngredientList.executeQuery();
-            int result = 0;
-            if (rs.next()) {
-                result = rs.getInt(1);
-            }
-            if (result > 0) {
-                return;
-            } else {
-                createIngredientList(recipeDTO, edition);
-            }
-        } catch (SQLException e) {
-            throw new DALException("An error occurred in the database at IngredientListDAO.");
-        }
-    }
-
+    @Override
     public void updateIngredientList(IRecipeDTO recipeDTO, int edition) throws DALException {
         try {
             conn.setAutoCommit(false);
@@ -94,23 +88,32 @@ public class IngredientListDAO {
         }
     }
 
-    public void createIngredientList(IRecipeDTO recipeDTO, int edition) throws DALException {
+    /**
+     * Metoden undersøger om der allerede er en ingrediensliste, hvis ikke bliver der skabt en og hvis der er
+     * gør der ikke.
+     *
+     * @param recipeDTO
+     */
+    @Override
+    public void isIngredientListCreated(IRecipeDTO recipeDTO, int edition) throws DALException {
         try {
-            conn.setAutoCommit(false);
-            String insertIngList = "INSERT INTO ingredientlist(ingredientlistid, edition, ingredientid, amountmg) " +
-                    "VALUES(?,?,?,?);";
-            PreparedStatement pstmtInsertIngredientList = conn.prepareStatement(insertIngList);
-            pstmtInsertIngredientList.setInt(1, recipeDTO.getRecipeId());
+            PreparedStatement pstmtGetIngredientList = conn.prepareStatement(
+                    "SELECT COUNT(*) FROM ingredientlist " +
+                            "WHERE ingredientlistid = ? " +
+                            "AND edition = ?;");
+            pstmtGetIngredientList.setInt(1, recipeDTO.getRecipeId());
+            pstmtGetIngredientList.setInt(2, edition);
 
-            for (IIngredientDTO ingredient : recipeDTO.getIngredientsList()) {
-                pstmtInsertIngredientList.setInt(2, edition);
-                pstmtInsertIngredientList.setInt(3, ingredient.getIngredientId());
-                pstmtInsertIngredientList.setDouble(4, ingredient.getAmount());
-                pstmtInsertIngredientList.executeUpdate();
+            ResultSet rs = pstmtGetIngredientList.executeQuery();
+            int result = 0;
+            if (rs.next()) {
+                result = rs.getInt(1);
             }
-            conn.commit();
-            System.out.println("The ingredientlist was successfully created.");
-
+            if (result > 0) {
+                return;
+            } else {
+                createIngredientList(recipeDTO, edition);
+            }
         } catch (SQLException e) {
             throw new DALException("An error occurred in the database at IngredientListDAO.");
         }

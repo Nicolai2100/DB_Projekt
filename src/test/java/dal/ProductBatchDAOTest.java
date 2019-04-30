@@ -15,7 +15,7 @@ public class ProductBatchDAOTest {
     UserDAO userDAO = new UserDAO();
     IngredientDAO ingredientDAO = new IngredientDAO();
     IngredientListDAO ingredientListDAO = new IngredientListDAO(ingredientDAO);
-    CommoditybatchDAO commoditybatchDAO = new CommoditybatchDAO(userDAO);
+    CommodityBatchDAO commoditybatchDAO = new CommodityBatchDAO(userDAO);
     RecipeDAO recipeDAO = new RecipeDAO(ingredientListDAO, userDAO);
 
     ProductBatchDAO productBatchDAO = new ProductBatchDAO(recipeDAO,commoditybatchDAO);
@@ -29,7 +29,7 @@ public class ProductBatchDAOTest {
          userDAO = new UserDAO(connectionDAO);
          ingredientDAO = new IngredientDAO(connectionDAO);
          ingredientListDAO = new IngredientListDAO(connectionDAO, userDAO, ingredientDAO);
-         commoditybatchDAO = new CommoditybatchDAO(connectionDAO, userDAO);
+         commoditybatchDAO = new CommodityBatchDAO(connectionDAO, userDAO);
          oldRecipeDAO = new OldRecipeDAO(connectionDAO, recipeDAO);
          recipeDAO = new RecipeDAO(connectionDAO, ingredientListDAO, userDAO, oldRecipeDAO);
 

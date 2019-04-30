@@ -11,7 +11,7 @@ public class OldRecipeDAO {
     private Connection conn;
     private RecipeDAO recipeDAO;
 
-    public OldRecipeDAO(RecipeDAO recipeDAO) {
+    public OldRecipeDAO(RecipeDAO recipeDAO) throws DALException {
         this.conn = ConnectionDAO.getConnection();
         this.recipeDAO = recipeDAO;
     }
