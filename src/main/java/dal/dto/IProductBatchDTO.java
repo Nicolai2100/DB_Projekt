@@ -3,7 +3,7 @@ package dal.dto;
 import java.sql.Date;
 import java.util.List;
 
-public interface IProductDTO {
+public interface IProductBatchDTO {
 
     int getProductId();
 
@@ -33,13 +33,13 @@ public interface IProductDTO {
 
     void setExpirationDate(Date expirationDate);
 
-    UserDTO getMadeBy();
+    IUserDTO getMadeBy();
 
-    void setMadeBy(UserDTO madeBy);
+    void setMadeBy(IUserDTO madeBy);
 
-    UserDTO getProducedBy();
+    IUserDTO getProducedBy();
 
-    void setProducedBy(UserDTO producedBy);
+    void setProducedBy(IUserDTO producedBy);
 
     void setBatchState(State state);
 
@@ -48,5 +48,4 @@ public interface IProductDTO {
     enum State {
         ORDERED, UNDER_PRODUCTION, COMPLETED
     }
-
 }

@@ -4,21 +4,21 @@ import java.util.ArrayList;
 import java.sql.Date;
 import java.util.List;
 
-public class ProductbatchDTO implements IProductDTO {
+public class ProductBatchDTO implements IProductBatchDTO {
 
     private int productId;
     private String name;
     private int recipe;
     private List<ICommodityBatchDTO> commodityBatches;
-    private UserDTO madeBy;
-    private UserDTO producedBy;
+    private IUserDTO madeBy;
+    private IUserDTO producedBy;
     private Date productionDate;
     private Date expirationDate;
     private int volume;
     private State batchState;
 
 
-    public ProductbatchDTO() {
+    public ProductBatchDTO() {
         this.commodityBatches = new ArrayList<>();
     }
 
@@ -85,21 +85,21 @@ public class ProductbatchDTO implements IProductDTO {
         this.commodityBatches = commodityBatches;
     }
 
-    public UserDTO getMadeBy() {
+    public IUserDTO getMadeBy() {
         return madeBy;
     }
 
-    public void setMadeBy(UserDTO madeBy) {
+    public void setMadeBy(IUserDTO madeBy) {
         this.madeBy = madeBy;
     }
 
     @Override
-    public UserDTO getProducedBy() {
+    public IUserDTO getProducedBy() {
         return producedBy;
     }
 
     @Override
-    public void setProducedBy(UserDTO producedBy) {
+    public void setProducedBy(IUserDTO producedBy) {
             this.producedBy = producedBy;
     }
 

@@ -95,20 +95,22 @@ public class RecipeDAO implements IRecipeDAO {
             return;
         }
         try {
-            conn.setAutoCommit(true);
-            String selectEditionString = "SELECT * FROM recipe WHERE recipeid = ? AND in_use = 1;";
-            PreparedStatement pstmtGetEdition = conn.prepareStatement(selectEditionString);
+            conn.setAutoCommit(false);
+            String selectVersionString = "SELECT version FROM recipe WHERE recipeid = ? AND in_use = 1;";
+            PreparedStatement pstmtGetEdition = conn.prepareStatement(selectVersionString);
             pstmtGetEdition.setInt(1, recipeDTO.getRecipeId());
-
             ResultSet rs = pstmtGetEdition.executeQuery();
-            int versionInt = 1;
-            if (rs.next()) {
-                versionInt += rs.getInt(2);
-                recipeDTO.setVersion(versionInt);
-                createRecipe(recipeDTO);
-            }
-            ingredientListDAO.createIngredientList(recipeDTO, versionInt);
 
+            int oldVersionInt = recipeDTO.getVersion();
+            if (oldVersionInt < 1) {
+                oldVersionInt = 1;
+            }
+            int newVersionInt = 1;
+            if (rs.next()) {
+                newVersionInt += rs.getInt(1);
+            }
+            recipeDTO.setVersion(newVersionInt);
+            createRecipe(recipeDTO);
             Instant instant = Instant.now();
             Timestamp timestamp = Timestamp.from(instant);
 
@@ -117,9 +119,10 @@ public class RecipeDAO implements IRecipeDAO {
             pstmtUpdateRecipe.setBoolean(1, false);
             pstmtUpdateRecipe.setTimestamp(2, timestamp);
             pstmtUpdateRecipe.setInt(3, recipeDTO.getRecipeId());
-            pstmtUpdateRecipe.setInt(4, versionInt);
-            pstmtUpdateRecipe.executeUpdate();
+            pstmtUpdateRecipe.setInt(4, oldVersionInt);
+            int result = pstmtUpdateRecipe.executeUpdate();
 
+            System.out.println(result);
             conn.commit();
 
             updateMinAmounts();

@@ -15,12 +15,19 @@ public class ConnectionDAO implements IConnectionDAO{
     public static Connection getConnection() throws DALException {
         try {
             if (conn == null) {
-                String dataBase = "jdbc:mysql://ec2-52-30-211-3.eu-west-1.compute.amazonaws.com/jekala";
+                /*String dataBase = "jdbc:mysql://ec2-52-30-211-3.eu-west-1.compute.amazonaws.com/jekala";
                 String user = "jekala";
-                String password = "d0czCtqcu5015NhwwP5zl";
+                String password = "d0czCtqcu5015NhwwP5zl";*/
+                String dataBase = "jdbc:mysql://ec2-52-30-211-3.eu-west-1.compute.amazonaws.com:3306/s185020";
+                String pathS = "s185020";
+                String portS = " ";
+                String user = "s185020";
+                String password = "iEFSqK2BFP60YWMPlw77I";
+
                 conn = DriverManager.getConnection(dataBase, user, password);
             }
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new DALException("An error occurred in the database at ConnectionDAO.");
         }
         return conn;

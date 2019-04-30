@@ -17,7 +17,7 @@ public class ProductBatchDAOTest {
     IngredientListDAO ingredientListDAO = new IngredientListDAO(ingredientDAO);
     CommodityBatchDAO commoditybatchDAO = new CommodityBatchDAO(userDAO);
     RecipeDAO recipeDAO = new RecipeDAO(ingredientListDAO, userDAO);
-    ProductBatchDAO productBatchDAO = new ProductBatchDAO(recipeDAO, commoditybatchDAO);
+    ProductBatchDAO productBatchDAO = new ProductBatchDAO(recipeDAO, commoditybatchDAO, userDAO);
     UserDAOTest userDAOTest = new UserDAOTest();
 
     public ProductBatchDAOTest() throws DALException {
@@ -49,7 +49,7 @@ public class ProductBatchDAOTest {
 
     @Test
     public void createProduct() throws DALException {
-        ProductbatchDTO productbatchDTO = new ProductbatchDTO();
+        ProductBatchDTO productbatchDTO = new ProductBatchDTO();
         UserDTO testUser = (UserDTO) userDAO.getUser(2);
         productbatchDTO.setMadeBy(testUser);
         productbatchDTO.setName("Ost");
@@ -60,7 +60,7 @@ public class ProductBatchDAOTest {
         productbatchDTO.setVolume(100);
         productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(2));
         productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(3));
-        productbatchDTO.setBatchState(IProductDTO.State.UNDER_PRODUCTION);
+        productbatchDTO.setBatchState(IProductBatchDTO.State.UNDER_PRODUCTION);
         productBatchDAO.createProductbatch(productbatchDTO);
     }
 

@@ -9,6 +9,7 @@ import java.util.List;
 
 public class UserDAO implements IUserDAO {
     private Connection conn;
+
     public UserDAO() throws DALException {
         this.conn = ConnectionDAO.getConnection();
     }
@@ -49,13 +50,14 @@ public class UserDAO implements IUserDAO {
             }
             int result = pSmtInsertUser.executeUpdate();
 
-            if (result > 0){
+            if (result > 0) {
                 setUserRoles(conn, user);
                 conn.commit();
                 System.out.println("The user was successfully created in the database system");
             }
 
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new DALException("An error occurred in the database at UserDAO.");
         }
     }

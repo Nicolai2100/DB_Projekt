@@ -9,15 +9,17 @@ public class ProductBatchDAO implements IProductBatchDAO {
     private Connection conn;
     private RecipeDAO recipeDAO;
     private CommodityBatchDAO commoditybatchDAO;
+    private UserDAO userDAO;
 
-    public ProductBatchDAO(RecipeDAO recipeDAO, CommodityBatchDAO commoditybatchDAO) throws DALException {
+    public ProductBatchDAO(RecipeDAO recipeDAO, CommodityBatchDAO commoditybatchDAO, UserDAO userDAO) throws DALException {
         this.conn = ConnectionDAO.getConnection();
         this.commoditybatchDAO = commoditybatchDAO;
         this.recipeDAO = recipeDAO;
+        this.userDAO = userDAO;
     }
 
     @Override
-    public void createProductbatch(ProductbatchDTO productbatch) throws DALException {
+    public void createProductbatch(ProductBatchDTO productbatch) throws DALException {
         if (!productbatch.getMadeBy().getRoles().contains("productionleader") || !productbatch.getMadeBy().getIsActive()) {
             System.out.println("User not authorized to proceed!");
             return;
@@ -27,7 +29,7 @@ public class ProductBatchDAO implements IProductBatchDAO {
 
             PreparedStatement pstmtSelectVersionNum = conn.prepareStatement("SELECT version from recipe where " +
                     "recipeid = ? AND in_use = 1");
-            pstmtSelectVersionNum.setInt(1,productbatch.getRecipe());
+            pstmtSelectVersionNum.setInt(1, productbatch.getRecipe());
 
             ResultSet rs = pstmtSelectVersionNum.executeQuery();
             int versionNum = 0;
@@ -63,11 +65,8 @@ public class ProductBatchDAO implements IProductBatchDAO {
     }
 
     @Override
-    public ProductbatchDTO getProductbatch(int productBatch) throws DALException {
-
-        ProductbatchDTO productbatchDTO = new ProductbatchDTO();
-        UserDAO userDAO = new UserDAO();
-        CommodityBatchDAO commoditybatchDAO = new CommodityBatchDAO(userDAO);
+    public ProductBatchDTO getProductbatch(int productBatch) throws DALException {
+        ProductBatchDTO productbatchDTO = new ProductBatchDTO();
 
         try {
             PreparedStatement pstmtSelectProductBatch = conn.prepareStatement(
@@ -85,7 +84,7 @@ public class ProductBatchDAO implements IProductBatchDAO {
                     productbatchDTO.setProductionDate(rs.getDate("production_date"));
                     productbatchDTO.setExpirationDate(rs.getDate("expiration_date"));
                     productbatchDTO.setVolume(rs.getInt("volume"));
-                    productbatchDTO.setBatchState(IProductDTO.State.valueOf(rs.getString("batch_state")));
+                    productbatchDTO.setBatchState(IProductBatchDTO.State.valueOf(rs.getString("batch_state")));
                     i++;
                 }
                 productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(rs.getInt("commodity_batch_id")));
@@ -98,7 +97,7 @@ public class ProductBatchDAO implements IProductBatchDAO {
     }
 
     @Override
-    public void updateProductBatch(ProductbatchDTO productbatch, UserDTO user) throws DALException {
+    public void updateProductBatch(ProductBatchDTO productbatch, IUserDTO user) throws DALException {
         if ((!user.getRoles().contains("laborant") || !user.getRoles().contains("productionleader")) && !user.getIsActive()) {
             System.out.println("User not authorized to proceed!");
             return;
@@ -135,19 +134,19 @@ public class ProductBatchDAO implements IProductBatchDAO {
     }
 
     @Override
-    public void initiateProduction(ProductbatchDTO productbatch, UserDTO user) throws DALException {
-        productbatch.setBatchState(IProductDTO.State.UNDER_PRODUCTION);
+    public void initiateProduction(ProductBatchDTO productbatch, IUserDTO user) throws DALException {
+        productbatch.setBatchState(IProductBatchDTO.State.UNDER_PRODUCTION);
         updateProductBatch(productbatch, user);
     }
 
     @Override
-    public void produceProductBatch(ProductbatchDTO productbatch, UserDTO user) throws DALException {
+    public void produceProductBatch(ProductBatchDTO productbatch, IUserDTO user) throws DALException {
         if (!user.getRoles().contains("laborant") && !user.getIsActive()) {
             System.out.println("User not authorized to proceed!");
             return;
         }
         productbatch.setProducedBy(user);
-        productbatch.setBatchState(IProductDTO.State.COMPLETED);
+        productbatch.setBatchState(IProductBatchDTO.State.COMPLETED);
         productbatch.setProductionDate(new Date(System.currentTimeMillis()));
 
         for (IIngredientDTO i : recipeDAO.getActiveRecipe(productbatch.getRecipe()).getIngredientsList()) {
