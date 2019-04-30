@@ -70,14 +70,6 @@ public class DALTest {
         testUser_2.setIni("PL");
         testUser_2.addRole("farmaceut");
         userDAO.createUser(testUser_1, testUser_2);
-        testUser_2.setUserName("Pelle Hansen");
-        testUser_2.setIni("PH");
-        ArrayList<String> roles2 = new ArrayList();
-        roles2.add("admin");
-        roles2.add("productionleader");
-        testUser_2.setRoles(roles2);
-        testUser_2.setIsActive(true);
-        userDAO.createUser(testUser_1, testUser_2);
 
         UserDTO testUser_3 = new UserDTO();
         testUser_3.setUserId(3);
