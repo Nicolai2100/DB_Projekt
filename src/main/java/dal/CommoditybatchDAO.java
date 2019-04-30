@@ -95,24 +95,38 @@ public class CommoditybatchDAO {
         }
     }
 
-    public void updateCommodityBatch (ICommodityBatchDTO commodityBatch) throws SQLException {
+    public void updateCommodityBatch (ICommodityBatchDTO commodityBatch) throws IUserDAO.DALException {
         try {
             conn.setAutoCommit(false);
-            PreparedStatement preparedStatement = conn.prepareStatement(
+            PreparedStatement preparedStatementUpdate = conn.prepareStatement(
                     "UPDATE commoditybatch " +
                             "SET commoditybatchid=?, ingredientid=?, orderedby=?, amountinkg=?, orderdate=?, residue=? " +
                             "WHERE commoditybatchid=?"
             );
-            preparedStatement.setInt(1, commodityBatch.getBatchId());
-            preparedStatement.setInt(2, commodityBatch.getIngredientDTO().getIngredientId());
-            preparedStatement.setInt(3, commodityBatch.getOrderedBy().getUserId());
-            preparedStatement.setDouble(4, commodityBatch.getAmountInKg()); //TODO er sat til int i databasen
-            preparedStatement.setString(5, commodityBatch.getOrderDate());
-            preparedStatement.setBoolean(6, commodityBatch.isResidue());
-            preparedStatement.setInt(7, commodityBatch.getBatchId());
+            preparedStatementUpdate.setInt(1, commodityBatch.getBatchId());
+            preparedStatementUpdate.setInt(2, commodityBatch.getIngredientDTO().getIngredientId());
+            preparedStatementUpdate.setInt(3, commodityBatch.getOrderedBy().getUserId());
+            preparedStatementUpdate.setDouble(4, commodityBatch.getAmountInKg()); //TODO er sat til int i databasen
+            preparedStatementUpdate.setString(5, commodityBatch.getOrderDate());
+            preparedStatementUpdate.setBoolean(6, commodityBatch.isResidue());
+            preparedStatementUpdate.setInt(7, commodityBatch.getBatchId());
 
-            preparedStatement.executeUpdate();
+            preparedStatementUpdate.executeUpdate();
             conn.commit();
+
+            if (checkForReorder(commodityBatch)) {
+                PreparedStatement preparedStatementReorder = conn.prepareStatement(
+                        "UPDATE ingredient " +
+                                "SET reorder=?, " +
+                                "WHERE ingredientid=?"
+                );
+                preparedStatementReorder.setInt(1, 1); //set reorder status to true
+                preparedStatementReorder.setInt(2, commodityBatch.getIngredientDTO().getIngredientId());
+
+                preparedStatementReorder.executeUpdate();
+                conn.commit(); //TODO ikke atomic, men kan det nogensinde blive det?
+            }
+
             conn.setAutoCommit(true);
 
         } catch (SQLException e) {
@@ -147,7 +161,7 @@ public class CommoditybatchDAO {
 
         try {
             PreparedStatement preparedStatement = conn.prepareStatement( //TODO skal det medregnes, hvis det er rest?
-                    "SELECT commoditybatchid, ingredientid, amountinkg, orderdate, residue " + //TODO orderedby tages ikke med for det er wack
+                    "SELECT commoditybatchid, ingredientid, amountinkg, orderdate, residue " + //TODO orderedby tages ikke med fordi det er wack
                             "FROM commoditybatch " +
                             "WHERE ingdientid=? AND NOT residue=1"
             );
@@ -170,4 +184,35 @@ public class CommoditybatchDAO {
 
         return commodityBatchList;
     }
+
+    public boolean checkForReorder (ICommodityBatchDTO commodityBatch) throws IUserDAO.DALException {
+        double maxAmount = 0;
+        boolean reorder = false;
+
+        try {
+            PreparedStatement preparedStatement = conn.prepareStatement(
+                    "SELECT amountmg, minbatchsize " +
+                            "FROM ingredientlist, recipe " +
+                            "WHERE ingredientlist.ingredientlistid = recipe.ingredientlistid " +
+                            "AND ingredientlist.ingredientlistid = 2;"
+            );
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                double amount = resultSet.getInt("amountmg") * resultSet.getInt("minbatchsize");
+                if (amount > maxAmount) {
+                    maxAmount = amount;
+                }
+            }
+
+            if (commodityBatch.getAmountInKg()/1000000 < maxAmount*2) {
+                reorder = true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return reorder;
+    }
+
 }
