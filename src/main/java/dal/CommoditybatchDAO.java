@@ -78,7 +78,7 @@ public class CommoditybatchDAO {
         return commodityBatch;
     }
 
-    public void deleteCommodityBatch (int commodityBatchId) throws SQLException {
+    public void deleteCommodityBatch(int commodityBatchId) throws SQLException {
         try {
             conn.setAutoCommit(false);
             PreparedStatement preparedStatement = conn.prepareStatement(
@@ -95,7 +95,7 @@ public class CommoditybatchDAO {
         }
     }
 
-    public void updateCommodityBatch (ICommodityBatchDTO commodityBatch) throws SQLException {
+    public void updateCommodityBatch(ICommodityBatchDTO commodityBatch) throws SQLException {
         try {
             conn.setAutoCommit(false);
             PreparedStatement preparedStatement = conn.prepareStatement(
@@ -120,7 +120,7 @@ public class CommoditybatchDAO {
         }
     }
 
-    public double getTotalCommodityAmountInKG (IIngredientDTO ingredient) throws SQLException {
+    public double getTotalCommodityAmountInKG(IIngredientDTO ingredient) throws SQLException {
         double totalAmount = 0;
 
         try {
@@ -142,7 +142,7 @@ public class CommoditybatchDAO {
         return totalAmount;
     }
 
-    public List<ICommodityBatchDTO> getCommodityBatchList (IIngredientDTO ingredient) throws SQLException {
+    public List<ICommodityBatchDTO> getCommodityBatchList(IIngredientDTO ingredient) throws SQLException {
         List<ICommodityBatchDTO> commodityBatchList = new ArrayList<>();
 
         try {
@@ -170,4 +170,17 @@ public class CommoditybatchDAO {
 
         return commodityBatchList;
     }
+
+    private boolean checkForReorder(RecipeDTO recipeDTO, CommodityBatchDTO commodityBatchDTO) {
+        //TODO: Brug funktion. Evt. tjek alle recipes.
+
+            if(commodityBatchDTO.getIngredientDTO().getAmount()*recipeDTO.getMinBatchSize()>commodityBatchDTO.getAmountInKg()*1000000){
+                return false;
+            } else {
+                return true;
+            }
+
+
+    }
+
 }
