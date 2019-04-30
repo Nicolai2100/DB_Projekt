@@ -95,7 +95,7 @@ public class CommoditybatchDAO {
         }
     }
 
-    public void updateCommodityBatch (ICommodityBatchDTO commodityBatch) throws IUserDAO.DALException {
+    public void updateCommodityBatch (ICommodityBatchDTO commodityBatch) throws SQLException {
         try {
             conn.setAutoCommit(false);
             PreparedStatement preparedStatementUpdate = conn.prepareStatement(
@@ -123,6 +123,16 @@ public class CommoditybatchDAO {
                 preparedStatementReorder.setInt(1, commodityBatch.getIngredientDTO().getIngredientId());
 
                 preparedStatementReorder.executeUpdate();
+                conn.commit(); //TODO ikke atomic, men kan det nogensinde blive det?
+            }
+
+            if (checkIsResidue(commodityBatch)) {
+                PreparedStatement preparedStatementResidue = conn.prepareStatement(
+                        "UPDATE commoditybatch " +
+                                "SET residue=1, " +
+                                "WHERE ingredientid=?"
+                );
+                preparedStatementResidue.setInt(1, commodityBatch.getIngredientDTO().getIngredientId());
                 conn.commit(); //TODO ikke atomic, men kan det nogensinde blive det?
             }
 
@@ -190,7 +200,7 @@ public class CommoditybatchDAO {
      * @return true if the batch is smaller, false if it is still larger
      * @throws IUserDAO.DALException
      */
-    private boolean checkForReorder (ICommodityBatchDTO commodityBatch) throws IUserDAO.DALException {
+    private boolean checkForReorder (ICommodityBatchDTO commodityBatch) throws SQLException {
         double maxAmount = 0;
         boolean reorder = false;
 
@@ -220,5 +230,29 @@ public class CommoditybatchDAO {
         }
 
         return reorder;
+    }
+
+    private boolean checkIsResidue (ICommodityBatchDTO commodityBatch) throws SQLException {
+        boolean isResidue = false;
+
+        try {
+            PreparedStatement preparedStatement = conn.prepareStatement(
+                    "SELECT minamountinmg " +
+                            "FROM ingredient " +
+                            "WHERE ingredientid = ?"
+            );
+            preparedStatement.setInt(1, commodityBatch.getIngredientDTO().getIngredientId());
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet.next();
+
+            if (resultSet.getInt("minamountinmg") > commodityBatch.getAmountInKg()/1000000) {
+                isResidue = true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return isResidue;
     }
 }
