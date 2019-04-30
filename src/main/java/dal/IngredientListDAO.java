@@ -10,17 +10,40 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class IngredientListDAO {
+public class IngredientListDAO implements IIngredientListDAO{
     private Connection conn;
     private IngredientDAO ingredientDAO;
 
-    public IngredientListDAO(IngredientDAO ingredientDAO) {
+    public IngredientListDAO(IngredientDAO ingredientDAO) throws DALException {
         this.ingredientDAO = ingredientDAO;
         this.conn = ConnectionDAO.getConnection();
     }
 
+    @Override
+    public void createIngredientList(IRecipeDTO recipeDTO, int edition) throws DALException {
+        try {
+            conn.setAutoCommit(false);
+            String insertIngList = "INSERT INTO ingredientlist(ingredientlistid, edition, ingredientid, amountmg) " +
+                    "VALUES(?,?,?,?);";
+            PreparedStatement pstmtInsertIngredientList = conn.prepareStatement(insertIngList);
+            pstmtInsertIngredientList.setInt(1, recipeDTO.getRecipeId());
 
-    public List<IIngredientDTO> getIngredientList(IRecipeDTO recipeDTO) {
+            for (IIngredientDTO ingredient : recipeDTO.getIngredientsList()) {
+                pstmtInsertIngredientList.setInt(2, edition);
+                pstmtInsertIngredientList.setInt(3, ingredient.getIngredientId());
+                pstmtInsertIngredientList.setDouble(4, ingredient.getAmount());
+                pstmtInsertIngredientList.executeUpdate();
+            }
+            conn.commit();
+            System.out.println("The ingredientlist was successfully created.");
+
+        } catch (SQLException e) {
+            throw new DALException("An error occurred in the database at IngredientListDAO.");
+        }
+    }
+
+    @Override
+    public List<IIngredientDTO> getIngredientList(IRecipeDTO recipeDTO) throws DALException {
         List<IIngredientDTO> ingredientList = new ArrayList<>();
 
         try {
@@ -37,10 +60,32 @@ public class IngredientListDAO {
                 ingredientList.add(ingredientDTO);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at IngredientListDAO.");
         }
         return ingredientList;
+    }
 
+    @Override
+    public void updateIngredientList(IRecipeDTO recipeDTO, int edition) throws DALException {
+        try {
+            conn.setAutoCommit(false);
+            String updateIngListString = "INSERT INTO ingredientlist(ingredientlistid, edition, ingredientid, amountmg) " +
+                    "VALUES(?,?,?,?);";
+            PreparedStatement pstmtInsertIngredientList = conn.prepareStatement(updateIngListString);
+            pstmtInsertIngredientList.setInt(1, recipeDTO.getRecipeId());
+            pstmtInsertIngredientList.setInt(2, edition);
+
+            for (IIngredientDTO ingredient : recipeDTO.getIngredientsList()) {
+                pstmtInsertIngredientList.setInt(3, ingredient.getIngredientId());
+                pstmtInsertIngredientList.setDouble(4, ingredient.getAmount());
+                pstmtInsertIngredientList.executeUpdate();
+            }
+            conn.commit();
+            System.out.println("The ingredientlist was successfully updated.");
+
+        } catch (SQLException e) {
+            throw new DALException("An error occurred in the database at IngredientListDAO.");
+        }
     }
 
     /**
@@ -49,7 +94,8 @@ public class IngredientListDAO {
      *
      * @param recipeDTO
      */
-    public void isIngredientListCreated(IRecipeDTO recipeDTO, int edition) {
+    @Override
+    public void isIngredientListCreated(IRecipeDTO recipeDTO, int edition) throws DALException {
         try {
             PreparedStatement pstmtGetIngredientList = conn.prepareStatement(
                     "SELECT COUNT(*) FROM ingredientlist " +
@@ -69,51 +115,7 @@ public class IngredientListDAO {
                 createIngredientList(recipeDTO, edition);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void updateIngredientList(IRecipeDTO recipeDTO, int edition) {
-        try {
-            conn.setAutoCommit(false);
-            String updateIngListString = "INSERT INTO ingredientlist(ingredientlistid, edition, ingredientid, amountmg) " +
-                    "VALUES(?,?,?,?);";
-            PreparedStatement pstmtInsertIngredientList = conn.prepareStatement(updateIngListString);
-            pstmtInsertIngredientList.setInt(1, recipeDTO.getRecipeId());
-            pstmtInsertIngredientList.setInt(2, edition);
-
-            for (IIngredientDTO ingredient : recipeDTO.getIngredientsList()) {
-                pstmtInsertIngredientList.setInt(3, ingredient.getIngredientId());
-                pstmtInsertIngredientList.setDouble(4, ingredient.getAmount());
-                pstmtInsertIngredientList.executeUpdate();
-            }
-            conn.commit();
-            System.out.println("The ingredientlist was successfully updated.");
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void createIngredientList(IRecipeDTO recipeDTO, int edition) {
-        try {
-            conn.setAutoCommit(false);
-            String insertIngList = "INSERT INTO ingredientlist(ingredientlistid, edition, ingredientid, amountmg) " +
-                    "VALUES(?,?,?,?);";
-            PreparedStatement pstmtInsertIngredientList = conn.prepareStatement(insertIngList);
-            pstmtInsertIngredientList.setInt(1, recipeDTO.getRecipeId());
-
-            for (IIngredientDTO ingredient : recipeDTO.getIngredientsList()) {
-                pstmtInsertIngredientList.setInt(2, edition);
-                pstmtInsertIngredientList.setInt(3, ingredient.getIngredientId());
-                pstmtInsertIngredientList.setDouble(4, ingredient.getAmount());
-                pstmtInsertIngredientList.executeUpdate();
-            }
-            conn.commit();
-            System.out.println("The ingredientlist was successfully created.");
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at IngredientListDAO.");
         }
     }
 }

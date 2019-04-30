@@ -4,15 +4,15 @@ import dal.dto.*;
 
 import java.sql.*;
 
-public class ConnectionDAO {
+public class ConnectionDAO implements IConnectionDAO{
     private static Connection conn;
     private UserDAO userDAO;
 
-    public ConnectionDAO() {
+    public ConnectionDAO() throws DALException {
         userDAO = new UserDAO();
     }
 
-    public static Connection getConnection() {
+    public static Connection getConnection() throws DALException {
         try {
             if (conn == null) {
                 String dataBase = "jdbc:mysql://ec2-52-30-211-3.eu-west-1.compute.amazonaws.com/jekala";
@@ -21,20 +21,21 @@ public class ConnectionDAO {
                 conn = DriverManager.getConnection(dataBase, user, password);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at ConnectionDAO.");
         }
         return conn;
     }
 
-    public void closeConn() {
+    @Override
+    public void closeConn() throws DALException {
         try {
             conn.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at ConnectionDAO.");
         }
     }
 
-    public void createTriggerReorder() {
+    public void createTriggerReorder() throws DALException {
         try {
             String createTrigReorderString = "CREATE TRIGGER set_reorder AFTER INSERT ON commoditybatch FOR EACH ROW " +
                     "BEGIN UPDATE ingredient SET ingredient.reorder = 0 " +
@@ -44,11 +45,11 @@ public class ConnectionDAO {
             pstmtCreateTriggerReorder.execute();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at ConnectionDAO.");
         }
     }
 
-    public void createTriggerOldRecipe() {
+    public void createTriggerOldRecipe() throws DALException {
         try {
             String createTrigSaveDeletedString = "CREATE TRIGGER save_recipe_delete BEFORE DELETE ON recipe " +
                     "FOR EACH ROW BEGIN INSERT INTO oldrecipe VALUES " +
@@ -64,61 +65,11 @@ public class ConnectionDAO {
             pstmtCreateTriggerSaveDeletedRecipe.execute();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at ConnectionDAO.");
         }
     }
 
-    /**
-     * Creates triggers that constantly update the minimum required amount af a given raw material (commodity)
-     * in the recipe that uses the smallest amount. The triggers activate every time a row is inserted or deleted in the
-     * ingredientlist-table.
-     */
-    public void createTriggerNewMinamountCheck() {
-        try {
-            conn.setAutoCommit(false);
-
-            String inserttrigger = "CREATE TRIGGER new_min_amount_check_insert AFTER INSERT ON ingredientlist FOR EACH ROW " +
-                    "BEGIN " +
-                        "IF 0 = (SELECT min(minamountinmg) FROM ingredient, ingredientlist " +
-                            "WHERE ingredient.ingredientid = ingredientlist.ingredientid AND ingredient.ingredientid = NEW.ingredientid) " +
-                            "THEN " +
-                            "UPDATE ingredient " +
-                            "SET ingredient.minamountinmg = NEW.amountmg WHERE NEW.ingredientid = ingredient.ingredientid; " +
-                        "ELSEIF NEW.amountmg < (SELECT min(minamountinmg) FROM ingredient, ingredientlist " +
-                            "WHERE ingredient.ingredientid = ingredientlist.ingredientid AND ingredient.ingredientid = NEW.ingredientid) " +
-                            "THEN " +
-                            "UPDATE ingredient " +
-                            "SET ingredient.minamountinmg = NEW.amountmg WHERE NEW.ingredientid = ingredient.ingredientid; " +
-                        "END IF; " +
-                    "END";
-            String updatetrigger = "CREATE TRIGGER new_min_amount_check_update AFTER UPDATE ON ingredientlist FOR EACH ROW " +
-                    "BEGIN " +
-                        "IF 0 = (SELECT min(minamountinmg) FROM ingredient, ingredientlist " +
-                            "WHERE ingredient.ingredientid = ingredientlist.ingredientid AND ingredient.ingredientid = NEW.ingredientid) " +
-                            "THEN " +
-                            "UPDATE ingredient " +
-                            "SET ingredient.minamountinmg = NEW.amountmg WHERE NEW.ingredientid = ingredient.ingredientid; " +
-                        "ELSEIF NEW.amountmg < (SELECT min(minamountinmg) FROM ingredient, ingredientlist " +
-                            "WHERE ingredient.ingredientid = ingredientlist.ingredientid AND ingredient.ingredientid = NEW.ingredientid) " +
-                            "THEN " +
-                            "UPDATE ingredient " +
-                            "SET ingredient.minamountinmg = NEW.amountmg WHERE NEW.ingredientid = ingredient.ingredientid; " +
-                        "END IF; " +
-                    "END";
-
-            PreparedStatement preparedStatement1 = conn.prepareStatement(inserttrigger);
-            PreparedStatement preparedStatement2 = conn.prepareStatement(updatetrigger);
-            preparedStatement1.execute();
-            preparedStatement2.execute();
-            conn.commit();
-            conn.setAutoCommit(true);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void dropTriggers() {
+    public void dropTriggers() throws DALException {
         try {
            /* PreparedStatement pstmtDropTriggerReorder = conn.prepareStatement(
                     "DROP TRIGGER IF EXISTS set_reorder;");
@@ -134,13 +85,13 @@ public class ConnectionDAO {
 /*
             pstmtDropTriggerReorder.execute();
 */
-
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at ConnectionDAO.");
         }
     }
 
-    public void cleanTables() {
+    @Override
+    public void deleteTables() throws DALException {
         try {
             PreparedStatement pstmtDeleteProductbatchCommodityRelation = conn.prepareStatement("DELETE FROM productbatch_commodity_relationship;");
             PreparedStatement pstmtDeleteCommodityBatch = conn.prepareStatement("DELETE FROM commoditybatch;");
@@ -161,14 +112,14 @@ public class ConnectionDAO {
 
             deleteUsers();
 
-
             pstmtDeleteUsers.execute();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at ConnectionDAO.");
         }
     }
 
-    private void deleteUsers() {
+    @Override
+    public void deleteUsers() throws DALException {
         String deleteUserString = "DELETE FROM user WHERE userid = ?;";
         try {
             PreparedStatement deleteNonAdmins = conn.prepareStatement(deleteUserString);
@@ -179,15 +130,18 @@ public class ConnectionDAO {
                     deleteNonAdmins.executeUpdate();
                 }
             }
-
-        } catch (IUserDAO.DALException e) {
-            e.printStackTrace();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at ConnectionDAO.");
         }
     }
 
-    public void initializeDataBase() {
+    @Override
+    public void createTriggers() throws DALException {
+
+    }
+
+    @Override
+    public void initializeDataBase() throws DALException {
         try {
             conn.setAutoCommit(false);
             PreparedStatement createTableUser = conn.prepareStatement(
@@ -283,7 +237,6 @@ public class ConnectionDAO {
                             "volume INT, " +
                             "expiration_date DATE, " +
                             "batch_state VARCHAR(20), " +
-                            "producedby INT, " +
                             "PRIMARY KEY (productbatchid), " +
                             "FOREIGN KEY (recipe) " +
                             "REFERENCES recipe(recipeid));");
@@ -298,7 +251,6 @@ public class ConnectionDAO {
                             "FOREIGN KEY (commodity_batch_id) " +
                             "REFERENCES commoditybatch(commoditybatchid));");
 
-
             //rækkefølgen er vigtig!
             createTableUser.execute();
             createTableUserRole.execute();
@@ -312,11 +264,11 @@ public class ConnectionDAO {
             conn.commit();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at ConnectionDAO.");
         }
     }
 
-    public void dropAllTables(int deleteTable) {
+    public void dropAllTables(int deleteTable) throws DALException {
         try {
             PreparedStatement dropTableUser = conn.prepareStatement(
                     "drop table IF EXISTS user;");
@@ -337,7 +289,6 @@ public class ConnectionDAO {
             PreparedStatement dropTableProductbatchCommodityRelation = conn.prepareStatement(
                     "DROP TABLE IF EXISTS productbatch_commodity_relationship;");
 
-
             if (deleteTable == 0) {
                 dropTableProductbatchCommodityRelation.execute();
                 dropTableOldRecipe.execute();
@@ -351,8 +302,7 @@ public class ConnectionDAO {
 
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at ConnectionDAO.");
         }
     }
-
 }

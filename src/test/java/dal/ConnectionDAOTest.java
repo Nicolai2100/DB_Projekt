@@ -1,7 +1,6 @@
 package dal;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.jupiter.api.Test;
 
 public class ConnectionDAOTest {
@@ -49,7 +48,7 @@ public class ConnectionDAOTest {
 
     @Test
     public void deleteFromAllTables() throws IUserDAO.DALException {
-        connectionDAO.cleanTables();
+        connectionDAO.deleteTables();
     }
 
 }

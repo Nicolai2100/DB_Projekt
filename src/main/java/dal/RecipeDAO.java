@@ -9,7 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class RecipeDAO {
+public class RecipeDAO implements IRecipeDAO{
     private Connection conn;
     private IngredientListDAO ingredientListDAO;
     private UserDAO userDAO;
@@ -19,47 +19,15 @@ public class RecipeDAO {
         return oldRecipeDAO;
     }
 
-    public RecipeDAO(IngredientListDAO ingredientListDAO, UserDAO userDAO) {
+    public RecipeDAO(IngredientListDAO ingredientListDAO, UserDAO userDAO) throws DALException {
         this.oldRecipeDAO = new OldRecipeDAO(this);
         this.ingredientListDAO = ingredientListDAO;
         this.userDAO = userDAO;
         this.conn = ConnectionDAO.getConnection();
-
     }
 
-    public void updateRecipe(IRecipeDTO recipeDTO) {
-        IUserDTO userDTO = recipeDTO.getMadeBy();
-        if (!userDTO.getRoles().contains("farmaceut") || !userDTO.getIsActive()) {
-            System.out.println("User not authorized to proceed!");
-            return;
-        }
-        try {
-            conn.setAutoCommit(false);
-            String selectEditionString = "SELECT edition FROM recipe WHERE recipeid = ?;";
-            PreparedStatement pstmtGetEdition = conn.prepareStatement(selectEditionString);
-            pstmtGetEdition.setInt(1, recipeDTO.getRecipeId());
-            ResultSet rs = pstmtGetEdition.executeQuery();
-            int edition = 1;
-            if (rs.next()) {
-                edition += rs.getInt(1);
-            }
-            String uddateRecipeString = "UPDATE recipe SET edition = ?, name = ?, madeby = ?;";
-            PreparedStatement pstmtUpdateRecipe = conn.prepareStatement(uddateRecipeString);
-
-            pstmtUpdateRecipe.setInt(1, edition);
-            pstmtUpdateRecipe.setString(2, recipeDTO.getName());
-            pstmtUpdateRecipe.setInt(3, recipeDTO.getMadeBy().getUserId());
-
-            pstmtUpdateRecipe.executeUpdate();
-            //Hver liste af ingredienser bliver oprettet med opskriftens id som id... !?
-            ingredientListDAO.updateIngredientList(recipeDTO, edition);
-            conn.commit();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void createRecipe(IRecipeDTO recipeDTO) {
+    @Override
+    public void createRecipe(IRecipeDTO recipeDTO) throws DALException {
         //Først undersøges det om brugeren, der står på til at have oprettet opskriften har
         //den rette rolle til at kunne gøre det.
         IUserDTO userDTO = recipeDTO.getMadeBy();
@@ -91,11 +59,12 @@ public class RecipeDAO {
             conn.commit();
             System.out.println("The recipe was successfully created.");
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at RecipeDAO.");
         }
     }
 
-    public IRecipeDTO getRecipe(int recipeId) {
+    @Override
+    public IRecipeDTO getRecipe(int recipeId) throws DALException {
         IRecipeDTO recipeDTO = new RecipeDTO();
         try {
             String getRecipeString = "SELECT * FROM recipe WHERE recipeid = ?;";
@@ -109,14 +78,46 @@ public class RecipeDAO {
                 recipeDTO.setIngredientsList(ingredientListDAO.getIngredientList(recipeDTO));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (IUserDAO.DALException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at RecipeDAO.");
         }
         return recipeDTO;
     }
 
-    public void archiveRecipe(int recipeId, IUserDTO userDTO) {
+    @Override
+    public void updateRecipe(IRecipeDTO recipeDTO) throws DALException {
+        IUserDTO userDTO = recipeDTO.getMadeBy();
+        if (!userDTO.getRoles().contains("farmaceut") || !userDTO.getIsActive()) {
+            System.out.println("User not authorized to proceed!");
+            return;
+        }
+        try {
+            conn.setAutoCommit(false);
+            String selectEditionString = "SELECT edition FROM recipe WHERE recipeid = ?;";
+            PreparedStatement pstmtGetEdition = conn.prepareStatement(selectEditionString);
+            pstmtGetEdition.setInt(1, recipeDTO.getRecipeId());
+            ResultSet rs = pstmtGetEdition.executeQuery();
+            int edition = 1;
+            if (rs.next()) {
+                edition += rs.getInt(1);
+            }
+            String uddateRecipeString = "UPDATE recipe SET edition = ?, name = ?, madeby = ?;";
+            PreparedStatement pstmtUpdateRecipe = conn.prepareStatement(uddateRecipeString);
+
+            pstmtUpdateRecipe.setInt(1, edition);
+            pstmtUpdateRecipe.setString(2, recipeDTO.getName());
+            pstmtUpdateRecipe.setInt(3, recipeDTO.getMadeBy().getUserId());
+
+            pstmtUpdateRecipe.executeUpdate();
+            //Hver liste af ingredienser bliver oprettet med opskriftens id som id... !?
+            ingredientListDAO.updateIngredientList(recipeDTO, edition);
+            conn.commit();
+        } catch (SQLException e) {
+            throw new DALException("An error occurred in the database at RecipeDAO.");
+        }
+    }
+
+    @Override
+    public void archiveRecipe(int recipeId, IUserDTO userDTO) throws DALException {
         if (!userDTO.getRoles().contains("farmaceut") || !userDTO.getIsActive()) {
             System.out.println("User not authorized to proceed!");
             return;
@@ -127,13 +128,12 @@ public class RecipeDAO {
             pstmtDeleteRecipe.setInt(1, recipeId);
             int result = pstmtDeleteRecipe.executeUpdate();
             if (result < 1) {
-                System.out.println("Error! No such recipe in the system!");
+                System.out.println("The recipe was not archived.");
             } else {
                 System.out.println("The recipe with id: " + recipeId + " was successfully archived.");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
-            System.out.println("The recipe was not archived.");
+            throw new DALException("An error occurred in the database at RecipeDAO.");
         }
     }
 }
