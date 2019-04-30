@@ -114,6 +114,8 @@ public class CommoditybatchDAO {
             preparedStatementUpdate.executeUpdate();
             conn.commit();
 
+            //check whether or not the batch now contains less than the amount required to produce two product
+            // batches of the "most-expensive" recipe
             if (checkForReorder(commodityBatch)) {
                 PreparedStatement preparedStatementReorder = conn.prepareStatement(
                         "UPDATE ingredient " +
