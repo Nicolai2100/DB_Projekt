@@ -18,6 +18,7 @@ public class RecipeDAO implements IRecipeDAO{
         this.ingredientListDAO = ingredientListDAO;
         this.userDAO = userDAO;
         this.conn = ConnectionDAO.getConnection();
+
     }
 
     @Override
@@ -50,11 +51,15 @@ public class RecipeDAO implements IRecipeDAO{
             pstmtInsertRecipe.setInt(4, recipeDTO.getMadeBy().getUserId());
             pstmtInsertRecipe.setInt(5, recipeDTO.getRecipeId());
             pstmtInsertRecipe.setBoolean(6,true);
+            pstmtInsertRecipe.setInt(7, recipeDTO.getMinBatchSize());
             //Opretter ingrediensliste
             ingredientListDAO.isIngredientListCreated(recipeDTO, edition);
             pstmtInsertRecipe.executeUpdate();
             conn.commit();
             System.out.println("The recipe was successfully created.");
+
+            updateMinAmounts();
+
         } catch (SQLException e) {
             throw new DALException("An error occurred in the database at RecipeDAO.");
         }
@@ -73,6 +78,7 @@ public class RecipeDAO implements IRecipeDAO{
                 recipeDTO.setName(rs.getString(3));
                 recipeDTO.setMadeBy(userDAO.getUser(rs.getInt(4)));
                 recipeDTO.setIngredientsList(ingredientListDAO.getIngredientList(recipeDTO));
+                recipeDTO.setMinBatchSize(rs.getInt("minbatchsize"));
             }
         } catch (SQLException e) {
             throw new DALException("An error occurred in the database at RecipeDAO.");
@@ -108,6 +114,9 @@ public class RecipeDAO implements IRecipeDAO{
             //Hver liste af ingredienser bliver oprettet med opskriftens id som id... !?
             ingredientListDAO.updateIngredientList(recipeDTO, edition);
             conn.commit();
+
+            updateMinAmounts();
+
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DALException("An error occurred in the database at RecipeDAO.");
@@ -130,8 +139,50 @@ public class RecipeDAO implements IRecipeDAO{
             } else {
                 System.out.println("The recipe with id: " + recipeId + " was successfully archived.");
             }
+
+            updateMinAmounts();
+
         } catch (SQLException e) {
             throw new DALException("An error occurred in the database at RecipeDAO.");
         }
+    }
+
+    private void updateMinAmounts() throws SQLException {
+
+        try {
+            conn.setAutoCommit(false);
+
+            //Dette query returnerer ingredientid, mindste mængde forekommende(ingrediens) og minimumamount
+            PreparedStatement preparedStatementAmounts = conn.prepareStatement(
+                    "SELECT ingredientlist.ingredientid, min(amountmg*minbatchsize) AS amount, minamountinmg " +
+                            "FROM ingredientlist JOIN recipe ON ingredientlist.ingredientlistid = recipe.ingredientlistid " +
+                            "JOIN ingredient ON ingredient.ingredientid = ingredientlist.ingredientid WHERE in_use = 1 " + //TODO in_use skal slettes, når nicolai er færdig med lege
+                            "GROUP BY ingredientid ASC"
+            );
+
+            ResultSet resultSet = preparedStatementAmounts.executeQuery();
+
+            while (resultSet.next()) {
+                if (resultSet.getDouble("amount") < resultSet.getDouble("minamountinmg")) {
+                    PreparedStatement preparedStatementNewMin = conn.prepareStatement(
+                            "UPDATE ingredient " +
+                                    "SET minamountinmg = ? " +
+                                    "WHERE ingredientid = ?"
+                    );
+                    preparedStatementNewMin.setInt(1, resultSet.getInt("amount"));
+                    preparedStatementNewMin.setInt(2, resultSet.getInt("ingredientid"));
+
+                    preparedStatementNewMin.executeUpdate();
+
+                }
+            }
+
+            conn.commit();
+            conn.setAutoCommit(true);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
     }
 }

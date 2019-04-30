@@ -3,6 +3,8 @@ package dal;
 import dal.dto.*;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CommodityBatchDAO implements ICommodityBatchDAO {
     private UserDAO userDAO;
@@ -117,5 +119,56 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
         } catch (SQLException e) {
             throw new DALException("An error occurred in the database at CommodityBatchDAO.");
         }
+    }
+
+    public double getTotalCommodityAmountInKG (IIngredientDTO ingredient) throws SQLException {
+        double totalAmount = 0;
+
+        try {
+            PreparedStatement preparedStatement = conn.prepareStatement( //TODO skal det medregnes, hvis det er rest?
+                    "SELECT sum(amountinkg) " +
+                            "FROM commoditybatch " +
+                            "WHERE ingredientid=? AND NOT residue=1"
+            );
+            preparedStatement.setInt(1, ingredient.getIngredientId());
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            totalAmount = resultSet.getDouble(1);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return totalAmount;
+    }
+
+    public List<ICommodityBatchDTO> getCommodityBatchList (IIngredientDTO ingredient) throws SQLException {
+        List<ICommodityBatchDTO> commodityBatchList = new ArrayList<>();
+
+        try {
+            PreparedStatement preparedStatement = conn.prepareStatement( //TODO skal det medregnes, hvis det er rest?
+                    "SELECT commoditybatchid, ingredientid, amountinkg, orderdate, residue " + //TODO orderedby tages ikke med for det er wack
+                            "FROM commoditybatch " +
+                            "WHERE ingdientid=? AND NOT residue=1"
+            );
+            preparedStatement.setInt(1, ingredient.getIngredientId());
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                ICommodityBatchDTO batch = new CommodityBatchDTO();
+                batch.setBatchId(resultSet.getInt("commoditybatchid"));
+                batch.setIngredientDTO(ingredient);
+                batch.setAmountInKg(resultSet.getInt("amountinkg"));
+                batch.setOrderDate(resultSet.getString("orderdate"));
+                batch.setResidue(resultSet.getBoolean("residue"));
+                commodityBatchList.add(batch);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return commodityBatchList;
     }
 }
