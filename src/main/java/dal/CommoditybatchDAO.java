@@ -114,8 +114,6 @@ public class CommoditybatchDAO {
             preparedStatementUpdate.executeUpdate();
             conn.commit();
 
-            //check whether or not the batch now contains less than the amount required to produce two
-            // product batches of the most "expensive" recipe
             if (checkForReorder(commodityBatch)) {
                 PreparedStatement preparedStatementReorder = conn.prepareStatement(
                         "UPDATE ingredient " +
@@ -187,6 +185,12 @@ public class CommoditybatchDAO {
         return commodityBatchList;
     }
 
+    /**
+     * Check whether or not the batch now contains less than the amount required to produce two
+     * product batches of the most "expensive" recipe
+     * @return true if the batch is smaller, false if it is still larger
+     * @throws IUserDAO.DALException
+     */
     public boolean checkForReorder (ICommodityBatchDTO commodityBatch) throws IUserDAO.DALException {
         double maxAmount = 0;
         boolean reorder = false;
