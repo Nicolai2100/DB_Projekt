@@ -1,5 +1,6 @@
 package dal;
 
+import dal.dto.IIngredientDTO;
 import dal.dto.IRecipeDTO;
 import dal.dto.IUserDTO;
 import dal.dto.RecipeDTO;
@@ -137,6 +138,17 @@ public class RecipeDAO {
         } catch (SQLException e) {
             e.printStackTrace();
             System.out.println("The recipe was not archived.");
+        }
+    }
+
+    private void updateMinAmount (IRecipeDTO recipe) {
+
+
+        for (IIngredientDTO ingredient : recipe.getIngredientsList()) {
+            PreparedStatement preparedStatement = conn.prepareStatement(
+                    ""
+            )
+            //ingredientlist.amountmg * recipe.minbatchsize
         }
     }
 }

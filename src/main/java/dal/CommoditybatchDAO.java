@@ -114,8 +114,8 @@ public class CommoditybatchDAO {
             preparedStatementUpdate.executeUpdate();
             conn.commit();
 
-            //check whether or not the batch now contains less than the amount required to produce two product
-            // batches of the "most-expensive" recipe
+            //check whether or not the batch now contains less than the amount required to produce two
+            // product batches of the most "expensive" recipe
             if (checkForReorder(commodityBatch)) {
                 PreparedStatement preparedStatementReorder = conn.prepareStatement(
                         "UPDATE ingredient " +
@@ -162,8 +162,8 @@ public class CommoditybatchDAO {
         List<ICommodityBatchDTO> commodityBatchList = new ArrayList<>();
 
         try {
-            PreparedStatement preparedStatement = conn.prepareStatement( //TODO skal det medregnes, hvis det er rest?
-                    "SELECT commoditybatchid, ingredientid, amountinkg, orderdate, residue " + //TODO orderedby tages ikke med fordi det er wack
+            PreparedStatement preparedStatement = conn.prepareStatement( //TODO orderedby tages ikke med fordi det er wack
+                    "SELECT commoditybatchid, ingredientid, amountinkg, orderdate, residue " +
                             "FROM commoditybatch " +
                             "WHERE ingdientid=? AND NOT residue=1"
             );
@@ -196,8 +196,10 @@ public class CommoditybatchDAO {
                     "SELECT amountmg, minbatchsize " +
                             "FROM ingredientlist, recipe " +
                             "WHERE ingredientlist.ingredientlistid = recipe.ingredientlistid " +
-                            "AND ingredientlist.ingredientlistid = 2;"
+                            "AND ingredientlist.ingredientlistid = ?;"
             );
+            preparedStatement.setInt(1, commodityBatch.getIngredientDTO().getIngredientId());
+
             ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
