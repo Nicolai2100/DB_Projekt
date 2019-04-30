@@ -56,7 +56,7 @@ public class UserDAO implements IUserDAO {
             }
 
         } catch (SQLException e) {
-            System.out.println("Error! " + e.getMessage());
+            throw new DALException("An error occurred in the database at UserDAO.");
         }
     }
 
@@ -91,7 +91,7 @@ public class UserDAO implements IUserDAO {
                 return null;
             }
         } catch (SQLException e) {
-            System.out.println("Error! " + e.getMessage());
+            throw new DALException("An error occurred in the database at UserDAO.");
         }
         return returnUser;
     }
@@ -135,7 +135,7 @@ public class UserDAO implements IUserDAO {
                 }
             }
         } catch (SQLException e) {
-            System.out.println("Error " + e.getMessage());
+            throw new DALException("An error occurred in the database at UserDAO.");
         }
         return userList;
     }
@@ -178,7 +178,7 @@ public class UserDAO implements IUserDAO {
                 conn.commit();
             }
         } catch (SQLException e) {
-            System.out.println("Error! " + e.getMessage());
+            throw new DALException("An error occurred in the database at UserDAO.");
         }
     }
 
@@ -195,11 +195,6 @@ public class UserDAO implements IUserDAO {
         int result;
         try {
             String inactivateString = "UPDATE user SET active = 0 WHERE userid = ? ";
-            //String deleteUserString = "DELETE FROM user WHERE userid = ?;";
-            //PreparedStatement pSmtDeleteUser = conn.prepareStatement(deleteUserString);
-            //pSmtDeleteUser.setInt(1, userId);
-            //result = pSmtDeleteUser.executeUpdate();
-
             PreparedStatement psmtInactivateUser = conn.prepareStatement(inactivateString);
             psmtInactivateUser.setInt(1, userId);
             result = psmtInactivateUser.executeUpdate();
@@ -209,7 +204,7 @@ public class UserDAO implements IUserDAO {
                 System.out.println("Error no such user exists in the database!");
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            throw new DALException("An error occurred in the database at UserDAO.");
         }
     }
 
@@ -229,7 +224,7 @@ public class UserDAO implements IUserDAO {
             }
             conn.commit();
         } catch (SQLException e) {
-            System.out.println("Error in creating userrole " + e.getMessage());
+            throw new DALException("An error occurred in the database at UserDAO.");
         }
     }
 
@@ -239,7 +234,7 @@ public class UserDAO implements IUserDAO {
      * brugeren får flere roller end denne bør have.
      */
 
-    public void roleTransAct(IUserDTO user) {
+    public void roleTransAct(IUserDTO user) throws DALException {
         List<String> newUserRoles = user.getRoles();
         try {
             String deleteRoleString = "DELETE FROM userrole WHERE userid = ?;";
@@ -263,8 +258,7 @@ public class UserDAO implements IUserDAO {
             }
             conn.commit();
         } catch (SQLException e) {
-            e.getMessage();
-            //            throw new DALException(e.getMessage())
+            throw new DALException("An error occurred in the database at UserDAO.");
         }
     }
 }

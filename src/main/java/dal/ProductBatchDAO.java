@@ -3,7 +3,6 @@ package dal;
 import dal.dto.*;
 
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 
 public class ProductBatchDAO {
@@ -13,15 +12,7 @@ public class ProductBatchDAO {
         this.conn = ConnectionDAO.getConnection();
     }
 
-    /*Systemet skal således understøtte
-  Oprettelse og administration af opskrifter med indholdsstoffer (Farmaceut)
-  Oprettelse og administration af råvarebatches (Produktionsleder)
-  Oprettelse og igangsætning af produktbatches (Produktionsleder)
-  Produktion af produktbatches (Laborant)
-  Lagerstatus af råvarer og råvarebatches (Produktionsleder)
-  */
-
-    public void createProductbatch(ProductbatchDTO productbatch) {
+    public void createProductbatch(ProductbatchDTO productbatch) throws DALException {
         //kontroller om han er aktiv i systemet
         if (!productbatch.getMadeBy().getRoles().contains("productionleader") || !productbatch.getMadeBy().getIsActive()) {
             System.out.println("User not authorized to proceed!");
@@ -33,8 +24,6 @@ public class ProductBatchDAO {
             PreparedStatement pstmtInsertProduct = conn.prepareStatement(
                     "INSERT INTO productbatch " +
                             "VALUES(?,?,?,?,?,?,?,?)");
-
-
             pstmtInsertProduct.setInt(1, productbatch.getProductId());
             pstmtInsertProduct.setString(2, productbatch.getName());
             pstmtInsertProduct.setInt(3, productbatch.getMadeBy().getUserId());
@@ -44,19 +33,17 @@ public class ProductBatchDAO {
             pstmtInsertProduct.setDate(7, productbatch.getExpirationDate());
             pstmtInsertProduct.setString(8, productbatch.getBatchState());
             pstmtInsertProduct.executeUpdate();
-
-
             createRelations(productbatch.getCommodityBatches(), productbatch.getProductId());
 
             conn.commit();
             System.out.println("The product was successfully created.");
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at ProductBatchDAO.");
         }
     }
 
-    public ProductbatchDTO getProductbatch(int productBatch) {
+    public ProductbatchDTO getProductbatch(int productBatch) throws DALException {
 
         ProductbatchDTO productbatchDTO = new ProductbatchDTO();
         UserDAO userDAO = new UserDAO();
@@ -65,7 +52,6 @@ public class ProductBatchDAO {
         try {
             PreparedStatement pstmtSelectProductBatch = conn.prepareStatement(
                     "SELECT productbatchid, name, madeby, recipe, production_date, volume, expiration_date, batch_state, commodity_batch_id FROM productbatch NATURAL JOIN productbatch_commodity_relationship WHERE productbatchid = ?;");
-
 
             pstmtSelectProductBatch.setInt(1, productBatch);
             ResultSet rs = pstmtSelectProductBatch.executeQuery();
@@ -88,12 +74,12 @@ public class ProductBatchDAO {
 
 
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at ProductBatchDAO.");
         }
         return productbatchDTO;
     }
 
-    public void updateProductBatch(ProductbatchDTO productbatch) {
+    public void updateProductBatch(ProductbatchDTO productbatch) throws DALException {
         try {
             conn.setAutoCommit(false);
             PreparedStatement pstmtDeleteRelations = conn.prepareStatement(
@@ -119,7 +105,7 @@ public class ProductBatchDAO {
             conn.commit();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at ProductBatchDAO.");
         }
     }
 

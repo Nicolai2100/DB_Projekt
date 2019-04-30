@@ -41,7 +41,7 @@ public class DALTest {
 
     @Test
     public void cleanTables() {
-        connectionDAO.cleanTables();
+        connectionDAO.deleteTables();
     }
 
     @Test
@@ -50,7 +50,7 @@ public class DALTest {
         /**
          * Alt slettes
          */
-        connectionDAO.cleanTables();
+        connectionDAO.deleteTables();
 
         /**
          * Brugerne oprettes

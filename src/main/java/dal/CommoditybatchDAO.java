@@ -8,12 +8,12 @@ public class CommoditybatchDAO {
     private UserDAO userDAO;
     private Connection conn;
 
-    public CommoditybatchDAO(UserDAO userDAO) {
+    public CommoditybatchDAO(UserDAO userDAO) throws DALException {
         this.userDAO = userDAO;
         this.conn = ConnectionDAO.getConnection();
     }
 
-    public void createCommodityBatch(ICommodityBatchDTO commodityBatch) {
+    public void createCommodityBatch(ICommodityBatchDTO commodityBatch) throws DALException {
         IUserDTO userDTO = commodityBatch.getOrderedBy();
         if (!userDTO.getRoles().contains("productionleader")) {
             System.out.println("User not authorized to proceed!");
@@ -32,11 +32,11 @@ public class CommoditybatchDAO {
             pstmtInsertCommodityBatch.executeUpdate();
             conn.commit();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at CommodityBatchDAO.");
         }
     }
 
-    public ICommodityBatchDTO getCommodityBatch(int commodityBatchId) {
+    public ICommodityBatchDTO getCommodityBatch(int commodityBatchId) throws DALException {
         ICommodityBatchDTO commodityBatch = new CommodityBatchDTO();
         commodityBatch.setBatchId(commodityBatchId);
         IIngredientDTO ingredientDTO = new IngredientDTO();
@@ -69,9 +69,7 @@ public class CommoditybatchDAO {
                 return null;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (IUserDAO.DALException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at CommodityBatchDAO.");
         }
         return commodityBatch;
     }

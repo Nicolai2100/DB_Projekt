@@ -42,7 +42,7 @@ public class ProductBatchDAOTest {
 
     @Test
     public void cleanTables() {
-        connectionDAO.cleanTables();
+        connectionDAO.deleteTables();
     }
 
     @Test
@@ -277,7 +277,7 @@ public class ProductBatchDAOTest {
          * Alt slettes
          */
 
-        connectionDAO.cleanTables();
+        connectionDAO.deleteTables();
 
 
         /**

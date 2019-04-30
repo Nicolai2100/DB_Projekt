@@ -12,7 +12,7 @@ public class ConnectionDAO {
         userDAO = new UserDAO();
     }
 
-    public static Connection getConnection() {
+    public static Connection getConnection() throws DALException {
         try {
             if (conn == null) {
                 String dataBase = "jdbc:mysql://ec2-52-30-211-3.eu-west-1.compute.amazonaws.com/jekala";
@@ -21,20 +21,20 @@ public class ConnectionDAO {
                 conn = DriverManager.getConnection(dataBase, user, password);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at ConnectionDAO.");
         }
         return conn;
     }
 
-    public void closeConn() {
+    public void closeConn() throws DALException {
         try {
             conn.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at ConnectionDAO.");
         }
     }
 
-    public void createTriggerReorder() {
+    public void createTriggerReorder() throws DALException {
         try {
             String createTrigReorderString = "CREATE TRIGGER set_reorder AFTER INSERT ON commoditybatch FOR EACH ROW " +
                     "BEGIN UPDATE ingredient SET ingredient.reorder = 0 " +
@@ -44,11 +44,11 @@ public class ConnectionDAO {
             pstmtCreateTriggerReorder.execute();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at ConnectionDAO.");
         }
     }
 
-    public void createTriggerOldRecipe() {
+    public void createTriggerOldRecipe() throws DALException {
         try {
             String createTrigSaveDeletedString = "CREATE TRIGGER save_recipe_delete BEFORE DELETE ON recipe " +
                     "FOR EACH ROW BEGIN INSERT INTO oldrecipe VALUES " +
@@ -64,11 +64,11 @@ public class ConnectionDAO {
             pstmtCreateTriggerSaveDeletedRecipe.execute();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at ConnectionDAO.");
         }
     }
 
-    public void dropTriggers() {
+    public void dropTriggers() throws DALException {
         try {
            /* PreparedStatement pstmtDropTriggerReorder = conn.prepareStatement(
                     "DROP TRIGGER IF EXISTS set_reorder;");
@@ -84,13 +84,12 @@ public class ConnectionDAO {
 /*
             pstmtDropTriggerReorder.execute();
 */
-
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at ConnectionDAO.");
         }
     }
 
-    public void cleanTables() {
+    public void deleteTables() throws DALException {
         try {
             PreparedStatement pstmtDeleteProductbatchCommodityRelation = conn.prepareStatement("DELETE FROM productbatch_commodity_relationship;");
             PreparedStatement pstmtDeleteCommodityBatch = conn.prepareStatement("DELETE FROM commoditybatch;");
@@ -111,14 +110,13 @@ public class ConnectionDAO {
 
             deleteUsers();
 
-
             pstmtDeleteUsers.execute();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at ConnectionDAO.");
         }
     }
 
-    private void deleteUsers() {
+    private void deleteUsers() throws DALException {
         String deleteUserString = "DELETE FROM user WHERE userid = ?;";
         try {
             PreparedStatement deleteNonAdmins = conn.prepareStatement(deleteUserString);
@@ -129,15 +127,12 @@ public class ConnectionDAO {
                     deleteNonAdmins.executeUpdate();
                 }
             }
-
-        } catch (IUserDAO.DALException e) {
-            e.printStackTrace();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at ConnectionDAO.");
         }
     }
 
-    public void initializeDataBase() {
+    public void initializeDataBase() throws DALException {
         try {
             conn.setAutoCommit(false);
             PreparedStatement createTableUser = conn.prepareStatement(
@@ -247,7 +242,6 @@ public class ConnectionDAO {
                             "FOREIGN KEY (commodity_batch_id) " +
                             "REFERENCES commoditybatch(commoditybatchid));");
 
-
             //rækkefølgen er vigtig!
             createTableUser.execute();
             createTableUserRole.execute();
@@ -261,11 +255,11 @@ public class ConnectionDAO {
             conn.commit();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at ConnectionDAO.");
         }
     }
 
-    public void dropAllTables(int deleteTable) {
+    public void dropAllTables(int deleteTable) throws DALException {
         try {
             PreparedStatement dropTableUser = conn.prepareStatement(
                     "drop table IF EXISTS user;");
@@ -286,7 +280,6 @@ public class ConnectionDAO {
             PreparedStatement dropTableProductbatchCommodityRelation = conn.prepareStatement(
                     "DROP TABLE IF EXISTS productbatch_commodity_relationship;");
 
-
             if (deleteTable == 0) {
                 dropTableProductbatchCommodityRelation.execute();
                 dropTableOldRecipe.execute();
@@ -300,8 +293,7 @@ public class ConnectionDAO {
 
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at ConnectionDAO.");
         }
     }
-
 }

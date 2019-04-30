@@ -17,7 +17,7 @@ public class IngredientDAO {
         this.conn = ConnectionDAO.getConnection();
     }
 
-    public void createIngredient(IIngredientDTO ingredientDTO) {
+    public void createIngredient(IIngredientDTO ingredientDTO) throws DALException {
         try {
             conn.setAutoCommit(false);
             String insertIngString = "INSERT INTO ingredient VALUES(?,?,?,?,?);";
@@ -32,11 +32,11 @@ public class IngredientDAO {
             System.out.println("The ingredient was successfully created.");
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at IngredientDAO.");
         }
     }
 
-    public IIngredientDTO getIngredient(int ingredientId) {
+    public IIngredientDTO getIngredient(int ingredientId) throws DALException {
         IIngredientDTO ingredientDTO = new IngredientDTO();
         try {
             String getIngString = "SELECT * FROM ingredient WHERE ingredientid = ?;";
@@ -50,12 +50,12 @@ public class IngredientDAO {
                 ingredientDTO.setType(rs.getString(3));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at IngredientDAO.");
         }
         return ingredientDTO;
     }
 
-    public List<IIngredientDTO> checkForReorder() {
+    public List<IIngredientDTO> checkForReorder() throws DALException {
         List<IIngredientDTO> toBeOrdered = new ArrayList<>();
         try {
             String getReorderString = "SELECT * FROM ingredient WHERE reorder = 1;";
@@ -70,7 +70,7 @@ public class IngredientDAO {
                 toBeOrdered.add(ingredientDTO);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at IngredientDAO.");
         }
 
         return toBeOrdered;
@@ -82,7 +82,7 @@ public class IngredientDAO {
      *
      * @param ingredient
      */
-    public void isIngredientThere(IIngredientDTO ingredient) {
+    public void isIngredientThere(IIngredientDTO ingredient) throws DALException {
         try {
             String isIngThere = "SELECT COUNT(*) FROM ingredient WHERE ingredientid = ?;";
             PreparedStatement pstmtIsIngThere = conn.prepareStatement(isIngThere);
@@ -95,7 +95,7 @@ public class IngredientDAO {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at IngredientDAO.");
         }
     }
 
@@ -105,7 +105,7 @@ public class IngredientDAO {
      * @param ingredient the given ingredient.
      * @return the total remaining amount across productbatches in kg
      */
-    public double getTotalAmount(IIngredientDTO ingredient) {
+    public double getTotalAmount(IIngredientDTO ingredient) throws DALException {
         double totalAmount = 0;
 
         try {
@@ -120,7 +120,7 @@ public class IngredientDAO {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new DALException("An error occurred in the database at IngredientDAO.");
         }
         return totalAmount;
     }
