@@ -557,6 +557,8 @@ public class DALTest {
 
         IRecipeDTO recipeDTO = recipeDAO.getActiveRecipe(3);
         recipeDTO.setName("Opdateret 2 " + recipeDTO.getName());
+/*
         recipeDAO.updateRecipe(recipeDTO);
+*/
     }
 }
