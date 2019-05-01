@@ -201,34 +201,21 @@ public class ConnectionDAO implements IConnectionDAO{
 
     @Override
     public void createTriggers() throws DALException {
-
+        createTriggerReorder();
     }
-
-   /* public void createTriggerArchiveRecipe() throws DALException {
+    public void createTriggerReorder() throws DALException {
         try {
-            String createTrigSaveDeletedString = "CREATE TRIGGER save_recipe_delete AFTER DELETE ON recipe " +
-                    "FOR EACH ROW " +
-                    "BEGIN " +
-                    "INSERT INTO recipe VALUES " +
-                    "(old.recipeid, old.edition, old.name, " +
-                    "old.madeby, old.ingredientlistid, 0, NOW(), old.minbatchsize); " +
-                    "END;";
-            PreparedStatement pstmtCreateTriggerSaveDeletedRecipe = conn.prepareStatement(createTrigSaveDeletedString);
-            String createTrigUpdateDeletedString = "CREATE TRIGGER save_recipe_update AFTER UPDATE ON recipe " +
-                    "FOR EACH ROW " +
-                    "BEGIN " +
-                    "INSERT INTO recipe VALUES (old.recipeid, old.edition, " +
-                    "old.name, old.madeby, old.ingredientlistid, 0, NOW(), old.minbatchsize); " +
-                    "END;";
-            PreparedStatement pstmtCreateTriggerSaveUpdatedRecipe = conn.prepareStatement(createTrigUpdateDeletedString);
-            pstmtCreateTriggerSaveUpdatedRecipe.execute();
-            pstmtCreateTriggerSaveDeletedRecipe.execute();
+            String createTrigReorderString = "CREATE TRIGGER set_reorder AFTER INSERT ON commoditybatch FOR EACH ROW " +
+                    "BEGIN UPDATE ingredient SET ingredient.reorder = 0 " +
+                    "WHERE ingredient.ingredientid = new.ingredientid; END;";
+            PreparedStatement pstmtCreateTriggerReorder = conn.prepareStatement(createTrigReorderString);
+
+            pstmtCreateTriggerReorder.execute();
+
         } catch (SQLException e) {
-            e.printStackTrace();
             throw new DALException("An error occurred in the database at ConnectionDAO.");
         }
     }
-*/
     public void dropAllTables(int deleteTable) throws DALException {
         try {
             PreparedStatement dropTableUser = conn.prepareStatement(

@@ -80,17 +80,16 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
 
     @Override
     public void updateCommodityBatch(ICommodityBatchDTO commodityBatch) throws DALException {
+        String updateComBatchString = "UPDATE commoditybatch " +
+                "SET commoditybatchid=?, ingredientid=?, orderedby=?, amountinkg=?, orderdate=?, residue=? " +
+                "WHERE commoditybatchid=?";
         try {
             conn.setAutoCommit(false);
-            PreparedStatement preparedStatement = conn.prepareStatement(
-                    "UPDATE commoditybatch " +
-                            "SET commoditybatchid=?, ingredientid=?, orderedby=?, amountinkg=?, orderdate=?, residue=? " +
-                            "WHERE commoditybatchid=?"
-            );
+            PreparedStatement preparedStatement = conn.prepareStatement(updateComBatchString);
             preparedStatement.setInt(1, commodityBatch.getBatchId());
             preparedStatement.setInt(2, commodityBatch.getIngredientDTO().getIngredientId());
             preparedStatement.setInt(3, commodityBatch.getOrderedBy().getUserId());
-            preparedStatement.setDouble(4, commodityBatch.getAmountInKg()); //TODO er sat til int i databasen
+            preparedStatement.setDouble(4, commodityBatch.getAmountInKg()); //TODO er sat til int i databasen - nej den er float
             preparedStatement.setString(5, commodityBatch.getOrderDate());
             preparedStatement.setBoolean(6, commodityBatch.isResidue());
             preparedStatement.setInt(7, commodityBatch.getBatchId());

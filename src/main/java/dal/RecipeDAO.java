@@ -57,14 +57,12 @@ public class RecipeDAO implements IRecipeDAO {
             ingredientListDAO.createIngredientList(recipeDTO, version);
             pstmtInsertRecipe.executeUpdate();
             conn.commit();
-            if (version == 1){
+            if (version == 1) {
                 System.out.println("The recipe was successfully created.");
-            }else{
+            } else {
                 System.out.println("The recipe was successfully updated.");
             }
-/*
             updateMinAmounts();
-*/
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -124,7 +122,10 @@ public class RecipeDAO implements IRecipeDAO {
 /*
             conn.commit();
 */
+/*
+            bliver allerede gjort
             updateMinAmounts();
+*/
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -185,12 +186,11 @@ public class RecipeDAO implements IRecipeDAO {
             conn.setAutoCommit(false);
 
             //Dette query returnerer ingredientid, mindste mængde forekommende(ingrediens) og minimumamount
-            PreparedStatement preparedStatementAmounts = conn.prepareStatement(
-                    "SELECT ingredientlist.ingredientid, min(amountmg*minbatchsize) AS amount, minamountinmg " +
-                            "FROM ingredientlist JOIN recipe ON ingredientlist.ingredientlistid = recipe.ingredientlistid " +
-                            "JOIN ingredient ON ingredient.ingredientid = ingredientlist.ingredientid WHERE in_use = 1 " + //TODO in_use skal slettes, når nicolai er færdig med lege
-                            "GROUP BY ingredientid ASC"
-            );
+            String minAmountsString = "SELECT ingredientlist.ingredientid, min(amountmg*minbatchsize) AS amount, minamountinmg " +
+                    "FROM ingredientlist JOIN recipe ON ingredientlist.ingredientlistid = recipe.ingredientlistid " +
+                    "JOIN ingredient ON ingredient.ingredientid = ingredientlist.ingredientid WHERE in_use = 1 " +
+                    "GROUP BY ingredientid ASC;";
+            PreparedStatement preparedStatementAmounts = conn.prepareStatement(minAmountsString);
 
             ResultSet resultSet = preparedStatementAmounts.executeQuery();
 
@@ -206,9 +206,7 @@ public class RecipeDAO implements IRecipeDAO {
                     preparedStatementNewMin.executeUpdate();
                 }
             }
-
             conn.commit();
-            conn.setAutoCommit(true);
 
         } catch (SQLException e) {
             e.printStackTrace();
