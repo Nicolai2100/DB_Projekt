@@ -296,12 +296,14 @@ public class DALTest {
          */
         IRecipeDTO norethisteron_recipe = new RecipeDTO();
         norethisteron_recipe.setRecipeId(2);
+        norethisteron_recipe.setMinBatchSize(10000);
         norethisteron_recipe.setName("Norethisteron/estrogen");
         norethisteron_recipe.setMadeBy(userDAO.getUser(2));
         List<IIngredientDTO> norethisteron_ingredients = new ArrayList<>();
 
         IRecipeDTO sildenafil_recipe = new RecipeDTO();
         sildenafil_recipe.setRecipeId(3);
+        sildenafil_recipe.setMinBatchSize(11000);
         sildenafil_recipe.setName("sildenafil");
         sildenafil_recipe.setMadeBy(userDAO.getUser(2));
         List<IIngredientDTO> sildenafil_ingredients = new ArrayList<>();
@@ -454,8 +456,6 @@ public class DALTest {
 
         sildenafil_recipe.setIngredientsList(sildenafil_ingredients);
         norethisteron_recipe.setIngredientsList(norethisteron_ingredients);
-        ingredientListDAO.createIngredientList(sildenafil_recipe, 1);
-        ingredientListDAO.createIngredientList(norethisteron_recipe, 1);
         recipeDAO.createRecipe(sildenafil_recipe);
         recipeDAO.createRecipe(norethisteron_recipe);
 
@@ -478,36 +478,36 @@ public class DALTest {
         commodityBatch.setAmountInKg(2.5);
         commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(4));
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
-
         commoditybatchDAO.createCommodityBatch(commodityBatch);
+
         commodityBatch.setOrderedBy(testUser);
         commodityBatch.setBatchId(12);
         commodityBatch.setAmountInKg(2.5);
         commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(12));
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
-
         commoditybatchDAO.createCommodityBatch(commodityBatch);
+
         commodityBatch.setOrderedBy(testUser);
         commodityBatch.setBatchId(13);
         commodityBatch.setAmountInKg(2.5);
         commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(13));
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
-
         commoditybatchDAO.createCommodityBatch(commodityBatch);
+
         commodityBatch.setOrderedBy(testUser);
         commodityBatch.setBatchId(14);
         commodityBatch.setAmountInKg(2.5);
         commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(14));
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
-
         commoditybatchDAO.createCommodityBatch(commodityBatch);
+
         commodityBatch.setOrderedBy(testUser);
         commodityBatch.setBatchId(15);
         commodityBatch.setAmountInKg(2.5);
         commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(15));
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
-
         commoditybatchDAO.createCommodityBatch(commodityBatch);
+
         commodityBatch.setOrderedBy(testUser);
         commodityBatch.setBatchId(16);
         commodityBatch.setAmountInKg(2.5);
@@ -527,12 +527,6 @@ public class DALTest {
         /**
          * Der oprettes et produkt-batch
          */
-        //todo få testUser_2 til at oprette et product-batch
-
-//        recipeDAO.archiveRecipe(2, testUser_2);
-
-        //      oldRecipeDAO.getAllOldRecipes();
-
         ProductBatchDTO productbatchDTO = new ProductBatchDTO();
         UserDTO testUser2 = (UserDTO) userDAO.getUser(1);
         productbatchDTO.setMadeBy(testUser2); //Produktionslederen indsættes som et bruger-objekt.
@@ -563,7 +557,6 @@ public class DALTest {
 
         IRecipeDTO recipeDTO = recipeDAO.getActiveRecipe(3);
         recipeDTO.setName("Opdateret 2 " + recipeDTO.getName());
-        //  recipeDAO.updateRecipe(recipeDTO);
+        recipeDAO.updateRecipe(recipeDTO);
     }
-
 }

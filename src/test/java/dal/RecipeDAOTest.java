@@ -54,8 +54,11 @@ public class RecipeDAOTest {
 
     @Test
     public void updateRecipe() throws DALException {
-        IRecipeDTO recipeDTO = recipeDAO.getActiveRecipe(3);
+        IRecipeDTO recipeDTO = recipeDAO.getActiveRecipe(2);
+        System.out.println(recipeDTO);
+/*
         recipeDTO.setName("Opdateret 2 " + recipeDTO.getName());
+*/
         recipeDAO.updateRecipe(recipeDTO);
     }
 

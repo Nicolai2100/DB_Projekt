@@ -53,12 +53,18 @@ public class RecipeDAO implements IRecipeDAO {
             pstmtInsertRecipe.setInt(5, recipeDTO.getRecipeId());
             pstmtInsertRecipe.setBoolean(6, true);
             pstmtInsertRecipe.setInt(7, recipeDTO.getMinBatchSize());
-            //Opretter ingrediensliste todo slet og lav ordentlig
-            ingredientListDAO.isIngredientListCreated(recipeDTO, version);
+
+            ingredientListDAO.createIngredientList(recipeDTO, version);
             pstmtInsertRecipe.executeUpdate();
             conn.commit();
-            System.out.println("The recipe was successfully created.");
+            if (version == 1){
+                System.out.println("The recipe was successfully created.");
+            }else{
+                System.out.println("The recipe was successfully updated.");
+            }
+/*
             updateMinAmounts();
+*/
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -76,10 +82,11 @@ public class RecipeDAO implements IRecipeDAO {
             ResultSet rs = pstmtGetRecipe.executeQuery();
             while (rs.next()) {
                 recipeDTO.setRecipeId(recipeId);
+                recipeDTO.setVersion(rs.getInt(2));
                 recipeDTO.setName(rs.getString(3));
                 recipeDTO.setMadeBy(userDAO.getUser(rs.getInt(4)));
                 recipeDTO.setIngredientsList(ingredientListDAO.getIngredientList(recipeDTO));
-                recipeDTO.setMinBatchSize(rs.getInt("minbatchsize"));
+                recipeDTO.setMinBatchSize(rs.getInt(8));
             }
         } catch (SQLException e) {
             throw new DALException("An error occurred in the database at RecipeDAO.");
@@ -95,22 +102,13 @@ public class RecipeDAO implements IRecipeDAO {
             return;
         }
         try {
+/*
             conn.setAutoCommit(false);
-            String selectVersionString = "SELECT version FROM recipe WHERE recipeid = ? AND in_use = 1;";
-            PreparedStatement pstmtGetEdition = conn.prepareStatement(selectVersionString);
-            pstmtGetEdition.setInt(1, recipeDTO.getRecipeId());
-            ResultSet rs = pstmtGetEdition.executeQuery();
-
+*/
             int oldVersionInt = recipeDTO.getVersion();
-            if (oldVersionInt < 1) {
-                oldVersionInt = 1;
-            }
-            int newVersionInt = 1;
-            if (rs.next()) {
-                newVersionInt += rs.getInt(1);
-            }
+            int newVersionInt = oldVersionInt + 1;
+
             recipeDTO.setVersion(newVersionInt);
-            createRecipe(recipeDTO);
             Instant instant = Instant.now();
             Timestamp timestamp = Timestamp.from(instant);
 
@@ -122,9 +120,10 @@ public class RecipeDAO implements IRecipeDAO {
             pstmtUpdateRecipe.setInt(4, oldVersionInt);
             int result = pstmtUpdateRecipe.executeUpdate();
 
-            System.out.println(result);
+            createRecipe(recipeDTO);
+/*
             conn.commit();
-
+*/
             updateMinAmounts();
 
         } catch (SQLException e) {
