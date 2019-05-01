@@ -50,6 +50,7 @@ public class IngredientDAO implements IIngredientDAO {
                 ingredientDTO.setIngredientId(rs.getInt(1));
                 ingredientDTO.setName(rs.getString(2));
                 ingredientDTO.setType(rs.getString(3));
+                ingredientDTO.setMinAmountMG(rs.getInt(4));
             }
         } catch (SQLException e) {
             throw new DALException("An error occurred in the database at IngredientDAO.");

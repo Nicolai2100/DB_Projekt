@@ -100,9 +100,7 @@ public class RecipeDAO implements IRecipeDAO {
             return;
         }
         try {
-/*
             conn.setAutoCommit(false);
-*/
             int oldVersionInt = recipeDTO.getVersion();
             int newVersionInt = oldVersionInt + 1;
 
@@ -119,13 +117,7 @@ public class RecipeDAO implements IRecipeDAO {
             int result = pstmtUpdateRecipe.executeUpdate();
 
             createRecipe(recipeDTO);
-/*
             conn.commit();
-*/
-/*
-            bliver allerede gjort
-            updateMinAmounts();
-*/
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -140,7 +132,7 @@ public class RecipeDAO implements IRecipeDAO {
             return;
         }
         try {
-            String deleteRecipeString = "UPDATE recipe SET in_use = 0 WHERE recipeid = ?;";
+            String deleteRecipeString = "UPDATE recipe SET in_use = 0 WHERE recipeid = ? AND in_use = 1;";
             PreparedStatement pstmtDeleteRecipe = conn.prepareStatement(deleteRecipeString);
             pstmtDeleteRecipe.setInt(1, recipeId);
             int result = pstmtDeleteRecipe.executeUpdate();
@@ -149,7 +141,6 @@ public class RecipeDAO implements IRecipeDAO {
             } else {
                 System.out.println("The recipe with id: " + recipeId + " was successfully archived.");
             }
-
             updateMinAmounts();
 
         } catch (SQLException e) {
@@ -195,7 +186,7 @@ public class RecipeDAO implements IRecipeDAO {
             ResultSet resultSet = preparedStatementAmounts.executeQuery();
 
             while (resultSet.next()) {
-                if (resultSet.getDouble("amount") < resultSet.getDouble("minamountinmg")) {
+                if (resultSet.getDouble("amount") > resultSet.getDouble("minamountinmg")) {
                     PreparedStatement preparedStatementNewMin = conn.prepareStatement(
                             "UPDATE ingredient " +
                                     "SET minamountinmg = ? " +
