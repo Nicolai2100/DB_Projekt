@@ -558,5 +558,16 @@ public class DALTest {
         IRecipeDTO recipeDTO = recipeDAO.getActiveRecipe(3);
         recipeDTO.setName("Opdateret 2 " + recipeDTO.getName());
         recipeDAO.updateRecipe(recipeDTO);
+
+        /**
+         * Liste over råvarer der skal bestilles
+         **/
+        System.out.println("To be ordered: ");
+        List<IIngredientDTO> ingredientDTOS3 = ingredientDAO.checkForReorder();
+
+        for (IIngredientDTO ing : ingredientDTOS3) {
+            System.out.println("" + (ingredientDTOS3.indexOf(ing) + 1) + ": IngredientID: " + ing.getIngredientId()
+                    + "-" + ing.getName());
+        }
     }
 }

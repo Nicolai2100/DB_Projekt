@@ -245,14 +245,11 @@ public class ConnectionDAO implements IConnectionDAO {
                             "FOR EACH ROW BEGIN " +
                             "DECLARE needamount float; " +
                             "DECLARE haveamount float; " +
-                            "SET needamount = (select minbatchsize * amountmg from recipe join ingredientlist " +
-                            "on recipe.recipeid = ingredientlist.ingredientlistid " +
-                            "join ingredient where ingredient.ingredientid = new.ingredientid " +
-                            "And recipe.in_use =1 " +
-                            "    limit 1); " +
-                            "SET haveamount = (select amountinkg * 1000000 from ingredientlist join commoditybatch " +
-                            "on new.ingredientid = commoditybatch.ingredientid where commoditybatch.residue = 0 " +
-                            "limit 1); " +
+                            "SET needamount = (select minamountinmg from ingredient " +
+                            "    where ingredient.ingredientid = new.ingredientid); " +
+                            "SET haveamount = (select max(amountinkg) * 1000000 from commoditybatch " +
+                            "    join ingredient on ingredient.ingredientid = commoditybatch.ingredientid " +
+                            "    where commoditybatch.residue = 0 and new.ingredientid = ingredient.ingredientid); " +
                             "IF needamount > haveamount THEN " +
                             "UPDATE ingredient SET ingredient.reorder = 1 " +
                             "WHERE new.ingredientid = ingredient.ingredientid; " +
@@ -278,14 +275,11 @@ public class ConnectionDAO implements IConnectionDAO {
                             "FOR EACH ROW BEGIN " +
                             "DECLARE needamount float; " +
                             "DECLARE haveamount float; " +
-                            "SET needamount = (select minbatchsize * amountmg from recipe join ingredientlist " +
-                            "on recipe.recipeid = ingredientlist.ingredientlistid " +
-                            "join ingredient where ingredient.ingredientid = new.ingredientid " +
-                            "And recipe.in_use =1 " +
-                            "    limit 1); " +
-                            "SET haveamount = (select amountinkg * 1000000 from ingredientlist join commoditybatch " +
-                            "on new.ingredientid = commoditybatch.ingredientid where commoditybatch.residue = 0 " +
-                            "limit 1); " +
+                            "SET needamount = (select minamountinmg from ingredient " +
+                            "    where ingredient.ingredientid = new.ingredientid); " +
+                            "SET haveamount = (select max(amountinkg) * 1000000 from commoditybatch " +
+                            "    join ingredient on ingredient.ingredientid = commoditybatch.ingredientid " +
+                            "    where commoditybatch.residue = 0 and new.ingredientid = ingredient.ingredientid); " +
                             "IF needamount > haveamount THEN " +
                             "UPDATE ingredient SET ingredient.reorder = 1 " +
                             "WHERE new.ingredientid = ingredient.ingredientid; " +
