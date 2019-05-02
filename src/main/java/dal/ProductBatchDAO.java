@@ -3,6 +3,7 @@ package dal;
 import dal.dto.*;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProductBatchDAO implements IProductBatchDAO {
@@ -138,7 +139,6 @@ public class ProductBatchDAO implements IProductBatchDAO {
         productbatch.setBatchState(IProductBatchDTO.State.UNDER_PRODUCTION);
         updateProductBatch(productbatch, user);
     }
-
     @Override
     public void produceProductBatch(ProductBatchDTO productbatch, IUserDTO user) throws DALException {
         if (!user.getRoles().contains("laborant") && !user.getIsActive()) {
@@ -149,19 +149,28 @@ public class ProductBatchDAO implements IProductBatchDAO {
         productbatch.setBatchState(IProductBatchDTO.State.COMPLETED);
         productbatch.setProductionDate(new Date(System.currentTimeMillis()));
 
+        List<ICommodityBatchDTO> commodityBatchDTOS = new ArrayList<>();
+
+        double newAmount;
         for (IIngredientDTO i : recipeDAO.getActiveRecipe(productbatch.getRecipe()).getIngredientsList()) {
             ICommodityBatchDTO commoditybatch = commoditybatchDAO.getCommodityBatch(i.getIngredientId());
-            double newAmount = (commoditybatch.getAmountInKg() - i.getAmount() / 1000000 * productbatch.getVolume());
-            if (newAmount >= 0){
+            newAmount = (commoditybatch.getAmountInKg() - i.getAmount() / 1000000 * productbatch.getVolume());
+            if (newAmount >= 0) {
                 commoditybatch.setAmountInKg(newAmount);
-                System.out.println("Commodity-BatchID: " + commoditybatch.getBatchId() + " new amount " + newAmount);
-                commoditybatchDAO.updateCommodityBatch(commoditybatch);
-            }else{
+                commodityBatchDTOS.add(commoditybatch);
+            } else {
                 throw new DALException("Not enough of commodity in stock!");
             }
         }
+        //Kører to gange for at sørge for at ingen commoditybatches bliver opdateret
+        //når en af dem går i minus
+        for (ICommodityBatchDTO commoditybatch: commodityBatchDTOS) {
+            System.out.println("Commodity-BatchID: " + commoditybatch.getBatchId() + " new amount " + commoditybatch.getAmountInKg());
+            commoditybatchDAO.updateCommodityBatch(commoditybatch);
+        }
         updateProductBatch(productbatch, user);
     }
+
 
     @Override
     public void createRelations(List<ICommodityBatchDTO> commodityBatchList, int productbatchId) throws DALException {
