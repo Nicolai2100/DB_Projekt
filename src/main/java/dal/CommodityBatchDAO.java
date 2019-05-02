@@ -21,8 +21,7 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
     public void createCommodityBatch(ICommodityBatchDTO commodityBatch) throws DALException {
         IUserDTO userDTO = commodityBatch.getOrderedBy();
         if (!userDTO.getRoles().contains("productionleader")) {
-            System.out.println("User not authorized to proceed!");
-            return;
+            throw new DALException("User not authorized to proceed!");
         }
         String insertString = "INSERT INTO commoditybatch VALUES(?,?,?,?,?,?);";
         try {
@@ -101,8 +100,7 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
             throw new DALException("An error occurred in the database at CommodityBatchDAO.");
         }
     }
-
-    @Override
+/*    @Override todo slet
     public void deleteCommodityBatch(int commodityBatchId) throws DALException {
         String deleteComBatString = "DELETE FROM commoditybatch WHERE commoditybatchid=?";
         try {
@@ -115,10 +113,10 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
         } catch (SQLException e) {
             throw new DALException("An error occurred in the database at CommodityBatchDAO.");
         }
-    }
+    }*/
 
     public double getTotalCommodityAmountInKG(IIngredientDTO ingredient) throws DALException {
-        double totalAmount = 0;
+        double totalAmount;
         //TODO skal det medregnes, hvis det er rest?
         String getTotComAmString = "SELECT sum(amountinkg) " +
                 "FROM commoditybatch " +
@@ -129,7 +127,7 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
             ResultSet resultSet = preparedStatement.executeQuery();
             totalAmount = resultSet.getDouble(1);
         } catch (SQLException e) {
-            throw new DALException("");
+            throw new DALException("An error occurred in the database at CommodityBatchDAO.");
         }
         return totalAmount;
     }
@@ -163,7 +161,7 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
 
     public List<ICommodityBatchDTO> getAllCommodityBatchList() throws DALException {
         List<ICommodityBatchDTO> commodityBatchList = new ArrayList<>();
-        String getAllComBat = "select * from commoditybatch WHERE residue = 0;";
+        String getAllComBat = "SELECT * FROM commoditybatch WHERE residue = 0;";
         try {
             PreparedStatement preparedStatement = conn.prepareStatement(getAllComBat);
             ResultSet resultSet = preparedStatement.executeQuery();

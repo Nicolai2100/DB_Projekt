@@ -17,17 +17,14 @@ public class UserDAO implements IUserDAO {
     @Override
     public void createUser(IUserDTO admin, IUserDTO user) throws DALException {
         if (user.getUserId() < 1) {
-            System.out.println("Error in userID!");
-            return;
+            throw new DALException("Error in userID!");
         }
         //Brugeren må kun angives som argument for metodekaldet, hvis brugeren har "admin" som rolle
         if (admin.equals(user) && !user.getRoles().contains("admin")) {
-            System.out.println("Error in authorization!");
-            return;
+            throw new DALException("User not authorized to proceed!");
         }
         if (!admin.getIsActive()) {
-            System.out.println("Admin is not active");
-            return;
+            throw new DALException("Admin is not active");
         }
         user.setAdmin(admin);
         String insertString = "INSERT INTO user VALUES(?,?,?,?,?);";
@@ -139,8 +136,7 @@ public class UserDAO implements IUserDAO {
     @Override
     public void updateUser(IUserDTO admin, IUserDTO user) throws DALException {
         if (user.getUserId() < 1) {
-            System.out.println("Error! User need to have a userID specified!");
-            return;
+            throw new DALException("Error! User need to have a userID specified!");
         }
         if (!admin.getIsActive()) {
             System.out.println("Admin is not active");

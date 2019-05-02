@@ -3,6 +3,8 @@ package dal;
 import dal.dto.IRecipeDTO;
 import dal.dto.IUserDTO;
 
+import java.util.List;
+
 public interface IRecipeDAO {
     void createRecipe(IRecipeDTO recipeDTO) throws DALException;
 
@@ -11,4 +13,7 @@ public interface IRecipeDAO {
     void updateRecipe(IRecipeDTO recipeDTO) throws DALException;
 
     void archiveRecipe(int recipeId, IUserDTO userDTO) throws DALException;
-}
+
+    List<IRecipeDTO> getListOfOldRecipes() throws DALException;
+
+    }

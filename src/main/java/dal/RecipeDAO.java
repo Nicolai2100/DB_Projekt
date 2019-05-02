@@ -20,17 +20,13 @@ public class RecipeDAO implements IRecipeDAO {
         this.commodityBatchDAO = commodityBatchDAO;
         this.ingredientDAO = ingredientDAO;
         this.conn = ConnectionDAO.getConnection();
-
     }
 
     @Override
     public void createRecipe(IRecipeDTO recipeDTO) throws DALException {
-        //Først undersøges det om brugeren, der står på til at have oprettet opskriften har
-        //den rette rolle til at kunne gøre det.
         IUserDTO userDTO = recipeDTO.getMadeBy();
         if (!userDTO.getRoles().contains("farmaceut") || !userDTO.getIsActive()) {
-            System.out.println("User not authorized to proceed!");
-            return;
+            throw new DALException("User not authorized to proceed!");
         }
         int version;
         if (recipeDTO.getVersion() == 0) {
@@ -93,8 +89,7 @@ public class RecipeDAO implements IRecipeDAO {
     public void updateRecipe(IRecipeDTO recipeDTO) throws DALException {
         IUserDTO userDTO = recipeDTO.getMadeBy();
         if (!userDTO.getRoles().contains("farmaceut") || !userDTO.getIsActive()) {
-            System.out.println("User not authorized to proceed!");
-            return;
+            throw new DALException("User not authorized to proceed!");
         }
         String updateRecipeString = "UPDATE recipe SET in_use = ?, last_used_date = ? WHERE recipeid = ? and version = ?;";
         try {
@@ -121,8 +116,7 @@ public class RecipeDAO implements IRecipeDAO {
     @Override
     public void archiveRecipe(int recipeId, IUserDTO userDTO) throws DALException {
         if (!userDTO.getRoles().contains("farmaceut") || !userDTO.getIsActive()) {
-            System.out.println("User not authorized to proceed!");
-            return;
+            throw new DALException("User not authorized to proceed!");
         }
         try {
             String deleteRecipeString = "UPDATE recipe SET in_use = 0 WHERE recipeid = ? AND in_use = 1;";
@@ -141,6 +135,7 @@ public class RecipeDAO implements IRecipeDAO {
         }
     }
 
+    @Override
     public List<IRecipeDTO> getListOfOldRecipes() throws DALException {
         List<IRecipeDTO> oldRecipes = new ArrayList<>();
         String getOldRecipesString = "SELECT * FROM recipe WHERE in_use = 0;";
@@ -192,7 +187,7 @@ public class RecipeDAO implements IRecipeDAO {
         }
     }
 
-    public void checkReorder(IRecipeDTO newRecipeDTO) throws DALException {
+    private void checkReorder(IRecipeDTO newRecipeDTO) throws DALException {
         List<ICommodityBatchDTO> commodities = commodityBatchDAO.getAllCommodityBatchList();
         List<IIngredientDTO> ingredientDTOS = ingredientListDAO.getIngredientList(newRecipeDTO);
         List<IIngredientDTO> ingToBeReordered = new ArrayList<>();

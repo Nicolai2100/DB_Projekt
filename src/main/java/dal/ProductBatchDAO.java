@@ -22,8 +22,7 @@ public class ProductBatchDAO implements IProductBatchDAO {
     @Override
     public void createProductbatch(ProductBatchDTO productbatch) throws DALException {
         if (!productbatch.getMadeBy().getRoles().contains("productionleader") || !productbatch.getMadeBy().getIsActive()) {
-            System.out.println("User not authorized to proceed!");
-            return;
+            throw new DALException("User not authorized to proceed!");
         }
         String selectVersionString = "SELECT version from recipe where recipeid = ? AND in_use = 1";
         String insertString = "INSERT INTO productbatch VALUES(?,?,?,?,?,?,?,?,?,?)";
@@ -93,8 +92,7 @@ public class ProductBatchDAO implements IProductBatchDAO {
     @Override
     public void updateProductBatch(ProductBatchDTO productbatch, IUserDTO user) throws DALException {
         if ((!user.getRoles().contains("laborant") || !user.getRoles().contains("productionleader")) && !user.getIsActive()) {
-            System.out.println("User not authorized to proceed!");
-            return;
+            throw new DALException("User not authorized to proceed!");
         }
         String delString = "DELETE FROM productbatch_commodity_relationship WHERE product_batch_id = ?";
         String updateProcString = "UPDATE productbatch SET name = ?, madeby = ?, recipe = ?, " +
@@ -127,6 +125,9 @@ public class ProductBatchDAO implements IProductBatchDAO {
 
     @Override
     public void initiateProduction(ProductBatchDTO productbatch, IUserDTO user) throws DALException {
+        if ((!user.getRoles().contains("laborant") || !user.getRoles().contains("productionleader")) && !user.getIsActive()) {
+            throw new DALException("User not authorized to proceed!");
+        }
         productbatch.setBatchState(IProductBatchDTO.State.UNDER_PRODUCTION);
         updateProductBatch(productbatch, user);
     }
@@ -134,8 +135,7 @@ public class ProductBatchDAO implements IProductBatchDAO {
     @Override
     public void produceProductBatch(ProductBatchDTO productbatch, IUserDTO user) throws DALException {
         if (!user.getRoles().contains("laborant") && !user.getIsActive()) {
-            System.out.println("User not authorized to proceed!");
-            return;
+            throw new DALException("User not authorized to proceed!");
         }
         productbatch.setProducedBy(user);
         productbatch.setBatchState(IProductBatchDTO.State.COMPLETED);

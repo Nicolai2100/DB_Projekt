@@ -10,5 +10,7 @@ public interface ICommodityBatchDAO {
 
     void updateCommodityBatch(ICommodityBatchDTO commodityBatch) throws DALException;
 
+/* todo slet
     void deleteCommodityBatch(int commodityBatchId) throws DALException;
+*/
 }
