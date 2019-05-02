@@ -139,8 +139,7 @@ public class UserDAO implements IUserDAO {
             throw new DALException("Error! User need to have a userID specified!");
         }
         if (!admin.getIsActive()) {
-            System.out.println("Admin is not active");
-            return;
+            throw new DALException("Admin is not active");
         }
         String updateUserString = "UPDATE user SET name = ?, ini = ?, active = ? WHERE userid = ?; ";
         try {
@@ -176,12 +175,10 @@ public class UserDAO implements IUserDAO {
     @Override
     public void deleteUser(IUserDTO admin, int userId) throws DALException {
         if (userId < 1) {
-            System.out.println("Error! Improper userID!");
-            return;
+            throw new DALException("Error! Improper userID!");
         }
         if (!admin.getIsActive()) {
-            System.out.println("Admin is not active");
-            return;
+            throw new DALException("Admin is not active");
         }
         int result;
         String inactivateString = "UPDATE user SET active = 0 WHERE userid = ? ";
@@ -224,8 +221,7 @@ public class UserDAO implements IUserDAO {
      * Dette bruges når brugeren bliver opdateret, for at undgå at
      * brugeren får flere roller end denne bør have.
      */
-
-    public void roleTransAct(IUserDTO user) throws DALException {
+    private void roleTransAct(IUserDTO user) throws DALException {
         List<String> newUserRoles = user.getRoles();
         String deleteRoleString = "DELETE FROM userrole WHERE userid = ?;";
         String insertRoleString = "INSERT INTO userrole VALUES(?,?);";
