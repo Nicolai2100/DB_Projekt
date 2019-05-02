@@ -1,5 +1,6 @@
 package dal.dto;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 public interface IRecipeDTO {
@@ -27,4 +28,9 @@ public interface IRecipeDTO {
     int getMinBatchSize();
 
     void setMinBatchSize(int size);
+
+    Timestamp getExpired();
+
+    void setExpired(Timestamp expired);
+
 }

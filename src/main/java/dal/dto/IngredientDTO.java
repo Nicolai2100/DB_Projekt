@@ -5,11 +5,7 @@ public class IngredientDTO implements IIngredientDTO {
     private String name;
     private String type;
     private double amountInMG;
-    private int minAmountInMG;
-
-
-    public IngredientDTO() {
-    }
+    private double minAmountInMG;
 
     @Override
     public int getIngredientId() {
@@ -52,17 +48,18 @@ public class IngredientDTO implements IIngredientDTO {
     }
 
     @Override
-    public void setMinAmountMG(int minAmount) {
+    public void setMinAmountMG(double minAmount) {
         this.minAmountInMG = minAmount;
     }
+
     @Override
-    public int getMinAmountMG() {
+    public double getMinAmountMG() {
         return minAmountInMG;
     }
 
     @Override
     public String toString() {
-        return "\n"+name + ", of type: " + type + " min amount: " + minAmountInMG + " mg.";
+        return name + ", of type: " + type + " min amount: " + minAmountInMG + " mg.";
     }
 }
 

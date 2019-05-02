@@ -36,34 +36,42 @@ public class RecipeDTO implements IRecipeDTO {
         return returnString;
     }
 
+    @Override
     public int getRecipeId() {
         return recipeId;
     }
 
+    @Override
     public void setRecipeId(int recipeId) {
         this.recipeId = recipeId;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }
 
+    @Override
     public IUserDTO getMadeBy() {
         return madeBy;
     }
 
+    @Override
     public void setMadeBy(IUserDTO madeBy) {
         this.madeBy = madeBy;
     }
 
+    @Override
     public List<IIngredientDTO> getIngredientsList() {
         return ingredientsList;
     }
 
+    @Override
     public void setIngredientsList(List<IIngredientDTO> ingredientsList) {
         this.ingredientsList = ingredientsList;
     }
@@ -88,10 +96,12 @@ public class RecipeDTO implements IRecipeDTO {
         this.minBatchSize = minBatchSize;
     }
 
+    @Override
     public Timestamp getExpired() {
         return expired;
     }
 
+    @Override
     public void setExpired(Timestamp expired) {
         this.expired = expired;
     }

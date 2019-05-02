@@ -14,7 +14,7 @@ public class DALTest {
     UserDAO userDAO = new UserDAO();
     IngredientDAO ingredientDAO = new IngredientDAO();
     IngredientListDAO ingredientListDAO = new IngredientListDAO(ingredientDAO);
-    CommodityBatchDAO commoditybatchDAO = new CommodityBatchDAO(userDAO,ingredientDAO);
+    CommodityBatchDAO commoditybatchDAO = new CommodityBatchDAO(userDAO, ingredientDAO);
     RecipeDAO recipeDAO = new RecipeDAO(ingredientListDAO, ingredientDAO, userDAO, commoditybatchDAO);
     ProductBatchDAO productBatchDAO = new ProductBatchDAO(recipeDAO, commoditybatchDAO, userDAO);
 
@@ -30,7 +30,6 @@ public class DALTest {
          ingredientListDAO = new IngredientListDAO(connectionDAO, userDAO, ingredientDAO);
          commoditybatchDAO = new CommodityBatchDAO(connectionDAO, userDAO);
          recipeDAO = new RecipeDAO(connectionDAO, ingredientListDAO, userDAO, oldRecipeDAO);
-
          userDAOTest = new UserDAOTest();
      }
  */
@@ -46,226 +45,10 @@ public class DALTest {
 
     @Test
     public void temp() throws DALException {
-        /**
-         * Alt slettes
-         */
-        connectionDAO.deleteTables();
-
-        /**
-         * Brugerne oprettes
-         */
-
-        IUserDTO testUser_1 = new UserDTO();
-        testUser_1.setUserId(1);
-        testUser_1.setUserName("Pelle Hansen");
-        testUser_1.setIni("PH");
-        testUser_1.addRole("admin");
-        testUser_1.addRole("productionleader");
-        userDAO.createUser(testUser_1, testUser_1);
-
-        UserDTO testUser_2 = new UserDTO();
-        testUser_2.setUserId(2);
-        testUser_2.setUserName("Puk Larsen");
-        testUser_2.setIni("PL");
-        testUser_2.addRole("farmaceut");
-        userDAO.createUser(testUser_1, testUser_2);
-
-        UserDTO testUser_3 = new UserDTO();
-        testUser_3.setUserId(3);
-        testUser_3.setUserName("John Peder");
-        testUser_3.setIni("JP");
-        testUser_3.addRole("laborant");
-        testUser_3.setAdmin(userDAO.getUser(2));
-        userDAO.createUser(testUser_1, testUser_3);
-        /**
-         * Ingredienser og opskrift oprettes
-         */
-        IRecipeDTO norethisteron_recipe = new RecipeDTO();
-        norethisteron_recipe.setRecipeId(1);
-        norethisteron_recipe.setName("Norethisteron/estrogen");
-        norethisteron_recipe.setMadeBy(userDAO.getUser(2));
-        norethisteron_recipe.setMinBatchSize(10000);
-        List<IIngredientDTO> norethisteron_ingredients = new ArrayList<>();
-
-        IRecipeDTO sildenafil_recipe = new RecipeDTO();
-        sildenafil_recipe.setRecipeId(2);
-        sildenafil_recipe.setName("sildenafil");
-        sildenafil_recipe.setMadeBy(userDAO.getUser(2));
-        sildenafil_recipe.setMinBatchSize(11000);
-        List<IIngredientDTO> sildenafil_ingredients = new ArrayList<>();
-
-        IngredientDTO ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(1);
-        ingredientDTO.setName("sildenafil");
-        ingredientDTO.setType("active");
-        ingredientDAO.createIngredient(ingredientDTO);
-
-        ingredientDTO.setAmount(25);
-        sildenafil_ingredients.add(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(2);
-        ingredientDTO.setName("calciumhydrogenphosphat_dihydrat");
-        ingredientDTO.setType("helper");
-        ingredientDAO.createIngredient(ingredientDTO);
-
-        ingredientDTO.setAmount(20);
-        sildenafil_ingredients.add(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(3);
-        ingredientDTO.setName("cellulose");
-        ingredientDTO.setType("helper");
-        ingredientDAO.createIngredient(ingredientDTO);
-
-        ingredientDTO.setAmount(25);
-        sildenafil_ingredients.add(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(4);
-        ingredientDTO.setName("magnesiumstearat");
-        ingredientDTO.setType("helper");
-        ingredientDAO.createIngredient(ingredientDTO);
-
-        ingredientDTO.setAmount(10);
-        sildenafil_ingredients.add(ingredientDTO);
-        ingredientDTO.setAmount(15);
-        norethisteron_ingredients.add(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(5);
-        ingredientDTO.setName("silica");
-        ingredientDTO.setType("helper");
-        ingredientDAO.createIngredient(ingredientDTO);
-
-        ingredientDTO.setAmount(5);
-        sildenafil_ingredients.add(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(6);
-        ingredientDTO.setName("croscarmellosenatrium");
-        ingredientDTO.setType("helper");
-        ingredientDAO.createIngredient(ingredientDTO);
-
-        ingredientDTO.setAmount(6);
-        sildenafil_ingredients.add(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(7);
-        ingredientDTO.setName("hypromellose");
-        ingredientDTO.setType("helper");
-        ingredientDAO.createIngredient(ingredientDTO);
-
-        ingredientDTO.setAmount(1.3);
-        sildenafil_ingredients.add(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(8);
-        ingredientDTO.setName("titandioxid");
-        ingredientDTO.setType("helper");
-        ingredientDAO.createIngredient(ingredientDTO);
-
-        ingredientDTO.setAmount(0.5);
-        sildenafil_ingredients.add(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(9);
-        ingredientDTO.setName("macrogol");
-        ingredientDTO.setType("helper");
-        ingredientDAO.createIngredient(ingredientDTO);
-
-        ingredientDTO.setAmount(20);
-        sildenafil_ingredients.add(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(10);
-        ingredientDTO.setName("talcum");
-        ingredientDTO.setType("helper");
-        ingredientDAO.createIngredient(ingredientDTO);
-
-        ingredientDTO.setAmount(1);
-        sildenafil_ingredients.add(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(11);
-        ingredientDTO.setName("indigotin");
-        ingredientDTO.setType("helper");
-        ingredientDAO.createIngredient(ingredientDTO);
-
-        ingredientDTO.setAmount(0.02);
-        sildenafil_ingredients.add(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(12);
-        ingredientDTO.setName("estradiol");
-        ingredientDTO.setType("active");
-        ingredientDAO.createIngredient(ingredientDTO);
-
-        ingredientDTO.setAmount(1);
-        norethisteron_ingredients.add(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(13);
-        ingredientDTO.setName("norethisteronacetat");
-        ingredientDTO.setType("active");
-        ingredientDAO.createIngredient(ingredientDTO);
-
-        ingredientDTO.setAmount(0.5);
-        norethisteron_ingredients.add(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(14);
-        ingredientDTO.setName("opovidon");
-        ingredientDTO.setType("helper");
-        ingredientDAO.createIngredient(ingredientDTO);
-
-        ingredientDTO.setAmount(50);
-        norethisteron_ingredients.add(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(15);
-        ingredientDTO.setName("laktosemonohydrat");
-        ingredientDTO.setType("helper");
-        ingredientDAO.createIngredient(ingredientDTO);
-
-        ingredientDTO.setAmount(10);
-        norethisteron_ingredients.add(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(16);
-        ingredientDTO.setName("majsstivelse");
-        ingredientDTO.setType("helper");
-        ingredientDAO.createIngredient(ingredientDTO);
-
-        ingredientDTO.setAmount(120);
-        norethisteron_ingredients.add(ingredientDTO);
-
-
-        System.out.println("To be ordered: ");
-        List<IIngredientDTO> ingredientDTOS1 = ingredientDAO.checkForReorder();
-
-        for (IIngredientDTO ing : ingredientDTOS1) {
-            System.out.println("" + (ingredientDTOS1.indexOf(ing) + 1) + ": IngredientID: " + ing.getIngredientId()
-                    + "-" + ing.getName());
-        }
-
-        sildenafil_recipe.setIngredientsList(sildenafil_ingredients);
-        norethisteron_recipe.setIngredientsList(norethisteron_ingredients);
-        recipeDAO.createRecipe(sildenafil_recipe);
-        recipeDAO.createRecipe(norethisteron_recipe);
-
-        System.out.println("To be ordered: ");
-        ingredientDTOS1 = ingredientDAO.checkForReorder();
-
-        for (IIngredientDTO ing : ingredientDTOS1) {
-            System.out.println("" + (ingredientDTOS1.indexOf(ing) + 1) + ": IngredientID: " + ing.getIngredientId()
-                    + "-" + ing.getName());
-        }
     }
 
     @Test
     public void testItAll() throws DALException {
-
         /**
          * Alt slettes
          */
@@ -469,29 +252,28 @@ public class DALTest {
 
         ingredientDTO.setAmount(120);
         norethisteron_ingredients.add(ingredientDTO);
-
-        System.out.println("To be ordered: ");
+        /**
+         * Liste over råvarer der skal bestilles
+         */
         List<IIngredientDTO> ingredientDTOS = ingredientDAO.checkForReorder();
-
+        System.out.println("\n" + ingredientDTOS.size() + " commodities to be ordered: ");
         for (IIngredientDTO ing : ingredientDTOS) {
             System.out.println("" + (ingredientDTOS.indexOf(ing) + 1) + ": IngredientID: " + ing.getIngredientId()
                     + "-" + ing.getName());
         }
-
         sildenafil_recipe.setIngredientsList(sildenafil_ingredients);
         norethisteron_recipe.setIngredientsList(norethisteron_ingredients);
         recipeDAO.createRecipe(sildenafil_recipe);
         recipeDAO.createRecipe(norethisteron_recipe);
-
-        System.out.println("To be ordered: ");
+        /**
+         * Liste over råvarer der skal bestilles
+         */
         List<IIngredientDTO> ingredientDTOS1 = ingredientDAO.checkForReorder();
-
+        System.out.println("\n" + ingredientDTOS1.size() + " commodities to be ordered: ");
         for (IIngredientDTO ing : ingredientDTOS1) {
             System.out.println("" + (ingredientDTOS1.indexOf(ing) + 1) + ": IngredientID: " + ing.getIngredientId()
                     + "-" + ing.getName());
         }
-
-
         /**
          * Der bestilles et råvare batch
          */
@@ -541,14 +323,12 @@ public class DALTest {
         /**
          * Liste over råvarer der skal bestilles
          */
-        System.out.println("To be ordered: ");
         List<IIngredientDTO> ingredientDTOS2 = ingredientDAO.checkForReorder();
-
+        System.out.println("\n" + ingredientDTOS2.size() + " commodities to be ordered: ");
         for (IIngredientDTO ing : ingredientDTOS2) {
             System.out.println("" + (ingredientDTOS2.indexOf(ing) + 1) + ": IngredientID: " + ing.getIngredientId()
                     + "-" + ing.getName());
         }
-
         /**
          * Der oprettes et produkt-batch
          */
@@ -558,41 +338,49 @@ public class DALTest {
         productbatchDTO.setName("Sildenafil"); //Produktets navn indsættes.
         productbatchDTO.setProductId(1); //Et unikt id vælges.
         productbatchDTO.setRecipe(2); //Id'et til opskriften, som produktet skal produceres ud fra, indsættes.
-        productbatchDTO.setProductionDate(new Date(System.currentTimeMillis())); //Produktionsdatoen indsættes i formatet java.sql.Date.
-        productbatchDTO.setExpirationDate(new Date(System.currentTimeMillis())); //Udløbsdatoen indsættes i formatet java.sql.Date.
+        //Produktionsdatoen indsættes i formatet java.sql.Date.
+        productbatchDTO.setProductionDate(new Date(System.currentTimeMillis()));
+        //Udløbsdatoen indsættes i formatet java.sql.Date.
+        productbatchDTO.setExpirationDate(new Date(System.currentTimeMillis()));
         productbatchDTO.setVolume(10000); //Mængden af piller indsættes.
-        productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(4)); //Råvare-batches tilknyttes. De skal have samme id, som den tilsvarende ingrediens i opskriften.
+        //Råvare-batches tilknyttes. De skal have samme id, som den tilsvarende ingrediens i opskriften.
+        productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(4));
         productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(12));
         productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(13));
         productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(14));
         productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(15));
         productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(16));
-        productbatchDTO.setProducedBy(testUser_4); //Laboranten, som producerer produktet, indsættes.
-        productbatchDTO.setBatchState(IProductBatchDTO.State.ORDERED); //Stadiet indsættes som ENUM. Det kan være enten ORDERED, UNDER_PRODUCTION eller COMPLETED.
-
+        //Laboranten, som producerer produktet, indsættes.
+        productbatchDTO.setProducedBy(testUser_4);
+        //Stadiet indsættes som ENUM. Det kan være enten ORDERED, UNDER_PRODUCTION eller COMPLETED.
+        productbatchDTO.setBatchState(IProductBatchDTO.State.ORDERED);
         productBatchDAO.createProductbatch(productbatchDTO);
-
         productBatchDAO.initiateProduction(productbatchDTO, testUser_2);
-
         productbatchDTO.setName("Amfetamin");
-
         productBatchDAO.produceProductBatch(productbatchDTO, testUser_4);
-
         System.out.println("Read product succesful:" + productBatchDAO.getProductbatch(1).toString());
-
+        /**
+         * En opskrift opdateres
+         */
         IRecipeDTO recipeDTO = recipeDAO.getActiveRecipe(3);
         recipeDTO.setName("Opdateret 2 " + recipeDTO.getName());
+        recipeDTO.getIngredientsList().get(1).setMinAmountMG(0.00002);
         recipeDAO.updateRecipe(recipeDTO);
-
         /**
          * Liste over råvarer der skal bestilles
          **/
-        System.out.println("To be ordered: ");
         List<IIngredientDTO> ingredientDTOS3 = ingredientDAO.checkForReorder();
-
+        System.out.println("\n" + ingredientDTOS3.size() + " commodities to be ordered: ");
         for (IIngredientDTO ing : ingredientDTOS3) {
             System.out.println("" + (ingredientDTOS3.indexOf(ing) + 1) + ": IngredientID: " + ing.getIngredientId()
                     + "-" + ing.getName());
+        }
+        /**
+         * Liste over arkiverede opskrifter
+         **/
+        System.out.println("\nOld recipes: ");
+        for (IRecipeDTO oldRecipe : recipeDAO.getListOfOldRecipes()) {
+            System.out.println(oldRecipe);
         }
     }
 }

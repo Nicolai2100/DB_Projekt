@@ -4,7 +4,6 @@ import dal.dto.*;
 
 import java.sql.*;
 import java.time.Instant;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,20 +32,16 @@ public class RecipeDAO implements IRecipeDAO {
             System.out.println("User not authorized to proceed!");
             return;
         }
-
         int version;
         if (recipeDTO.getVersion() == 0) {
             version = 1;
         } else {
             version = recipeDTO.getVersion();
         }
+        String insertRecipeString = "INSERT INTO recipe (recipeid, version, name, madeby, " +
+                "ingredientlistid, in_use, minbatchsize) VALUES(?,?,?,?,?,?,?)";
         try {
-            //Hvis en opskriften oprettes med det samme id som ligger i oldrecipe,
-            //må man gå ud fra at den nye opskrift er en ny udgave af den fra oldrecipe.
-            //Derfor får den automatisk et korrekt version-nummer.
-
             conn.setAutoCommit(false);
-            String insertRecipeString = "INSERT INTO recipe (recipeid, version, name, madeby, ingredientlistid, in_use, minbatchsize) VALUES(?,?,?,?,?,?,?)";
             PreparedStatement pstmtInsertRecipe = conn.prepareStatement(insertRecipeString);
             pstmtInsertRecipe.setInt(1, recipeDTO.getRecipeId());
             pstmtInsertRecipe.setInt(2, version);
@@ -66,7 +61,6 @@ public class RecipeDAO implements IRecipeDAO {
             }
             updateMinAmounts();
             checkReorder(recipeDTO);
-
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DALException("An error occurred in the database at RecipeDAO.");
@@ -76,8 +70,8 @@ public class RecipeDAO implements IRecipeDAO {
     @Override
     public IRecipeDTO getActiveRecipe(int recipeId) throws DALException {
         IRecipeDTO recipeDTO = new RecipeDTO();
+        String getRecipeString = "SELECT * FROM recipe WHERE recipeid = ? AND in_use = 1;";
         try {
-            String getRecipeString = "SELECT * FROM recipe WHERE recipeid = ? AND in_use = 1;";
             PreparedStatement pstmtGetRecipe = conn.prepareStatement(getRecipeString);
             pstmtGetRecipe.setInt(1, recipeId);
             ResultSet rs = pstmtGetRecipe.executeQuery();
@@ -102,26 +96,22 @@ public class RecipeDAO implements IRecipeDAO {
             System.out.println("User not authorized to proceed!");
             return;
         }
+        String updateRecipeString = "UPDATE recipe SET in_use = ?, last_used_date = ? WHERE recipeid = ? and version = ?;";
         try {
             conn.setAutoCommit(false);
             int oldVersionInt = recipeDTO.getVersion();
             int newVersionInt = oldVersionInt + 1;
-
             recipeDTO.setVersion(newVersionInt);
             Instant instant = Instant.now();
             Timestamp timestamp = Timestamp.from(instant);
-
-            String updateRecipeString = "UPDATE recipe SET in_use = ?, last_used_date = ? WHERE recipeid = ? and version = ?;";
             PreparedStatement pstmtUpdateRecipe = conn.prepareStatement(updateRecipeString);
             pstmtUpdateRecipe.setBoolean(1, false);
             pstmtUpdateRecipe.setTimestamp(2, timestamp);
             pstmtUpdateRecipe.setInt(3, recipeDTO.getRecipeId());
             pstmtUpdateRecipe.setInt(4, oldVersionInt);
-            int result = pstmtUpdateRecipe.executeUpdate();
-
+            pstmtUpdateRecipe.executeUpdate();
             createRecipe(recipeDTO);
             conn.commit();
-
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DALException("An error occurred in the database at RecipeDAO.");
@@ -153,8 +143,8 @@ public class RecipeDAO implements IRecipeDAO {
 
     public List<IRecipeDTO> getListOfOldRecipes() throws DALException {
         List<IRecipeDTO> oldRecipes = new ArrayList<>();
+        String getOldRecipesString = "SELECT * FROM recipe WHERE in_use = 0;";
         try {
-            String getOldRecipesString = "SELECT * FROM recipe WHERE in_use = 0;";
             PreparedStatement pstmtGetOldRecipe = conn.prepareStatement(getOldRecipesString);
             ResultSet rs = pstmtGetOldRecipe.executeQuery();
             while (rs.next()) {
@@ -164,57 +154,50 @@ public class RecipeDAO implements IRecipeDAO {
                 recipeDTO.setName(rs.getString(3));
                 recipeDTO.setMadeBy(userDAO.getUser(rs.getInt(4)));
                 recipeDTO.setIngredientsList(ingredientListDAO.getIngredientList(recipeDTO));
-                ((RecipeDTO) recipeDTO).setExpired(rs.getTimestamp(7));
+                recipeDTO.setExpired(rs.getTimestamp(7));
                 recipeDTO.setMinBatchSize(rs.getInt(8));
+                oldRecipes.add(recipeDTO);
             }
         } catch (SQLException e) {
             throw new DALException("An error occurred in the database at RecipeDAO.");
         }
         return oldRecipes;
-
     }
 
-    private void updateMinAmounts() throws SQLException {
+    private void updateMinAmounts() throws DALException {
         try {
             conn.setAutoCommit(false);
-
             //Dette query returnerer ingredientid, mindste mængde forekommende(ingrediens) og minimumamount
             String minAmountsString = "SELECT ingredientlist.ingredientid, min(amountmg*minbatchsize) AS amount, minamountinmg " +
                     "FROM ingredientlist JOIN recipe ON ingredientlist.ingredientlistid = recipe.ingredientlistid " +
                     "JOIN ingredient ON ingredient.ingredientid = ingredientlist.ingredientid WHERE in_use = 1 " +
                     "GROUP BY ingredientid ASC;";
+            String updateIngString = "UPDATE ingredient " +
+                    "SET minamountinmg = ? " +
+                    "WHERE ingredientid = ?";
             PreparedStatement preparedStatementAmounts = conn.prepareStatement(minAmountsString);
-
             ResultSet resultSet = preparedStatementAmounts.executeQuery();
-
             while (resultSet.next()) {
                 if (resultSet.getDouble("amount") > resultSet.getDouble("minamountinmg")) {
-                    PreparedStatement preparedStatementNewMin = conn.prepareStatement(
-                            "UPDATE ingredient " +
-                                    "SET minamountinmg = ? " +
-                                    "WHERE ingredientid = ?"
-                    );
+                    PreparedStatement preparedStatementNewMin = conn.prepareStatement(updateIngString);
                     preparedStatementNewMin.setInt(1, resultSet.getInt("amount"));
                     preparedStatementNewMin.setInt(2, resultSet.getInt("ingredientid"));
                     preparedStatementNewMin.executeUpdate();
                 }
             }
             conn.commit();
-
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new DALException("An error occurred in the database at RecipeDAO.");
         }
     }
 
     public void checkReorder(IRecipeDTO newRecipeDTO) throws DALException {
-
         List<ICommodityBatchDTO> commodities = commodityBatchDAO.getAllCommodityBatchList();
         List<IIngredientDTO> ingredientDTOS = ingredientListDAO.getIngredientList(newRecipeDTO);
         List<IIngredientDTO> ingToBeReordered = new ArrayList<>();
-
         for (ICommodityBatchDTO commod : commodities) {
             if (commod.getAmountInKg() * 1000000 < commod.getIngredientDTO().getMinAmountMG()) {
-                System.out.println( commod.getAmountInKg()*1000000 + " and "+commod.getIngredientDTO().getMinAmountMG());
                 ingToBeReordered.add(commod.getIngredientDTO());
             }
         }

@@ -33,14 +33,11 @@ public class UserDAO implements IUserDAO {
         String insertString = "INSERT INTO user VALUES(?,?,?,?,?);";
         try {
             conn.setAutoCommit(false);
-            PreparedStatement pSmtInsertUser = conn.prepareStatement(
-                    "INSERT INTO user " +
-                            "VALUES(?,?,?,?,?)");
+            PreparedStatement pSmtInsertUser = conn.prepareStatement(insertString);
             pSmtInsertUser.setInt(1, user.getUserId());
             pSmtInsertUser.setString(2, user.getUserName());
             pSmtInsertUser.setString(3, user.getIni());
             pSmtInsertUser.setBoolean(4, true);
-
             Integer adminId;
             if (user.getAdmin() != null) {
                 adminId = user.getAdmin().getUserId();
@@ -55,7 +52,6 @@ public class UserDAO implements IUserDAO {
                 conn.commit();
                 System.out.println("The user was successfully created in the database system");
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DALException("An error occurred in the database at UserDAO.");
@@ -101,13 +97,11 @@ public class UserDAO implements IUserDAO {
     @Override
     public List<IUserDTO> getUserList() throws DALException {
         List<IUserDTO> userList = new ArrayList<>();
+        String getUserListString = "SELECT * FROM user NATURAL JOIN userrole";
         try {
-            PreparedStatement pSmtSelectAllTable = conn.prepareStatement(
-                    "SELECT * " +
-                            "FROM user NATURAL JOIN userrole");
+            PreparedStatement pSmtSelectAllTable = conn.prepareStatement(getUserListString);
             UserDTO returnUser;
             ResultSet rs = pSmtSelectAllTable.executeQuery();
-
             while (rs.next()) {
                 returnUser = new UserDTO();
                 returnUser.setUserId(rs.getInt(1));
@@ -156,7 +150,6 @@ public class UserDAO implements IUserDAO {
         try {
             conn.setAutoCommit(false);
             IUserDTO returnUser = getUser(user.getUserId());
-
             PreparedStatement pSmtUpdateUser = conn.prepareStatement(updateUserString);
             if (user.getUserName() != null) {
                 pSmtUpdateUser.setString(1, user.getUserName());
@@ -195,8 +188,8 @@ public class UserDAO implements IUserDAO {
             return;
         }
         int result;
+        String inactivateString = "UPDATE user SET active = 0 WHERE userid = ? ";
         try {
-            String inactivateString = "UPDATE user SET active = 0 WHERE userid = ? ";
             PreparedStatement psmtInactivateUser = conn.prepareStatement(inactivateString);
             psmtInactivateUser.setInt(1, userId);
             result = psmtInactivateUser.executeUpdate();
@@ -214,9 +207,9 @@ public class UserDAO implements IUserDAO {
      * Metoden opretter og gemmer roller for en bruger i userrole.
      */
     private void setUserRoles(Connection conn, IUserDTO user) throws DALException {
+        String insertUserRoleString = "INSERT INTO userrole VALUES(?,?);";
         try {
             conn.setAutoCommit(false);
-            String insertUserRoleString = "INSERT INTO userrole VALUES(?,?);";
             PreparedStatement pSmtInsertUserRole = conn.prepareStatement(insertUserRoleString);
             pSmtInsertUserRole.setInt(1, user.getUserId());
             for (int i = 0; i < user.getRoles().size(); i++) {
@@ -238,19 +231,16 @@ public class UserDAO implements IUserDAO {
 
     public void roleTransAct(IUserDTO user) throws DALException {
         List<String> newUserRoles = user.getRoles();
+        String deleteRoleString = "DELETE FROM userrole WHERE userid = ?;";
+        String insertRoleString = "INSERT INTO userrole VALUES(?,?);";
         try {
-            String deleteRoleString = "DELETE FROM userrole WHERE userid = ?;";
             PreparedStatement deleteRolesFromDB = conn.prepareStatement(deleteRoleString);
             deleteRolesFromDB.setInt(1, user.getUserId());
-
-            String insertRoleString = "INSERT INTO userrole VALUES(?,?);";
             PreparedStatement insertRolesInDB = conn.prepareStatement(insertRoleString);
             insertRolesInDB.setInt(1, user.getUserId());
-
             conn.setAutoCommit(false);
             deleteRolesFromDB.setInt(1, user.getUserId());
             deleteRolesFromDB.executeUpdate();
-
             for (String role : newUserRoles) {
                 insertRolesInDB.setString(2, role);
                 int success = insertRolesInDB.executeUpdate();

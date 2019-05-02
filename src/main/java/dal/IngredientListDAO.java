@@ -21,14 +21,11 @@ public class IngredientListDAO implements IIngredientListDAO {
 
     @Override
     public void createIngredientList(IRecipeDTO recipeDTO, int version) throws DALException {
+        String insertIngList = "INSERT INTO ingredientlist(ingredientlistid, version, ingredientid, amountmg) " +
+                "VALUES(?,?,?,?);";
         try {
-/*
             conn.setAutoCommit(false);
-*/
-            String insertIngList = "INSERT INTO ingredientlist(ingredientlistid, version, ingredientid, amountmg) " +
-                    "VALUES(?,?,?,?);";
             PreparedStatement pstmtInsertIngredientList = conn.prepareStatement(insertIngList);
-
             for (IIngredientDTO ingredient : recipeDTO.getIngredientsList()) {
                 pstmtInsertIngredientList.setInt(1, recipeDTO.getRecipeId());
                 pstmtInsertIngredientList.setInt(2, version);
@@ -36,10 +33,7 @@ public class IngredientListDAO implements IIngredientListDAO {
                 pstmtInsertIngredientList.setDouble(4, ingredient.getAmount());
                 pstmtInsertIngredientList.executeUpdate();
             }
-/*
             conn.commit();
-*/
-
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DALException("An error occurred in the database at IngredientListDAO.");
@@ -49,9 +43,9 @@ public class IngredientListDAO implements IIngredientListDAO {
     @Override
     public List<IIngredientDTO> getIngredientList(IRecipeDTO recipeDTO) throws DALException {
         List<IIngredientDTO> ingredientList = new ArrayList<>();
+        String getMaxVersionInt = "SELECT MAX(version) FROM ingredientlist WHERE ingredientlistid = ?";
+        String getIngListString = "SELECT * FROM ingredientlist WHERE ingredientlistid = ? AND version = ?;";
         try {
-            String getMaxVersionInt = "SELECT MAX(version) FROM ingredientlist WHERE ingredientlistid = ?";
-            String getIngListString = "SELECT * FROM ingredientlist WHERE ingredientlistid = ? AND version = ?;";
             PreparedStatement pstmtGetMaxIngVersion = conn.prepareStatement(getMaxVersionInt);
             pstmtGetMaxIngVersion.setInt(1, recipeDTO.getRecipeId());
             ResultSet rs1 = pstmtGetMaxIngVersion.executeQuery();
@@ -63,7 +57,6 @@ public class IngredientListDAO implements IIngredientListDAO {
             pstmtGetIngredientList.setInt(1, recipeDTO.getRecipeId());
             pstmtGetIngredientList.setInt(2, maxVersion);
             ResultSet rs2 = pstmtGetIngredientList.executeQuery();
-
             while (rs2.next()) {
                 IIngredientDTO ingredientDTO = ingredientDAO.getIngredient(rs2.getInt(3));
                 ingredientDTO.setAmount(rs2.getDouble(4));
