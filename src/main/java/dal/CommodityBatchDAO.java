@@ -8,10 +8,12 @@ import java.util.List;
 
 public class CommodityBatchDAO implements ICommodityBatchDAO {
     private UserDAO userDAO;
+    private IngredientDAO ingredientDAO;
     private Connection conn;
 
-    public CommodityBatchDAO(UserDAO userDAO) throws DALException {
+    public CommodityBatchDAO(UserDAO userDAO, IngredientDAO ingredientDAO) throws DALException {
         this.userDAO = userDAO;
+        this.ingredientDAO = ingredientDAO;
         this.conn = ConnectionDAO.getConnection();
     }
 
@@ -121,7 +123,7 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
         }
     }
 
-    public double getTotalCommodityAmountInKG (IIngredientDTO ingredient) throws SQLException {
+    public double getTotalCommodityAmountInKG(IIngredientDTO ingredient) throws SQLException {
         double totalAmount = 0;
 
         try {
@@ -143,7 +145,7 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
         return totalAmount;
     }
 
-    public List<ICommodityBatchDTO> getCommodityBatchList (IIngredientDTO ingredient) throws SQLException {
+    public List<ICommodityBatchDTO> getCommodityBatchList(IIngredientDTO ingredient) throws DALException {
         List<ICommodityBatchDTO> commodityBatchList = new ArrayList<>();
 
         try {
@@ -167,6 +169,34 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new DALException("Error in ");
+        }
+
+        return commodityBatchList;
+    }
+
+    public List<ICommodityBatchDTO> getAllCommodityBatchList() throws DALException {
+        List<ICommodityBatchDTO> commodityBatchList = new ArrayList<>();
+        try {
+            String getAllComBat = "select * from commoditybatch WHERE residue = 0;";
+            PreparedStatement preparedStatement = conn.prepareStatement(getAllComBat);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            ICommodityBatchDTO batch;
+            while (resultSet.next()) {
+                batch = new CommodityBatchDTO();
+                batch.setBatchId(resultSet.getInt(1));
+                int ingInt = resultSet.getInt(2);
+                IIngredientDTO ing = ingredientDAO.getIngredient(ingInt);
+                batch.setIngredientDTO(ing);
+                batch.setOrderedBy(userDAO.getUser(resultSet.getInt(3)));
+                batch.setAmountInKg(resultSet.getDouble(4));
+                batch.setOrderDate(resultSet.getString(5));
+                commodityBatchList.add(batch);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DALException("Error in ");
         }
 
         return commodityBatchList;

@@ -1,8 +1,6 @@
 package dal;
 
-import dal.dto.IRecipeDTO;
-import dal.dto.IUserDTO;
-import dal.dto.RecipeDTO;
+import dal.dto.*;
 
 import java.sql.*;
 import java.time.Instant;
@@ -14,10 +12,14 @@ public class RecipeDAO implements IRecipeDAO {
     private Connection conn;
     private IngredientListDAO ingredientListDAO;
     private UserDAO userDAO;
+    private CommodityBatchDAO commodityBatchDAO;
+    private IngredientDAO ingredientDAO;
 
-    public RecipeDAO(IngredientListDAO ingredientListDAO, UserDAO userDAO) throws DALException {
+    public RecipeDAO(IngredientListDAO ingredientListDAO, IngredientDAO ingredientDAO, UserDAO userDAO, CommodityBatchDAO commodityBatchDAO) throws DALException {
         this.ingredientListDAO = ingredientListDAO;
         this.userDAO = userDAO;
+        this.commodityBatchDAO = commodityBatchDAO;
+        this.ingredientDAO = ingredientDAO;
         this.conn = ConnectionDAO.getConnection();
 
     }
@@ -63,6 +65,7 @@ public class RecipeDAO implements IRecipeDAO {
                 System.out.println("The recipe was successfully updated.");
             }
             updateMinAmounts();
+            checkReorder(recipeDTO);
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -202,4 +205,23 @@ public class RecipeDAO implements IRecipeDAO {
             e.printStackTrace();
         }
     }
+
+    public void checkReorder(IRecipeDTO newRecipeDTO) throws DALException {
+
+        List<ICommodityBatchDTO> commodities = commodityBatchDAO.getAllCommodityBatchList();
+        List<IIngredientDTO> ingredientDTOS = ingredientListDAO.getIngredientList(newRecipeDTO);
+        List<IIngredientDTO> ingToBeReordered = new ArrayList<>();
+
+        for (ICommodityBatchDTO commod : commodities) {
+            if (commod.getAmountInKg() * 1000000 < commod.getIngredientDTO().getMinAmountMG()) {
+                System.out.println( commod.getAmountInKg()*1000000 + " and "+commod.getIngredientDTO().getMinAmountMG());
+                ingToBeReordered.add(commod.getIngredientDTO());
+            }
+        }
+        if (commodities.size() == 0) {
+            ingToBeReordered = ingredientDTOS;
+        }
+        ingredientDAO.setReorder(ingToBeReordered);
+    }
 }
+

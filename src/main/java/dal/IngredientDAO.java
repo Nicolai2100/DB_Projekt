@@ -80,6 +80,21 @@ public class IngredientDAO implements IIngredientDAO {
         return toBeOrdered;
     }
 
+    public void setReorder(List<IIngredientDTO> ingList) throws DALException {
+        try {
+            String getReorderString = "update ingredient set reorder = 1 where ingredientid = ?;";
+            PreparedStatement pstmtGetReorder = conn.prepareStatement(getReorderString);
+
+            for (IIngredientDTO ing: ingList) {
+                pstmtGetReorder.setInt(1,ing.getIngredientId());
+                pstmtGetReorder.executeUpdate();
+            }
+
+        } catch (SQLException e) {
+            throw new DALException("An error occurred in the database at IngredientDAO.");
+        }
+    }
+
     /**
      * Opretter et ingrediens i DB, hvis der ikke findes et
      * med dets id

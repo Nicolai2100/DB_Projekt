@@ -17,8 +17,8 @@ public class CommodityBatchDAOTest {
     public void initialize() throws DALException {
         connectionDAO = new ConnectionDAO();
         userDAO = new UserDAO();
-        commoditybatchDAO = new CommodityBatchDAO(userDAO);
         ingredientDAO = new IngredientDAO();
+        commoditybatchDAO = new CommodityBatchDAO(userDAO, ingredientDAO);
     }
 
     @After
@@ -31,6 +31,16 @@ public class CommodityBatchDAOTest {
         ICommodityBatchDTO batchFromDB = commoditybatchDAO.getCommodityBatch(4);
         System.out.println(batchFromDB);
     }
+
+
+    @Test
+    public void getAllCommodityBatch() throws DALException {
+
+        for (ICommodityBatchDTO comBat: commoditybatchDAO.getAllCommodityBatchList()) {
+            System.out.println(comBat);
+        }
+    }
+
 
     @Test
     public void createCommodityBatch() throws DALException {

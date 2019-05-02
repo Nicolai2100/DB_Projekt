@@ -8,14 +8,14 @@ public class CommodityBatchDTO implements ICommodityBatchDTO {
     private String orderDate;
     private boolean residue;
 
-    public CommodityBatchDTO(){
+    public CommodityBatchDTO() {
     }
 
     @Override
     public String toString() {
         return "Commodity-batchID: " + batchId + ", ingredient: " + ingredientDTO.getName() + " amount: " + amountInKg + " kg." +
                 "\nOrdered by: " + orderedBy.getUserName() + ", userID: " + orderedBy.getUserId() + ", roles: " + orderedBy.getRoles() +
-                ".\nOrder date: " + orderDate.substring(0,19);
+                ".\nOrder date: " + orderDate.substring(0, 19);
     }
 
     @Override

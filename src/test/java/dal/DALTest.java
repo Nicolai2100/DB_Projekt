@@ -14,8 +14,8 @@ public class DALTest {
     UserDAO userDAO = new UserDAO();
     IngredientDAO ingredientDAO = new IngredientDAO();
     IngredientListDAO ingredientListDAO = new IngredientListDAO(ingredientDAO);
-    CommodityBatchDAO commoditybatchDAO = new CommodityBatchDAO(userDAO);
-    RecipeDAO recipeDAO = new RecipeDAO(ingredientListDAO, userDAO);
+    CommodityBatchDAO commoditybatchDAO = new CommodityBatchDAO(userDAO,ingredientDAO);
+    RecipeDAO recipeDAO = new RecipeDAO(ingredientListDAO, ingredientDAO, userDAO, commoditybatchDAO);
     ProductBatchDAO productBatchDAO = new ProductBatchDAO(recipeDAO, commoditybatchDAO, userDAO);
 
     public DALTest() throws DALException {

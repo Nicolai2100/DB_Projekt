@@ -103,11 +103,12 @@ public class IngredientDAOTest {
 
     @Test
     public void getIngredientList() throws DALException {
-        RecipeDTO recipeDTO = new RecipeDTO();
+      /*  RecipeDTO recipeDTO = new RecipeDTO();
         recipeDTO.setRecipeId(2);
         List<IIngredientDTO> ingredients = ingredientListDAO.getIngredientList(recipeDTO);
 
-        System.out.println(ingredients);
+        System.out.println(ingredients);*/
+        System.out.println(        ingredientDAO.getIngredient(4));
     }
 
     @Test
