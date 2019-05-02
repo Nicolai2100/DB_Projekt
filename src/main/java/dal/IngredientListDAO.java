@@ -22,19 +22,23 @@ public class IngredientListDAO implements IIngredientListDAO {
     @Override
     public void createIngredientList(IRecipeDTO recipeDTO, int version) throws DALException {
         try {
+/*
             conn.setAutoCommit(false);
+*/
             String insertIngList = "INSERT INTO ingredientlist(ingredientlistid, version, ingredientid, amountmg) " +
                     "VALUES(?,?,?,?);";
             PreparedStatement pstmtInsertIngredientList = conn.prepareStatement(insertIngList);
-            pstmtInsertIngredientList.setInt(1, recipeDTO.getRecipeId());
 
             for (IIngredientDTO ingredient : recipeDTO.getIngredientsList()) {
+                pstmtInsertIngredientList.setInt(1, recipeDTO.getRecipeId());
                 pstmtInsertIngredientList.setInt(2, version);
                 pstmtInsertIngredientList.setInt(3, ingredient.getIngredientId());
                 pstmtInsertIngredientList.setDouble(4, ingredient.getAmount());
                 pstmtInsertIngredientList.executeUpdate();
             }
+/*
             conn.commit();
+*/
 
         } catch (SQLException e) {
             e.printStackTrace();

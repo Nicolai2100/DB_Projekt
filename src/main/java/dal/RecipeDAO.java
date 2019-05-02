@@ -172,7 +172,6 @@ public class RecipeDAO implements IRecipeDAO {
     }
 
     private void updateMinAmounts() throws SQLException {
-
         try {
             conn.setAutoCommit(false);
 

@@ -240,12 +240,27 @@ public class DALTest {
         ingredientDTO.setAmount(120);
         norethisteron_ingredients.add(ingredientDTO);
 
+
+        System.out.println("To be ordered: ");
+        List<IIngredientDTO> ingredientDTOS1 = ingredientDAO.checkForReorder();
+
+        for (IIngredientDTO ing : ingredientDTOS1) {
+            System.out.println("" + (ingredientDTOS1.indexOf(ing) + 1) + ": IngredientID: " + ing.getIngredientId()
+                    + "-" + ing.getName());
+        }
+
         sildenafil_recipe.setIngredientsList(sildenafil_ingredients);
         norethisteron_recipe.setIngredientsList(norethisteron_ingredients);
-        ingredientListDAO.createIngredientList(sildenafil_recipe, 1);
-        ingredientListDAO.createIngredientList(norethisteron_recipe, 1);
         recipeDAO.createRecipe(sildenafil_recipe);
         recipeDAO.createRecipe(norethisteron_recipe);
+
+        System.out.println("To be ordered: ");
+        ingredientDTOS1 = ingredientDAO.checkForReorder();
+
+        for (IIngredientDTO ing : ingredientDTOS1) {
+            System.out.println("" + (ingredientDTOS1.indexOf(ing) + 1) + ": IngredientID: " + ing.getIngredientId()
+                    + "-" + ing.getName());
+        }
     }
 
     @Test
@@ -409,6 +424,7 @@ public class DALTest {
         ingredientDTO.setAmount(0.02);
         sildenafil_ingredients.add(ingredientDTO);
 
+        //Ny opskrift
         ingredientDTO = new IngredientDTO();
         ingredientDTO.setIngredientId(12);
         ingredientDTO.setName("estradiol");
@@ -454,20 +470,28 @@ public class DALTest {
         ingredientDTO.setAmount(120);
         norethisteron_ingredients.add(ingredientDTO);
 
+        System.out.println("To be ordered: ");
+        List<IIngredientDTO> ingredientDTOS = ingredientDAO.checkForReorder();
+
+        for (IIngredientDTO ing : ingredientDTOS) {
+            System.out.println("" + (ingredientDTOS.indexOf(ing) + 1) + ": IngredientID: " + ing.getIngredientId()
+                    + "-" + ing.getName());
+        }
+
         sildenafil_recipe.setIngredientsList(sildenafil_ingredients);
         norethisteron_recipe.setIngredientsList(norethisteron_ingredients);
         recipeDAO.createRecipe(sildenafil_recipe);
         recipeDAO.createRecipe(norethisteron_recipe);
 
-        /**
-         * Liste over råvarer der skal bestilles
-         */
         System.out.println("To be ordered: ");
-        List<IIngredientDTO> ingredientDTOS = ingredientDAO.checkForReorder();
+        List<IIngredientDTO> ingredientDTOS1 = ingredientDAO.checkForReorder();
 
-        for (IIngredientDTO ing : ingredientDTOS) {
-            System.out.println("" + (ingredientDTOS.indexOf(ing) + 1) + " " + ing);
+        for (IIngredientDTO ing : ingredientDTOS1) {
+            System.out.println("" + (ingredientDTOS1.indexOf(ing) + 1) + ": IngredientID: " + ing.getIngredientId()
+                    + "-" + ing.getName());
         }
+
+
         /**
          * Der bestilles et råvare batch
          */
@@ -520,8 +544,9 @@ public class DALTest {
         System.out.println("To be ordered: ");
         List<IIngredientDTO> ingredientDTOS2 = ingredientDAO.checkForReorder();
 
-        for (IIngredientDTO ing2 : ingredientDTOS2) {
-            System.out.println("" + (ingredientDTOS2.indexOf(ing2) + 1) + " " + ing2);
+        for (IIngredientDTO ing : ingredientDTOS2) {
+            System.out.println("" + (ingredientDTOS2.indexOf(ing) + 1) + ": IngredientID: " + ing.getIngredientId()
+                    + "-" + ing.getName());
         }
 
         /**
