@@ -35,6 +35,7 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
             pstmtInsertCommodityBatch.executeUpdate();
             conn.commit();
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new DALException("An error occurred in the database at CommodityBatchDAO.");
         }
     }

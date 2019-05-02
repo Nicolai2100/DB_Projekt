@@ -475,42 +475,42 @@ public class DALTest {
         IUserDTO testUser = userDAO.getUser(1);
         commodityBatch.setOrderedBy(testUser);
         commodityBatch.setBatchId(4);
-        commodityBatch.setAmountInKg(2.5);
+        commodityBatch.setAmountInKg(0.5);
         commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(4));
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
         commoditybatchDAO.createCommodityBatch(commodityBatch);
 
         commodityBatch.setOrderedBy(testUser);
         commodityBatch.setBatchId(12);
-        commodityBatch.setAmountInKg(2.5);
+        commodityBatch.setAmountInKg(0.5);
         commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(12));
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
         commoditybatchDAO.createCommodityBatch(commodityBatch);
 
         commodityBatch.setOrderedBy(testUser);
         commodityBatch.setBatchId(13);
-        commodityBatch.setAmountInKg(2.5);
+        commodityBatch.setAmountInKg(0.5);
         commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(13));
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
         commoditybatchDAO.createCommodityBatch(commodityBatch);
 
         commodityBatch.setOrderedBy(testUser);
         commodityBatch.setBatchId(14);
-        commodityBatch.setAmountInKg(2.5);
+        commodityBatch.setAmountInKg(0.5);
         commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(14));
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
         commoditybatchDAO.createCommodityBatch(commodityBatch);
 
         commodityBatch.setOrderedBy(testUser);
         commodityBatch.setBatchId(15);
-        commodityBatch.setAmountInKg(2.5);
+        commodityBatch.setAmountInKg(0.5);
         commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(15));
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
         commoditybatchDAO.createCommodityBatch(commodityBatch);
 
         commodityBatch.setOrderedBy(testUser);
         commodityBatch.setBatchId(16);
-        commodityBatch.setAmountInKg(2.5);
+        commodityBatch.setAmountInKg(1.2);
         commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(16));
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
         commoditybatchDAO.createCommodityBatch(commodityBatch);

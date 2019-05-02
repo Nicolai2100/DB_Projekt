@@ -49,19 +49,36 @@ public class ProductBatchDAOTest {
 
     @Test
     public void createProduct() throws DALException {
+        IUserDTO testUser_4 = userDAO.getUser(4);
+        IUserDTO testUser_2 = userDAO.getUser(1);
+
         ProductBatchDTO productbatchDTO = new ProductBatchDTO();
-        UserDTO testUser = (UserDTO) userDAO.getUser(2);
-        productbatchDTO.setMadeBy(testUser);
-        productbatchDTO.setName("Ost");
-        productbatchDTO.setProductId(1);
-        productbatchDTO.setRecipe(2);
-        productbatchDTO.setProductionDate(new Date(System.currentTimeMillis()));
-        productbatchDTO.setExpirationDate(new Date(System.currentTimeMillis()));
-        productbatchDTO.setVolume(100);
-        productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(2));
-        productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(3));
-        productbatchDTO.setBatchState(IProductBatchDTO.State.UNDER_PRODUCTION);
+        UserDTO testUser2 = (UserDTO) userDAO.getUser(1);
+        productbatchDTO.setMadeBy(testUser2); //Produktionslederen indsættes som et bruger-objekt.
+        productbatchDTO.setName("Sildenafil"); //Produktets navn indsættes.
+        productbatchDTO.setProductId(3); //Et unikt id vælges.
+        productbatchDTO.setRecipe(2); //Id'et til opskriften, som produktet skal produceres ud fra, indsættes.
+        productbatchDTO.setProductionDate(new Date(System.currentTimeMillis())); //Produktionsdatoen indsættes i formatet java.sql.Date.
+        productbatchDTO.setExpirationDate(new Date(System.currentTimeMillis())); //Udløbsdatoen indsættes i formatet java.sql.Date.
+        productbatchDTO.setVolume(10000); //Mængden af piller indsættes.
+        productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(4)); //Råvare-batches tilknyttes. De skal have samme id, som den tilsvarende ingrediens i opskriften.
+        productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(12));
+        productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(13));
+        productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(14));
+        productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(15));
+        productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(16));
+        productbatchDTO.setProducedBy(testUser_4); //Laboranten, som producerer produktet, indsættes.
+        productbatchDTO.setBatchState(IProductBatchDTO.State.ORDERED); //Stadiet indsættes som ENUM. Det kan være enten ORDERED, UNDER_PRODUCTION eller COMPLETED.
+
         productBatchDAO.createProductbatch(productbatchDTO);
+
+        productBatchDAO.initiateProduction(productbatchDTO, testUser_2);
+
+        productbatchDTO.setName("Amfetamin");
+
+        productBatchDAO.produceProductBatch(productbatchDTO, testUser_4);
+
+        System.out.println("Read product succesful:" + productBatchDAO.getProductbatch(1).toString());
     }
 
 

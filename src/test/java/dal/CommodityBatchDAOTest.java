@@ -36,11 +36,11 @@ public class CommodityBatchDAOTest {
     public void createCommodityBatch() throws DALException {
 
         ICommodityBatchDTO commodityBatch = new CommodityBatchDTO();
-        IUserDTO testUser = userDAO.getUser(2);
+        IUserDTO testUser = userDAO.getUser(1);
         commodityBatch.setOrderedBy(testUser);
-        commodityBatch.setBatchId(4);
+        commodityBatch.setBatchId(50);
         commodityBatch.setAmountInKg(2.5);
-        commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(5));
+        commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(16));
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
         commoditybatchDAO.createCommodityBatch(commodityBatch);
     }

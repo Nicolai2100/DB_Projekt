@@ -27,7 +27,7 @@ public class IngredientDAO implements IIngredientDAO {
             pstmtInsertIngredient.setString(2, ingredientDTO.getName());
             pstmtInsertIngredient.setString(3, ingredientDTO.getType());
             pstmtInsertIngredient.setInt(4,0);
-            pstmtInsertIngredient.setBoolean(5, true);
+            pstmtInsertIngredient.setBoolean(5, false);
             pstmtInsertIngredient.executeUpdate();
             conn.commit();
             System.out.println("The ingredient was successfully created.");

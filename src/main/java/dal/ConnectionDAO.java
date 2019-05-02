@@ -201,36 +201,12 @@ public class ConnectionDAO implements IConnectionDAO {
 
     @Override
     public void createTriggers() throws DALException {
-        createTriggerReorder();
+        createTriggerReorderInsertIngList();
+        createTriggerReorderInsertCom();
+        createTriggerReorderUpdateCom();
     }
-/*
-DELIMITER $$
-CREATE TRIGGER set_reorder_afterinsertinglist
-  AFTER INSERT ON ingredientlist
-  FOR EACH ROW
-BEGIN
-  DECLARE needamount float;
-  DECLARE haveamount float;
-SET needamount = (select minbatchsize * amountmg from ingredient join ingredientlist
-	on ingredient.ingredientid = ingredientlist.ingredientlistid
-	join recipe where  recipe.in_use =1 and ingredientlist.ingredientid = 1
-    limit 1);
-SET haveamount = (select amountinkg * 1000000 from ingredientlist join commoditybatch
-	on new.ingredientid = commoditybatch.ingredientid where commoditybatch.residue = 0
-    limit 1);
 
-IF needamount > haveamount THEN
-	UPDATE ingredient SET ingredient.reorder = 1
-		WHERE new.ingredientid = ingredient.ingredientid;
-ELSE
-	UPDATE ingredient SET ingredient.reorder = 0
-		WHERE new.ingredientid =  ingredient.ingredientid;
-    END IF;
-END $$
-DELIMITER ;
-*/
-
-    public void createTriggerReorder() throws DALException {
+    public void createTriggerReorderInsertIngList() throws DALException {
         try {
             String createTrigReorderString =
                     "CREATE TRIGGER set_reorder_afterinsertinglist AFTER INSERT ON ingredientlist " +
@@ -238,18 +214,84 @@ DELIMITER ;
                             "DECLARE needamount float; " +
                             "DECLARE haveamount float; " +
                             "SET needamount = (select minbatchsize * amountmg from ingredient join ingredientlist " +
-            "on ingredient.ingredientid = new.ingredientlistid " +
-            "join recipe where recipe.in_use =1 and new.ingredientid = ingredient.ingredientid " +
-            "limit 1); " +
-            "SET haveamount = (select amountinkg * 1000000 from ingredientlist join commoditybatch " +
-            "on new.ingredientid = commoditybatch.ingredientid where commoditybatch.residue = 0 " +
-            "limit 1); " +
-            "IF needamount > haveamount THEN " +
-            "UPDATE ingredient SET ingredient.reorder = 1 " +
-            "WHERE new.ingredientid = ingredient.ingredientid; " +
-            "ELSE " +
-            "UPDATE ingredient SET ingredient.reorder = 0 " +
-            "WHERE new.ingredientid =  ingredient.ingredientid; " +
+                            "on ingredient.ingredientid = new.ingredientlistid " +
+                            "join recipe where recipe.in_use =1 and new.ingredientid = ingredient.ingredientid " +
+                            "limit 1); " +
+                            "SET haveamount = (select amountinkg * 1000000 from ingredientlist join commoditybatch " +
+                            "on new.ingredientid = commoditybatch.ingredientid where commoditybatch.residue = 0 " +
+                            "limit 1); " +
+                            "IF needamount > haveamount THEN " +
+                            "UPDATE ingredient SET ingredient.reorder = 1 " +
+                            "WHERE new.ingredientid = ingredient.ingredientid; " +
+                            "ELSE " +
+                            "UPDATE ingredient SET ingredient.reorder = 0 " +
+                            "WHERE new.ingredientid =  ingredient.ingredientid; " +
+                            "END IF; " +
+                            "END;";
+            PreparedStatement pstmtCreateTriggerReorder = conn.prepareStatement(createTrigReorderString);
+
+            pstmtCreateTriggerReorder.execute();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DALException("An error occurred in the database at ConnectionDAO.");
+        }
+    }
+
+    public void createTriggerReorderUpdateCom() throws DALException {
+        try {
+            String createTrigReorderString =
+                    "CREATE TRIGGER set_reorder_afterupdatecombatch AFTER UPDATE ON commoditybatch " +
+                            "FOR EACH ROW BEGIN " +
+                            "DECLARE needamount float; " +
+                            "DECLARE haveamount float; " +
+                            "SET needamount = (select minbatchsize * amountmg from recipe join ingredientlist " +
+                            "on recipe.recipeid = ingredientlist.ingredientlistid " +
+                            "join ingredient where ingredient.ingredientid = new.ingredientid " +
+                            "And recipe.in_use =1 " +
+                            "    limit 1); " +
+                            "SET haveamount = (select amountinkg * 1000000 from ingredientlist join commoditybatch " +
+                            "on new.ingredientid = commoditybatch.ingredientid where commoditybatch.residue = 0 " +
+                            "limit 1); " +
+                            "IF needamount > haveamount THEN " +
+                            "UPDATE ingredient SET ingredient.reorder = 1 " +
+                            "WHERE new.ingredientid = ingredient.ingredientid; " +
+                            "ELSE " +
+                            "UPDATE ingredient SET ingredient.reorder = 0 " +
+                            "WHERE new.ingredientid =  ingredient.ingredientid; " +
+                            "END IF; " +
+                            "END;";
+            PreparedStatement pstmtCreateTriggerReorder = conn.prepareStatement(createTrigReorderString);
+
+            pstmtCreateTriggerReorder.execute();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DALException("An error occurred in the database at ConnectionDAO.");
+        }
+    }
+
+    public void createTriggerReorderInsertCom() throws DALException {
+        try {
+            String createTrigReorderString =
+                    "CREATE TRIGGER set_reorder_afterinsertcombatch AFTER INSERT ON commoditybatch " +
+                            "FOR EACH ROW BEGIN " +
+                            "DECLARE needamount float; " +
+                            "DECLARE haveamount float; " +
+                            "SET needamount = (select minbatchsize * amountmg from recipe join ingredientlist " +
+                            "on recipe.recipeid = ingredientlist.ingredientlistid " +
+                            "join ingredient where ingredient.ingredientid = new.ingredientid " +
+                            "And recipe.in_use =1 " +
+                            "    limit 1); " +
+                            "SET haveamount = (select amountinkg * 1000000 from ingredientlist join commoditybatch " +
+                            "on new.ingredientid = commoditybatch.ingredientid where commoditybatch.residue = 0 " +
+                            "limit 1); " +
+                            "IF needamount > haveamount THEN " +
+                            "UPDATE ingredient SET ingredient.reorder = 1 " +
+                            "WHERE new.ingredientid = ingredient.ingredientid; " +
+                            "ELSE " +
+                            "UPDATE ingredient SET ingredient.reorder = 0 " +
+                            "WHERE new.ingredientid =  ingredient.ingredientid; " +
                             "END IF; " +
                             "END;";
             PreparedStatement pstmtCreateTriggerReorder = conn.prepareStatement(createTrigReorderString);

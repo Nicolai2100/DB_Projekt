@@ -151,10 +151,14 @@ public class ProductBatchDAO implements IProductBatchDAO {
 
         for (IIngredientDTO i : recipeDAO.getActiveRecipe(productbatch.getRecipe()).getIngredientsList()) {
             ICommodityBatchDTO commoditybatch = commoditybatchDAO.getCommodityBatch(i.getIngredientId());
-            double newamount = (commoditybatch.getAmountInKg() - i.getAmount() / 1000000 * productbatch.getVolume());
-            System.out.println(newamount);
-            commoditybatch.setAmountInKg(newamount);
-            commoditybatchDAO.updateCommodityBatch(commoditybatch);
+            double newAmount = (commoditybatch.getAmountInKg() - i.getAmount() / 1000000 * productbatch.getVolume());
+            if (newAmount >= 0){
+                commoditybatch.setAmountInKg(newAmount);
+                System.out.println("Commodity-BatchID: " + commoditybatch.getBatchId() + " new amount " + newAmount);
+                commoditybatchDAO.updateCommodityBatch(commoditybatch);
+            }else{
+                throw new DALException("Not enough of commodity in stock!");
+            }
         }
         updateProductBatch(productbatch, user);
     }
