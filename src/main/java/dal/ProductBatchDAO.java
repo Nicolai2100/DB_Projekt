@@ -157,6 +157,7 @@ public class ProductBatchDAO implements IProductBatchDAO {
         for (ICommodityBatchDTO commoditybatch : commodityBatchDTOS) {
             System.out.println("Commodity-BatchID: " + commoditybatch.getBatchId() + " new amount " + commoditybatch.getAmountInKg());
             commoditybatchDAO.updateCommodityBatch(commoditybatch);
+            commoditybatchDAO.checkForResidue();
         }
         updateProductBatch(productbatch, user);
     }

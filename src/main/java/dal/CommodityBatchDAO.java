@@ -1,5 +1,6 @@
 package dal;
 
+import com.sun.org.apache.bcel.internal.generic.NEW;
 import dal.dto.*;
 
 import java.sql.*;
@@ -97,6 +98,7 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
             preparedStatement.executeUpdate();
             conn.commit();
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new DALException("An error occurred in the database at CommodityBatchDAO.");
         }
     }
@@ -120,7 +122,7 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
         //TODO skal det medregnes, hvis det er rest?
         String getTotComAmString = "SELECT sum(amountinkg) " +
                 "FROM commoditybatch " +
-                "WHERE ingredientid=? AND NOT residue=1";
+                "WHERE ingredientid=? AND residue=0";
         try {
             PreparedStatement preparedStatement = conn.prepareStatement(getTotComAmString);
             preparedStatement.setInt(1, ingredient.getIngredientId());
@@ -182,5 +184,25 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
             throw new DALException("An error occurred in the database at CommodityBatchDAO.");
         }
         return commodityBatchList;
+    }
+
+    public void checkForResidue() throws DALException {
+        try {
+            List<ICommodityBatchDTO> combats = getAllCommodityBatchList();
+
+            String setResidueString = "UPDATE commoditybatch SET residue = 1 WHERE " +
+                    "commoditybatchid = ?;";
+            PreparedStatement pstmtSetResidue = conn.prepareStatement(setResidueString);
+
+            for (ICommodityBatchDTO combat : combats) {
+                if (combat.getAmountInKg()*1000000 < combat.getIngredientDTO().getMinAmountMG()) {
+                    pstmtSetResidue.setInt(1, combat.getBatchId());
+                    pstmtSetResidue.executeUpdate();
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DALException("An error occurred in the database at CommodityBatchDAO.");
+        }
     }
 }

@@ -316,7 +316,7 @@ public class DALTest {
 
         commodityBatch.setOrderedBy(testUser);
         commodityBatch.setBatchId(16);
-        commodityBatch.setAmountInKg(1.2);
+        commodityBatch.setAmountInKg(1.21);
         commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(16));
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
         commoditybatchDAO.createCommodityBatch(commodityBatch);
@@ -382,5 +382,10 @@ public class DALTest {
         for (IRecipeDTO oldRecipe : recipeDAO.getListOfOldRecipes()) {
             System.out.println(oldRecipe);
         }
-    }
+
+/*        for (IIngredientDTO ing : sildenafil_ingredients
+        ) {
+            System.out.println(commoditybatchDAO.getTotalCommodityAmountInKG(ing));
+        }
+  */  }
 }

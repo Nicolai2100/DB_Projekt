@@ -35,7 +35,6 @@ public class CommodityBatchDAOTest {
 
     @Test
     public void getAllCommodityBatch() throws DALException {
-
         for (ICommodityBatchDTO comBat: commoditybatchDAO.getAllCommodityBatchList()) {
             System.out.println(comBat);
         }
@@ -44,7 +43,6 @@ public class CommodityBatchDAOTest {
 
     @Test
     public void createCommodityBatch() throws DALException {
-
         ICommodityBatchDTO commodityBatch = new CommodityBatchDTO();
         IUserDTO testUser = userDAO.getUser(1);
         commodityBatch.setOrderedBy(testUser);
@@ -53,5 +51,11 @@ public class CommodityBatchDAOTest {
         commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(16));
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
         commoditybatchDAO.createCommodityBatch(commodityBatch);
+    }
+
+    @Test
+    public void updateBatch() throws DALException {
+        ICommodityBatchDTO comBat = commoditybatchDAO.getCommodityBatch(4);
+        commoditybatchDAO.updateCommodityBatch(comBat);
     }
 }
