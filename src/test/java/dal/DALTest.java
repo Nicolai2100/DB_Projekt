@@ -5,7 +5,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +42,6 @@ public class DALTest {
          * Alt slettes
          */
         connectionDAO.deleteTables();
-
         /**
          * Brugerne oprettes
          */
@@ -319,7 +317,6 @@ public class DALTest {
          * Liste over råvarer der skal bestilles
          */
         ingredientDTOS = ingredientDAO.getReorders();
-        System.out.println(ingredientDTOS.size());
         assertTrue(ingredientDTOS.size() == 10);
         System.out.println("\n" + ingredientDTOS.size() + " commodities to be ordered: ");
         for (IIngredientDTO ing : ingredientDTOS) {
@@ -353,10 +350,13 @@ public class DALTest {
         //Laboranten, som producerer produktet, indsættes og produktbatchen produceres færdigt
         productbatchDTO.setProducedBy(testUser_4);
         productBatchDAO.produceProductBatch(productbatchDTO, testUser_4);
-        System.out.println(productBatchDAO.getProductbatch(1).getBatchState());
+
+        IProductBatchDTO productBatchDTO = productBatchDAO.getProductbatch(1);
+        System.out.println(productBatchDTO.getBatchState());
+        System.out.println(productBatchDTO);
+
 
         ingredientDTOS = ingredientDAO.getReorders();
-        System.out.println(ingredientDTOS.size());
         assertTrue(ingredientDTOS.size() == 12);
         System.out.println("\n" + ingredientDTOS.size() + " commodities to be ordered: ");
         for (IIngredientDTO ing : ingredientDTOS) {
@@ -406,7 +406,6 @@ public class DALTest {
         }
 
         ingredientDTOS = ingredientDAO.getReorders();
-        System.out.println(ingredientDTOS.size());
         assertTrue(ingredientDTOS.size() == 11);
         System.out.println("\n" + ingredientDTOS.size() + " commodities to be ordered: ");
         for (IIngredientDTO ing : ingredientDTOS) {
