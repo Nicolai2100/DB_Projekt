@@ -1,7 +1,5 @@
 package dal;
 
-import java.sql.Connection;
-
 public interface IConnectionDAO {
     void initializeDataBase() throws DALException;
 
@@ -10,6 +8,4 @@ public interface IConnectionDAO {
     void deleteTables() throws DALException;
 
     void deleteUsers() throws DALException;
-
-    void createTriggers() throws DALException;
 }

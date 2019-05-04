@@ -150,7 +150,7 @@ public class RecipeDAO implements IRecipeDAO {
             } else {
                 System.out.println("The recipe with id: " + recipeId + " was successfully archived.");
             }
-            updateMinAmounts();
+            //updateMinAmounts();
 
         } catch (SQLException e) {
             throw new DALException("An error occurred in the database at RecipeDAO.");

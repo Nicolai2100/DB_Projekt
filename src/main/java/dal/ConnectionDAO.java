@@ -194,68 +194,6 @@ public class ConnectionDAO implements IConnectionDAO {
         }
     }
 
-    @Override
-    public void createTriggers() throws DALException {
-        createTriggerReorderInsertCom();
-        createTriggerReorderUpdateCom();
-    }
-
-    public void createTriggerReorderUpdateCom() throws DALException {
-        try {
-            String createTrigReorderString =
-                    "CREATE TRIGGER set_reorder_afterupdatecombatch AFTER UPDATE ON commoditybatch " +
-                            "FOR EACH ROW BEGIN " +
-                            "DECLARE needamount float; " +
-                            "DECLARE haveamount float; " +
-                            "SET needamount = (select minamountinmg from ingredient " +
-                            "    where ingredient.ingredientid = new.ingredientid); " +
-                            "SET haveamount = (select max(amountinkg) * 1000000 from commoditybatch " +
-                            "    join ingredient on ingredient.ingredientid = commoditybatch.ingredientid " +
-                            "    where commoditybatch.residue = 0 and new.ingredientid = ingredient.ingredientid); " +
-                            "IF needamount > haveamount THEN " +
-                            "UPDATE ingredient SET ingredient.reorder = 1 " +
-                            "WHERE new.ingredientid = ingredient.ingredientid; " +
-                            "ELSE " +
-                            "UPDATE ingredient SET ingredient.reorder = 0 " +
-                            "WHERE new.ingredientid =  ingredient.ingredientid; " +
-                            "END IF; " +
-                            "END;";
-            PreparedStatement pstmtCreateTriggerReorder = conn.prepareStatement(createTrigReorderString);
-            pstmtCreateTriggerReorder.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new DALException("An error occurred in the database at ConnectionDAO.");
-        }
-    }
-
-    public void createTriggerReorderInsertCom() throws DALException {
-        try {
-            String createTrigReorderString =
-                    "CREATE TRIGGER set_reorder_afterinsertcombatch AFTER INSERT ON commoditybatch " +
-                            "FOR EACH ROW BEGIN " +
-                            "DECLARE needamount float; " +
-                            "DECLARE haveamount float; " +
-                            "SET needamount = (select minamountinmg from ingredient " +
-                            "    where ingredient.ingredientid = new.ingredientid); " +
-                            "SET haveamount = (select max(amountinkg) * 1000000 from commoditybatch " +
-                            "    join ingredient on ingredient.ingredientid = commoditybatch.ingredientid " +
-                            "    where commoditybatch.residue = 0 and new.ingredientid = ingredient.ingredientid); " +
-                            "IF needamount > haveamount THEN " +
-                            "UPDATE ingredient SET ingredient.reorder = 1 " +
-                            "WHERE new.ingredientid = ingredient.ingredientid; " +
-                            "ELSE " +
-                            "UPDATE ingredient SET ingredient.reorder = 0 " +
-                            "WHERE new.ingredientid =  ingredient.ingredientid; " +
-                            "END IF; " +
-                            "END;";
-            PreparedStatement pstmtCreateTriggerReorder = conn.prepareStatement(createTrigReorderString);
-            pstmtCreateTriggerReorder.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new DALException("An error occurred in the database at ConnectionDAO.");
-        }
-    }
-
     public void dropAllTables(int deleteTable) throws DALException {
         try {
             PreparedStatement dropTableUser = conn.prepareStatement(
