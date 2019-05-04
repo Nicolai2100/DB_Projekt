@@ -31,6 +31,7 @@ public class IngredientDAO implements IIngredientDAO {
             pstmtInsertIngredient.executeUpdate();
             conn.commit();
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new DALException("An error occurred in the database at IngredientDAO.");
         }
     }

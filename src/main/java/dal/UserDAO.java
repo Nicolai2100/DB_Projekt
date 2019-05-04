@@ -64,7 +64,6 @@ public class UserDAO implements IUserDAO {
             PreparedStatement pSmtSelectUser = conn.prepareStatement(selectString);
             pSmtSelectUser.setInt(1, userId);
             ResultSet rs = pSmtSelectUser.executeQuery();
-
             while (rs.next()) {
                 empty = false;
                 returnUser.setUserId(rs.getInt(1));
@@ -82,7 +81,6 @@ public class UserDAO implements IUserDAO {
                 }
             }
             if (empty) {
-                System.out.println("No such user in the database!");
                 return null;
             }
         } catch (SQLException e) {

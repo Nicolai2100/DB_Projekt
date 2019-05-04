@@ -256,15 +256,14 @@ public class DALTest {
         recipeDAO.updateRecipe(recipeDAO.getActiveRecipe(sildenafil_recipe.getRecipeId()));
         recipeDAO.createRecipe(norethisteron_recipe);
         recipeDAO.updateRecipe(recipeDAO.getActiveRecipe(norethisteron_recipe.getRecipeId()));
-
         /**
          * Liste over råvarer der skal bestilles
          */
-        List<IIngredientDTO> ingredientDTOS1 = ingredientDAO.getReorders();
-        assertTrue(ingredientDTOS1.size() == 16);
-        System.out.println("\n" + ingredientDTOS1.size() + " commodities to be ordered: ");
-        for (IIngredientDTO ing : ingredientDTOS1) {
-            System.out.println("" + (ingredientDTOS1.indexOf(ing) + 1) + ": IngredientID: " + ing.getIngredientId()
+        ingredientDTOS = ingredientDAO.getReorders();
+        assertTrue(ingredientDTOS.size() == 16);
+        System.out.println("\n" + ingredientDTOS.size() + " commodities to be ordered: ");
+        for (IIngredientDTO ing : ingredientDTOS) {
+            System.out.println("" + (ingredientDTOS.indexOf(ing) + 1) + ": IngredientID: " + ing.getIngredientId()
                     + "-" + ing.getName());
         }
         /**
@@ -341,20 +340,26 @@ public class DALTest {
         productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(14));
         productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(15));
         productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(16));
+
         //Et produkt oprettes som en bestilling
         productBatchDAO.createProductbatch(productbatchDTO);
-        System.out.println(productBatchDAO.getProductbatch(1).getBatchState());
+        List<IProductBatchDTO> orderedProducts = productBatchDAO.getProductsOrdered();
+        System.out.println(orderedProducts);
+        assertTrue(orderedProducts.size() == 1);
+
         //Et produktets status ændres til under produktion
         productBatchDAO.initiateProduction(productbatchDTO, testUser_2);
-        System.out.println(productBatchDAO.getProductbatch(1).getBatchState());
+        List<IProductBatchDTO> underProductionProducts = productBatchDAO.getProductsUnderProduction();
+        System.out.println(underProductionProducts);
+        assertTrue(underProductionProducts.size() == 1);
+
+
         //Laboranten, som producerer produktet, indsættes og produktbatchen produceres færdigt
         productbatchDTO.setProducedBy(testUser_4);
         productBatchDAO.produceProductBatch(productbatchDTO, testUser_4);
-
-        IProductBatchDTO productBatchDTO = productBatchDAO.getProductbatch(1);
-        System.out.println(productBatchDTO.getBatchState());
-        System.out.println(productBatchDTO);
-
+        List<IProductBatchDTO> completedProducts = productBatchDAO.getProductsCompleted();
+        System.out.println(completedProducts);
+        assertTrue(completedProducts.size() == 1);
 
         ingredientDTOS = ingredientDAO.getReorders();
         assertTrue(ingredientDTOS.size() == 12);

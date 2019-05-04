@@ -1,6 +1,7 @@
 package dal;
 
 import dal.dto.*;
+import org.junit.platform.commons.function.Try;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -182,16 +183,13 @@ public class ProductBatchDAO implements IProductBatchDAO {
         }
         productbatch.setProducedBy(user);
         productbatch.setBatchState(IProductBatchDTO.State.COMPLETED);
-
         Date now = (new Date(System.currentTimeMillis()));
         System.out.println(now);
         LocalDate ld = now.toLocalDate();
         LocalDate expirationDate = ld.plusMonths(3);
         java.sql.Date sqlExpirationDate = java.sql.Date.valueOf(expirationDate);
-
         productbatch.setProductionDate(now);
         productbatch.setExpirationDate(sqlExpirationDate);
-
         updateProductBatch(productbatch, user);
     }
 
@@ -209,5 +207,48 @@ public class ProductBatchDAO implements IProductBatchDAO {
         } catch (SQLException e) {
             throw new DALException("An error occurred in the database at ProductBatchDAO.");
         }
+    }
+
+    @Override
+    public List<IProductBatchDTO> getProductsOrdered() throws DALException {
+        return getProductList("ORDERED");
+    }
+
+    @Override
+    public List<IProductBatchDTO> getProductsUnderProduction() throws DALException {
+        return getProductList("UNDER_PRODUCTION");
+    }
+
+    @Override
+    public List<IProductBatchDTO> getProductsCompleted() throws DALException {
+        return getProductList("COMPLETED");
+    }
+
+    private List<IProductBatchDTO> getProductList(String status) throws DALException {
+        String selectString = "SELECT * FROM productbatch WHERE batch_state = ?;";
+        List<IProductBatchDTO> products = new ArrayList<>();
+        try {
+            PreparedStatement pstmtSelect = conn.prepareStatement(selectString);
+            pstmtSelect.setString(1, status);
+            ResultSet resultSet = pstmtSelect.executeQuery();
+
+            while (resultSet.next()) {
+                IProductBatchDTO productBatchDTO = new ProductBatchDTO();
+                productBatchDTO.setProductId(resultSet.getInt(1));
+                productBatchDTO.setName(resultSet.getString(2));
+                productBatchDTO.setMadeBy(userDAO.getUser(resultSet.getInt(3)));
+                productBatchDTO.setRecipe(resultSet.getInt(4));
+                productBatchDTO.setProductionDate(resultSet.getDate(6));
+                productBatchDTO.setVolume(resultSet.getInt(7));
+                productBatchDTO.setExpirationDate(resultSet.getDate(8));
+                productBatchDTO.setBatchState(IProductBatchDTO.State.valueOf(resultSet.getString(9)));
+                productBatchDTO.setProducedBy(userDAO.getUser(resultSet.getInt(10)));
+                products.add(productBatchDTO);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DALException("An error occurred in the database at ProductBatchDAO.");
+        }
+        return products;
     }
 }

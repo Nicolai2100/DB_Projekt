@@ -16,4 +16,11 @@ public interface IProductBatchDAO {
     void produceProductBatch(IProductBatchDTO productbatch, IUserDTO user) throws DALException;
 
     void createRelations(List<ICommodityBatchDTO> commodityBatchList, int productbatchId) throws DALException;
+
+    List<IProductBatchDTO> getProductsOrdered() throws DALException;
+
+    List<IProductBatchDTO> getProductsUnderProduction() throws DALException;
+
+    List<IProductBatchDTO> getProductsCompleted() throws DALException;
+
 }

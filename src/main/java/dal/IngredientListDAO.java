@@ -44,6 +44,23 @@ public class IngredientListDAO implements IIngredientListDAO {
         }
     }
 
+    public void createIngredientList(int recipeDTOID, int version, IIngredientDTO ingredientDTO) throws DALException {
+        String insertIngList = "INSERT INTO ingredientlist(ingredientlistid, version, ingredientid, amountmg) " +
+                "VALUES(?,?,?,?);";
+        try {
+            PreparedStatement pstmtInsertIngredientList = conn.prepareStatement(insertIngList);
+                pstmtInsertIngredientList.setInt(1, recipeDTOID);
+                pstmtInsertIngredientList.setInt(2, version);
+                pstmtInsertIngredientList.setInt(3, ingredientDTO.getIngredientId());
+                pstmtInsertIngredientList.setDouble(4, ingredientDTO.getAmount());
+                pstmtInsertIngredientList.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DALException("An error occurred in the database at IngredientListDAO.");
+        }
+    }
+
+
     @Override
     public List<IIngredientDTO> getIngredientList(IRecipeDTO recipeDTO) throws DALException {
         List<IIngredientDTO> ingredientList = new ArrayList<>();

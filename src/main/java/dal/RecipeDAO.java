@@ -44,7 +44,10 @@ public class RecipeDAO implements IRecipeDAO {
             pstmtInsertRecipe.setBoolean(6, true);
             pstmtInsertRecipe.setInt(7, recipeDTO.getMinBatchSize());
 
-            ingredientListDAO.createIngredientList(recipeDTO, version);
+            for (IIngredientDTO ing: recipeDTO.getIngredientsList()) {
+                ingredientListDAO.createIngredientList(recipeDTO.getRecipeId(), recipeDTO.getVersion(),ing);
+            }
+
             int result = pstmtInsertRecipe.executeUpdate();
             conn.commit();
             if (result == 1 && version == 1) {
@@ -53,7 +56,8 @@ public class RecipeDAO implements IRecipeDAO {
                 System.out.println("The recipe was successfully updated.");
             }
             updateMinAmounts();
-/*
+
+/*          Metoden er blevet erstattet af en trigger
             checkReorder();
 */
         } catch (SQLException e) {
