@@ -400,7 +400,6 @@ public class DALTest {
             double amountOnStock = commoditybatchDAO.getTotalCommodityAmountInKG(ing);
             System.out.println(amountOnStock);
             if (ing.getIngredientId() == 3) {
-                System.out.println(amountOnStock);
                 assertTrue(amountOnStock == 7.5);
             }
         }
