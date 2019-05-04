@@ -2,36 +2,39 @@ package dal;
 
 import dal.dto.*;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class RecipeDAOTest {
-    ConnectionDAO connectionDAO = new ConnectionDAO();
+  /*  ConnectionDAO connectionDAO = new ConnectionDAO();
     UserDAO userDAO = new UserDAO();
     IngredientDAO ingredientDAO = new IngredientDAO();
     IngredientListDAO ingredientListDAO = new IngredientListDAO(ingredientDAO);
     CommodityBatchDAO commodityBatchDAO = new CommodityBatchDAO(userDAO,ingredientDAO);
-    RecipeDAO recipeDAO = new RecipeDAO(ingredientListDAO, ingredientDAO, userDAO, commodityBatchDAO);
+    RecipeDAO recipeDAO = new RecipeDAO(ingredientDAO, ingredientListDAO, userDAO, commodityBatchDAO);
+*/
+    ConnectionDAO connectionDAO;
+    UserDAO userDAO;
+    IngredientDAO ingredientDAO;
+    IngredientListDAO ingredientListDAO;
+    CommodityBatchDAO commodityBatchDAO;
+    RecipeDAO recipeDAO;
 
     public RecipeDAOTest() throws DALException {
     }
 
-    /* @Before
-     public void initialize() {
+     @Before
+     public void initialize() throws DALException {
          connectionDAO = new ConnectionDAO();
-         productBatchDAO = new ProductBatchDAO(connectionDAO);
-         userDAO = new UserDAO(connectionDAO);
-         ingredientDAO = new IngredientDAO(connectionDAO);
-         ingredientListDAO = new IngredientListDAO(connectionDAO, userDAO, ingredientDAO);
-         commoditybatchDAO = new CommodityBatchDAO(connectionDAO, userDAO);
-         oldRecipeDAO = new OldRecipeDAO(connectionDAO, recipeDAO);
-         recipeDAO = new RecipeDAO(connectionDAO, ingredientListDAO, userDAO, oldRecipeDAO);
-
-         userDAOTest = new UserDAOTest();
+         userDAO = new UserDAO();
+         ingredientDAO = new IngredientDAO();
+         ingredientListDAO = new IngredientListDAO(ingredientDAO);
+         recipeDAO = new RecipeDAO(ingredientDAO, ingredientListDAO, userDAO);
+         commodityBatchDAO = new CommodityBatchDAO(userDAO, ingredientDAO, recipeDAO);
      }
- */
     @After
     public void close() throws DALException {
         connectionDAO.closeConn();
@@ -123,5 +126,17 @@ public class RecipeDAOTest {
 
         recipeDTO.setIngredientsList(ingredients);
         recipeDAO.createRecipe(recipeDTO);
+    }
+
+    @Test
+    public void getActiveRec() throws DALException {
+        for (IRecipeDTO recipeDTO :recipeDAO.getAllActiveRecipes()) {
+            System.out.println(recipeDTO);
+        }
+    }
+
+    @Test
+    public void checkRe() throws DALException {
+//        recipeDAO.checkReorder();
     }
 }

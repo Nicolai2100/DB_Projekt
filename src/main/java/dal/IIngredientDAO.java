@@ -10,7 +10,7 @@ public interface IIngredientDAO {
 
     IIngredientDTO getIngredient(int ingredientId) throws DALException;
 
-    List<IIngredientDTO> checkForReorder() throws DALException;
+    List<IIngredientDTO> getReorders() throws DALException;
 
     double getTotalAmount(IIngredientDTO ingredient) throws DALException;
 

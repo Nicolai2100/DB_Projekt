@@ -24,6 +24,8 @@ public class ProductBatchDAO implements IProductBatchDAO {
         if (!productbatch.getMadeBy().getRoles().contains("productionleader") || !productbatch.getMadeBy().getIsActive()) {
             throw new DALException("User not authorized to proceed!");
         }
+        //Stadiet indsættes som ENUM. Det kan være enten ORDERED, UNDER_PRODUCTION eller COMPLETED.
+        productbatch.setBatchState(IProductBatchDTO.State.ORDERED);
         String selectVersionString = "SELECT version from recipe where recipeid = ? AND in_use = 1";
         String insertString = "INSERT INTO productbatch VALUES(?,?,?,?,?,?,?,?,?,?)";
         try {
@@ -35,7 +37,6 @@ public class ProductBatchDAO implements IProductBatchDAO {
             if (rs.next()) {
                 versionNum = rs.getInt(1);
             }
-            System.out.println(versionNum);
             PreparedStatement pstmtInsertProduct = conn.prepareStatement(insertString);
             pstmtInsertProduct.setInt(1, productbatch.getProductId());
             pstmtInsertProduct.setString(2, productbatch.getName());
@@ -47,10 +48,13 @@ public class ProductBatchDAO implements IProductBatchDAO {
             pstmtInsertProduct.setDate(8, productbatch.getExpirationDate());
             pstmtInsertProduct.setString(9, productbatch.getBatchState());
             pstmtInsertProduct.setInt(10, productbatch.getProducedBy().getUserId());
-            pstmtInsertProduct.executeUpdate();
+            int result = pstmtInsertProduct.executeUpdate();
             createRelations(productbatch.getCommodityBatches(), productbatch.getProductId());
             conn.commit();
-            System.out.println("The product was successfully created.");
+            if (result > 0) {
+                System.out.println("The product was successfully initiated.");
+            } else {
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DALException("An error occurred in the database at ProductBatchDAO.");
@@ -114,10 +118,9 @@ public class ProductBatchDAO implements IProductBatchDAO {
             pstmtUpdateProduct.setInt(8, productbatch.getProductId());
             pstmtUpdateProduct.setInt(9, productbatch.getProducedBy().getUserId());
             pstmtUpdateProduct.executeUpdate();
-
             createRelations(productbatch.getCommodityBatches(), productbatch.getProductId());
             conn.commit();
-            System.out.println("The product was successfully updated.");
+            System.out.println("The product was successfully produced.");
         } catch (SQLException e) {
             throw new DALException("An error occurred in the database at ProductBatchDAO.");
         }
@@ -155,7 +158,6 @@ public class ProductBatchDAO implements IProductBatchDAO {
         //Sørger for at ingen commoditybatches bliver opdateret
         //når bare en af dem går i minus
         for (ICommodityBatchDTO commoditybatch : commodityBatchDTOS) {
-            System.out.println("Commodity-BatchID: " + commoditybatch.getBatchId() + " new amount " + commoditybatch.getAmountInKg());
             commoditybatchDAO.updateCommodityBatch(commoditybatch);
             commoditybatchDAO.checkForResidue();
         }

@@ -2,6 +2,7 @@ package dal;
 
 import dal.dto.*;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.sql.Date;
@@ -9,42 +10,31 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DALTest {
-    ConnectionDAO connectionDAO = new ConnectionDAO();
-    UserDAO userDAO = new UserDAO();
-    IngredientDAO ingredientDAO = new IngredientDAO();
-    IngredientListDAO ingredientListDAO = new IngredientListDAO(ingredientDAO);
-    CommodityBatchDAO commoditybatchDAO = new CommodityBatchDAO(userDAO, ingredientDAO);
-    RecipeDAO recipeDAO = new RecipeDAO(ingredientListDAO, ingredientDAO, userDAO, commoditybatchDAO);
-    ProductBatchDAO productBatchDAO = new ProductBatchDAO(recipeDAO, commoditybatchDAO, userDAO);
+import static org.junit.Assert.*;
 
-    public DALTest() throws DALException {
+public class DALTest {
+    ConnectionDAO connectionDAO;
+    UserDAO userDAO;
+    CommodityBatchDAO commoditybatchDAO;
+    IngredientDAO ingredientDAO;
+    RecipeDAO recipeDAO;
+    IngredientListDAO ingredientListDAO;
+    ProductBatchDAO productBatchDAO;
+
+    @Before
+    public void initialize() throws DALException {
+        connectionDAO = new ConnectionDAO();
+        userDAO = new UserDAO();
+        ingredientDAO = new IngredientDAO();
+        ingredientListDAO = new IngredientListDAO(ingredientDAO);
+        recipeDAO = new RecipeDAO(ingredientDAO, ingredientListDAO, userDAO);
+        commoditybatchDAO = new CommodityBatchDAO(userDAO, ingredientDAO, recipeDAO);
+        productBatchDAO = new ProductBatchDAO(recipeDAO, commoditybatchDAO, userDAO);
     }
 
-    /* @Before
-     public void initialize() {
-         connectionDAO = new ConnectionDAO();
-         productBatchDAO = new ProductBatchDAO(connectionDAO);
-         userDAO = new UserDAO(connectionDAO);
-         ingredientDAO = new IngredientDAO(connectionDAO);
-         ingredientListDAO = new IngredientListDAO(connectionDAO, userDAO, ingredientDAO);
-         commoditybatchDAO = new CommodityBatchDAO(connectionDAO, userDAO);
-         recipeDAO = new RecipeDAO(connectionDAO, ingredientListDAO, userDAO, oldRecipeDAO);
-         userDAOTest = new UserDAOTest();
-     }
- */
     @After
     public void close() throws DALException {
         connectionDAO.closeConn();
-    }
-
-    @Test
-    public void cleanTables() throws DALException {
-        connectionDAO.deleteTables();
-    }
-
-    @Test
-    public void temp() throws DALException {
     }
 
     @Test
@@ -255,7 +245,8 @@ public class DALTest {
         /**
          * Liste over råvarer der skal bestilles
          */
-        List<IIngredientDTO> ingredientDTOS = ingredientDAO.checkForReorder();
+        List<IIngredientDTO> ingredientDTOS = ingredientDAO.getReorders();
+        assertTrue(ingredientDTOS.size() == 0);
         System.out.println("\n" + ingredientDTOS.size() + " commodities to be ordered: ");
         for (IIngredientDTO ing : ingredientDTOS) {
             System.out.println("" + (ingredientDTOS.indexOf(ing) + 1) + ": IngredientID: " + ing.getIngredientId()
@@ -264,11 +255,15 @@ public class DALTest {
         sildenafil_recipe.setIngredientsList(sildenafil_ingredients);
         norethisteron_recipe.setIngredientsList(norethisteron_ingredients);
         recipeDAO.createRecipe(sildenafil_recipe);
+        recipeDAO.updateRecipe(recipeDAO.getActiveRecipe(sildenafil_recipe.getRecipeId()));
         recipeDAO.createRecipe(norethisteron_recipe);
+        recipeDAO.updateRecipe(recipeDAO.getActiveRecipe(norethisteron_recipe.getRecipeId()));
+
         /**
          * Liste over råvarer der skal bestilles
          */
-        List<IIngredientDTO> ingredientDTOS1 = ingredientDAO.checkForReorder();
+        List<IIngredientDTO> ingredientDTOS1 = ingredientDAO.getReorders();
+        assertTrue(ingredientDTOS1.size() == 16);
         System.out.println("\n" + ingredientDTOS1.size() + " commodities to be ordered: ");
         for (IIngredientDTO ing : ingredientDTOS1) {
             System.out.println("" + (ingredientDTOS1.indexOf(ing) + 1) + ": IngredientID: " + ing.getIngredientId()
@@ -281,52 +276,54 @@ public class DALTest {
         IUserDTO testUser = userDAO.getUser(1);
         commodityBatch.setOrderedBy(testUser);
         commodityBatch.setBatchId(4);
-        commodityBatch.setAmountInKg(0.5);
+        commodityBatch.setAmountInKg(1);
         commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(4));
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
         commoditybatchDAO.createCommodityBatch(commodityBatch);
 
         commodityBatch.setOrderedBy(testUser);
         commodityBatch.setBatchId(12);
-        commodityBatch.setAmountInKg(0.5);
+        commodityBatch.setAmountInKg(1);
         commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(12));
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
         commoditybatchDAO.createCommodityBatch(commodityBatch);
 
         commodityBatch.setOrderedBy(testUser);
         commodityBatch.setBatchId(13);
-        commodityBatch.setAmountInKg(0.5);
+        commodityBatch.setAmountInKg(1);
         commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(13));
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
         commoditybatchDAO.createCommodityBatch(commodityBatch);
 
         commodityBatch.setOrderedBy(testUser);
         commodityBatch.setBatchId(14);
-        commodityBatch.setAmountInKg(0.5);
+        commodityBatch.setAmountInKg(1);
         commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(14));
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
         commoditybatchDAO.createCommodityBatch(commodityBatch);
 
         commodityBatch.setOrderedBy(testUser);
         commodityBatch.setBatchId(15);
-        commodityBatch.setAmountInKg(0.5);
+        commodityBatch.setAmountInKg(1);
         commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(15));
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
         commoditybatchDAO.createCommodityBatch(commodityBatch);
 
         commodityBatch.setOrderedBy(testUser);
         commodityBatch.setBatchId(16);
-        commodityBatch.setAmountInKg(1.21);
+        commodityBatch.setAmountInKg(3);
         commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(16));
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
         commoditybatchDAO.createCommodityBatch(commodityBatch);
         /**
          * Liste over råvarer der skal bestilles
          */
-        List<IIngredientDTO> ingredientDTOS2 = ingredientDAO.checkForReorder();
-        System.out.println("\n" + ingredientDTOS2.size() + " commodities to be ordered: ");
-        for (IIngredientDTO ing : ingredientDTOS2) {
-            System.out.println("" + (ingredientDTOS2.indexOf(ing) + 1) + ": IngredientID: " + ing.getIngredientId()
+        ingredientDTOS = ingredientDAO.getReorders();
+        System.out.println(ingredientDTOS.size());
+        assertTrue(ingredientDTOS.size() == 10);
+        System.out.println("\n" + ingredientDTOS.size() + " commodities to be ordered: ");
+        for (IIngredientDTO ing : ingredientDTOS) {
+            System.out.println("" + (ingredientDTOS.indexOf(ing) + 1) + ": IngredientID: " + ing.getIngredientId()
                     + "-" + ing.getName());
         }
         /**
@@ -352,40 +349,76 @@ public class DALTest {
         productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(16));
         //Laboranten, som producerer produktet, indsættes.
         productbatchDTO.setProducedBy(testUser_4);
-        //Stadiet indsættes som ENUM. Det kan være enten ORDERED, UNDER_PRODUCTION eller COMPLETED.
-        productbatchDTO.setBatchState(IProductBatchDTO.State.ORDERED);
+
         productBatchDAO.createProductbatch(productbatchDTO);
+        System.out.println(productBatchDAO.getProductbatch(1).toString());
+
         productBatchDAO.initiateProduction(productbatchDTO, testUser_2);
+        System.out.println(productBatchDAO.getProductbatch(1).toString());
+
+
         productbatchDTO.setName("Amfetamin");
         productBatchDAO.produceProductBatch(productbatchDTO, testUser_4);
-        System.out.println("Read product succesful:" + productBatchDAO.getProductbatch(1).toString());
+        System.out.println(productBatchDAO.getProductbatch(1).toString());
+
+        ingredientDTOS = ingredientDAO.getReorders();
+        System.out.println(ingredientDTOS.size());
+        assertTrue(ingredientDTOS.size() == 12);
+        System.out.println("\n" + ingredientDTOS.size() + " commodities to be ordered: ");
+        for (IIngredientDTO ing : ingredientDTOS) {
+            System.out.println("" + (ingredientDTOS.indexOf(ing) + 1) + ": IngredientID: " + ing.getIngredientId()
+                    + "-" + ing.getName());
+        }
+
         /**
          * En opskrift opdateres
          */
         IRecipeDTO recipeDTO = recipeDAO.getActiveRecipe(3);
         recipeDTO.setName("Opdateret 2 " + recipeDTO.getName());
-        recipeDTO.getIngredientsList().get(1).setMinAmountMG(0.00002);
+        recipeDTO.getIngredientsList().get(1).setMinAmountMG(0.002);
         recipeDAO.updateRecipe(recipeDTO);
-        /**
-         * Liste over råvarer der skal bestilles
-         **/
-        List<IIngredientDTO> ingredientDTOS3 = ingredientDAO.checkForReorder();
-        System.out.println("\n" + ingredientDTOS3.size() + " commodities to be ordered: ");
-        for (IIngredientDTO ing : ingredientDTOS3) {
-            System.out.println("" + (ingredientDTOS3.indexOf(ing) + 1) + ": IngredientID: " + ing.getIngredientId()
-                    + "-" + ing.getName());
-        }
         /**
          * Liste over arkiverede opskrifter
          **/
         System.out.println("\nOld recipes: ");
-        for (IRecipeDTO oldRecipe : recipeDAO.getListOfOldRecipes()) {
+        List<IRecipeDTO> oldRecipes = recipeDAO.getListOfOldRecipes();
+        for (IRecipeDTO oldRecipe : oldRecipes) {
             System.out.println(oldRecipe);
         }
-
-/*        for (IIngredientDTO ing : sildenafil_ingredients
-        ) {
-            System.out.println(commoditybatchDAO.getTotalCommodityAmountInKG(ing));
+        assertTrue(oldRecipes.size() == 3);
+        /**
+         * Hamstring af cellulose
+         **/
+        for (int i = 0; i < 3; i++) {
+            ICommodityBatchDTO majsstivelse = new CommodityBatchDTO();
+            majsstivelse.setOrderedBy(testUser);
+            majsstivelse.setBatchId(50 + i);
+            majsstivelse.setAmountInKg(2.5);
+            majsstivelse.setIngredientDTO(ingredientDAO.getIngredient(3));
+            majsstivelse.setOrderDate(LocalDateTime.now().toString());
+            commoditybatchDAO.createCommodityBatch(majsstivelse);
         }
-  */  }
+        /**
+         * Liste over den resterende mængde af råvarer for hver ingrediens for opskriften sildenafil i kg
+         * som ikke er markeret som rest.
+         **/
+        for (IIngredientDTO ing : sildenafil_ingredients
+        ) {
+            double amountOnStock = commoditybatchDAO.getTotalCommodityAmountInKG(ing);
+            System.out.println(amountOnStock);
+            if (ing.getIngredientId() == 3) {
+                System.out.println(amountOnStock);
+                assertTrue(amountOnStock == 7.5);
+            }
+        }
+
+        ingredientDTOS = ingredientDAO.getReorders();
+        System.out.println(ingredientDTOS.size());
+        assertTrue(ingredientDTOS.size() == 11);
+        System.out.println("\n" + ingredientDTOS.size() + " commodities to be ordered: ");
+        for (IIngredientDTO ing : ingredientDTOS) {
+            System.out.println("" + (ingredientDTOS.indexOf(ing) + 1) + ": IngredientID: " + ing.getIngredientId()
+                    + "-" + ing.getName());
+        }
+    }
 }

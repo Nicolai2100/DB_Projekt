@@ -4,8 +4,6 @@ import dal.dto.*;
 import org.junit.After;
 import org.junit.Test;
 
-import java.sql.Date;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +38,7 @@ public class IngredientDAOTest {
 
     @Test
     public void checkForReorder() throws DALException {
-        List<IIngredientDTO> ingredientDTOS = ingredientDAO.checkForReorder();
+        List<IIngredientDTO> ingredientDTOS = ingredientDAO.getReorders();
 
         for (IIngredientDTO ing : ingredientDTOS) {
             System.out.println(ing);

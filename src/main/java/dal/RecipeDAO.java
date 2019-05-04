@@ -4,20 +4,17 @@ import dal.dto.*;
 
 import java.sql.*;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class RecipeDAO implements IRecipeDAO {
     private Connection conn;
     private IngredientListDAO ingredientListDAO;
     private UserDAO userDAO;
-    private CommodityBatchDAO commodityBatchDAO;
     private IngredientDAO ingredientDAO;
 
-    public RecipeDAO(IngredientListDAO ingredientListDAO, IngredientDAO ingredientDAO, UserDAO userDAO, CommodityBatchDAO commodityBatchDAO) throws DALException {
+    public RecipeDAO(IngredientDAO ingredientDAO, IngredientListDAO ingredientListDAO, UserDAO userDAO) throws DALException {
         this.ingredientListDAO = ingredientListDAO;
         this.userDAO = userDAO;
-        this.commodityBatchDAO = commodityBatchDAO;
         this.ingredientDAO = ingredientDAO;
         this.conn = ConnectionDAO.getConnection();
     }
@@ -48,15 +45,17 @@ public class RecipeDAO implements IRecipeDAO {
             pstmtInsertRecipe.setInt(7, recipeDTO.getMinBatchSize());
 
             ingredientListDAO.createIngredientList(recipeDTO, version);
-            pstmtInsertRecipe.executeUpdate();
+            int result = pstmtInsertRecipe.executeUpdate();
             conn.commit();
-            if (version == 1) {
+            if (result == 1 && version == 1) {
                 System.out.println("The recipe was successfully created.");
-            } else {
+            } else if (result == 1 && version > 1) {
                 System.out.println("The recipe was successfully updated.");
             }
             updateMinAmounts();
-            checkReorder(recipeDTO);
+/*
+            checkReorder();
+*/
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DALException("An error occurred in the database at RecipeDAO.");
@@ -84,6 +83,29 @@ public class RecipeDAO implements IRecipeDAO {
         }
         return recipeDTO;
     }
+
+    public List<IRecipeDTO> getAllActiveRecipes() throws DALException {
+        List<IRecipeDTO> activeRecipes = new ArrayList<>();
+        String getRecipeString = "SELECT * FROM recipe WHERE in_use = 1;";
+        try {
+            PreparedStatement pstmtGetRecipe = conn.prepareStatement(getRecipeString);
+            ResultSet rs = pstmtGetRecipe.executeQuery();
+            while (rs.next()) {
+                IRecipeDTO recipeDTO = new RecipeDTO();
+                recipeDTO.setRecipeId(rs.getInt(1));
+                recipeDTO.setVersion(rs.getInt(2));
+                recipeDTO.setName(rs.getString(3));
+                recipeDTO.setMadeBy(userDAO.getUser(rs.getInt(4)));
+                recipeDTO.setIngredientsList(ingredientListDAO.getIngredientList(recipeDTO));
+                recipeDTO.setMinBatchSize(rs.getInt(8));
+                activeRecipes.add(recipeDTO);
+            }
+        } catch (SQLException e) {
+            throw new DALException("An error occurred in the database at RecipeDAO.");
+        }
+        return activeRecipes;
+    }
+
 
     @Override
     public void updateRecipe(IRecipeDTO recipeDTO) throws DALException {
@@ -187,19 +209,46 @@ public class RecipeDAO implements IRecipeDAO {
         }
     }
 
-    private void checkReorder(IRecipeDTO newRecipeDTO) throws DALException {
-        List<ICommodityBatchDTO> commodities = commodityBatchDAO.getAllCommodityBatchList();
-        List<IIngredientDTO> ingredientDTOS = ingredientListDAO.getIngredientList(newRecipeDTO);
-        List<IIngredientDTO> ingToBeReordered = new ArrayList<>();
-        for (ICommodityBatchDTO commod : commodities) {
-            if (commod.getAmountInKg() * 1000000 < commod.getIngredientDTO().getMinAmountMG()) {
-                ingToBeReordered.add(commod.getIngredientDTO());
+    public void checkReorder() throws DALException {
+        Map<IIngredientDTO, Double> maxMinAmountValues = new HashMap<>();
+        List<IIngredientDTO> ingredientsToBeReordered = new ArrayList<>();
+        List<IRecipeDTO> recipes = getAllActiveRecipes();
+
+        String getTotComAmString = "SELECT sum(amountinkg) " +
+                "FROM commoditybatch " +
+                "WHERE ingredientid = ? AND residue=0";
+        try {
+            PreparedStatement pstmtGetTotAm = conn.prepareStatement(getTotComAmString);
+
+            for (IRecipeDTO rec : recipes) {
+                for (IIngredientDTO ing : rec.getIngredientsList()) {
+                    if (maxMinAmountValues.get(ing) == null) {
+                        maxMinAmountValues.put(ing, ing.getMinAmountMG());
+                    } else if (maxMinAmountValues.get(ing) < ing.getMinAmountMG()) {
+                        maxMinAmountValues.put(ing, ing.getMinAmountMG());
+                    }
+                }
             }
+            Iterator it = maxMinAmountValues.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry) it.next();
+                IIngredientDTO ing = (IIngredientDTO) pair.getKey();
+
+                pstmtGetTotAm.setInt(1, ing.getIngredientId());
+                double totalAmount = 0.0;
+                ResultSet resultSet = pstmtGetTotAm.executeQuery();
+                if (resultSet.next()) {
+                    totalAmount = resultSet.getDouble(1);
+                }
+                System.out.println(ing.getMinAmountMG()*2 +" and " + totalAmount * 1000000);
+                if (ing.getMinAmountMG() * 2 > totalAmount * 1000000)
+                    ingredientsToBeReordered.add(ing);
+                it.remove(); // avoids a ConcurrentModificationException
+            }
+            ingredientDAO.setReorder(ingredientsToBeReordered);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        if (commodities.size() == 0) {
-            ingToBeReordered = ingredientDTOS;
-        }
-        ingredientDAO.setReorder(ingToBeReordered);
     }
 }
 

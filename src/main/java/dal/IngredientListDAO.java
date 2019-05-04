@@ -24,7 +24,9 @@ public class IngredientListDAO implements IIngredientListDAO {
         String insertIngList = "INSERT INTO ingredientlist(ingredientlistid, version, ingredientid, amountmg) " +
                 "VALUES(?,?,?,?);";
         try {
+/*
             conn.setAutoCommit(false);
+*/
             PreparedStatement pstmtInsertIngredientList = conn.prepareStatement(insertIngList);
             for (IIngredientDTO ingredient : recipeDTO.getIngredientsList()) {
                 pstmtInsertIngredientList.setInt(1, recipeDTO.getRecipeId());
@@ -33,7 +35,9 @@ public class IngredientListDAO implements IIngredientListDAO {
                 pstmtInsertIngredientList.setDouble(4, ingredient.getAmount());
                 pstmtInsertIngredientList.executeUpdate();
             }
+/*
             conn.commit();
+*/
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DALException("An error occurred in the database at IngredientListDAO.");

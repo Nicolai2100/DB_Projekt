@@ -1,14 +1,14 @@
 package dal;
 
 import dal.dto.IIngredientDTO;
+import dal.dto.IRecipeDTO;
 import dal.dto.IngredientDTO;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class IngredientDAO implements IIngredientDAO {
     private Connection conn;
@@ -56,7 +56,7 @@ public class IngredientDAO implements IIngredientDAO {
     }
 
     @Override
-    public List<IIngredientDTO> checkForReorder() throws DALException {
+    public List<IIngredientDTO> getReorders() throws DALException {
         List<IIngredientDTO> toBeOrdered = new ArrayList<>();
         String getReorderString = "SELECT * FROM ingredient WHERE reorder = 1;";
         try {
@@ -110,4 +110,5 @@ public class IngredientDAO implements IIngredientDAO {
         }
         return totalAmount;
     }
+
 }

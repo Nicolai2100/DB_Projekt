@@ -1,20 +1,20 @@
 package dal;
 
-import com.sun.org.apache.bcel.internal.generic.NEW;
 import dal.dto.*;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class CommodityBatchDAO implements ICommodityBatchDAO {
     private UserDAO userDAO;
     private IngredientDAO ingredientDAO;
     private Connection conn;
+    private RecipeDAO recipeDAO;
 
-    public CommodityBatchDAO(UserDAO userDAO, IngredientDAO ingredientDAO) throws DALException {
+    public CommodityBatchDAO(UserDAO userDAO, IngredientDAO ingredientDAO, RecipeDAO recipeDAO) throws DALException {
         this.userDAO = userDAO;
         this.ingredientDAO = ingredientDAO;
+        this.recipeDAO = recipeDAO;
         this.conn = ConnectionDAO.getConnection();
     }
 
@@ -35,6 +35,10 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
             pstmtInsertCommodityBatch.setString(5, commodityBatch.getOrderDate());
             pstmtInsertCommodityBatch.setBoolean(6, false);
             pstmtInsertCommodityBatch.executeUpdate();
+
+/*
+            recipeDAO.checkReorder();
+*/
             conn.commit();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -96,39 +100,31 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
             preparedStatement.setBoolean(6, commodityBatch.isResidue());
             preparedStatement.setInt(7, commodityBatch.getBatchId());
             preparedStatement.executeUpdate();
+
+/*
+            recipeDAO.checkReorder();
+*/
             conn.commit();
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DALException("An error occurred in the database at CommodityBatchDAO.");
         }
     }
-/*    @Override todo slet
-    public void deleteCommodityBatch(int commodityBatchId) throws DALException {
-        String deleteComBatString = "DELETE FROM commoditybatch WHERE commoditybatchid=?";
-        try {
-            conn.setAutoCommit(false);
-            PreparedStatement preparedStatement = conn.prepareStatement(deleteComBatString);
-            preparedStatement.setInt(1, commodityBatchId);
-            preparedStatement.executeUpdate();
-            conn.commit();
-            conn.setAutoCommit(true);
-        } catch (SQLException e) {
-            throw new DALException("An error occurred in the database at CommodityBatchDAO.");
-        }
-    }*/
 
     public double getTotalCommodityAmountInKG(IIngredientDTO ingredient) throws DALException {
-        double totalAmount;
-        //TODO skal det medregnes, hvis det er rest?
+        double totalAmount = 0.0;
         String getTotComAmString = "SELECT sum(amountinkg) " +
                 "FROM commoditybatch " +
-                "WHERE ingredientid=? AND residue=0";
+                "WHERE ingredientid = ? AND residue=0";
         try {
             PreparedStatement preparedStatement = conn.prepareStatement(getTotComAmString);
             preparedStatement.setInt(1, ingredient.getIngredientId());
             ResultSet resultSet = preparedStatement.executeQuery();
-            totalAmount = resultSet.getDouble(1);
+            if (resultSet.next()){
+                totalAmount = resultSet.getDouble(1);
+            }
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new DALException("An error occurred in the database at CommodityBatchDAO.");
         }
         return totalAmount;

@@ -15,10 +15,9 @@ public class ProductBatchDAOTest {
     UserDAO userDAO = new UserDAO();
     IngredientDAO ingredientDAO = new IngredientDAO();
     IngredientListDAO ingredientListDAO = new IngredientListDAO(ingredientDAO);
-    CommodityBatchDAO commoditybatchDAO = new CommodityBatchDAO(userDAO, ingredientDAO);
-    RecipeDAO recipeDAO = new RecipeDAO(ingredientListDAO,ingredientDAO, userDAO, commoditybatchDAO);
+    RecipeDAO recipeDAO = new RecipeDAO(ingredientDAO, ingredientListDAO, userDAO);
+    CommodityBatchDAO commoditybatchDAO = new CommodityBatchDAO(userDAO, ingredientDAO, recipeDAO);
     ProductBatchDAO productBatchDAO = new ProductBatchDAO(recipeDAO, commoditybatchDAO, userDAO);
-    UserDAOTest userDAOTest = new UserDAOTest();
 
     public ProductBatchDAOTest() throws DALException {
     }
@@ -84,7 +83,7 @@ public class ProductBatchDAOTest {
 
     @Test
     public void checkForReorder() throws DALException {
-        List<IIngredientDTO> ingredientDTOS = ingredientDAO.checkForReorder();
+        List<IIngredientDTO> ingredientDTOS = ingredientDAO.getReorders();
 
         for (IIngredientDTO ing : ingredientDTOS) {
             System.out.println(ing);
@@ -380,7 +379,7 @@ public class ProductBatchDAOTest {
          * Liste over råvarer der skal bestilles
          */
         System.out.println("To be ordered: ");
-        List<IIngredientDTO> ingredientDTOS = ingredientDAO.checkForReorder();
+        List<IIngredientDTO> ingredientDTOS = ingredientDAO.getReorders();
 
         for (IIngredientDTO ing : ingredientDTOS) {
             System.out.println("" + (ingredientDTOS.indexOf(ing) + 1) + " " + ing);
@@ -402,7 +401,7 @@ public class ProductBatchDAOTest {
          * Liste over råvarer der skal bestilles
          */
         System.out.println("To be ordered: ");
-        List<IIngredientDTO> ingredientDTOS2 = ingredientDAO.checkForReorder();
+        List<IIngredientDTO> ingredientDTOS2 = ingredientDAO.getReorders();
 
         for (IIngredientDTO ing2 : ingredientDTOS2) {
             System.out.println("" + (ingredientDTOS2.indexOf(ing2) + 1) + " " + ing2);
