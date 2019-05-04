@@ -14,7 +14,7 @@ public class ConnectionDAO implements IConnectionDAO {
 
     public static Connection getConnection() throws DALException {
         try {
-            if (conn == null) {
+            if (conn == null || conn.isClosed()) {
                 String dataBase = "jdbc:mysql://ec2-52-30-211-3.eu-west-1.compute.amazonaws.com/jekala";
                 String user = "jekala";
                 String password = "d0czCtqcu5015NhwwP5zl";
