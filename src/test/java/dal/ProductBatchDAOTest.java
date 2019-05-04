@@ -41,17 +41,13 @@ public class ProductBatchDAOTest {
         connectionDAO.closeConn();
     }
 
-    @Test
-    public void cleanTables() throws DALException {
-        connectionDAO.deleteTables();
-    }
 
     @Test
     public void createProduct() throws DALException {
+        IUserDTO testUser_1 = userDAO.getUser(1);
         IUserDTO testUser_4 = userDAO.getUser(4);
-        IUserDTO testUser_2 = userDAO.getUser(1);
 
-        ProductBatchDTO productbatchDTO = new ProductBatchDTO();
+      /*  ProductBatchDTO productbatchDTO = new ProductBatchDTO();
         UserDTO testUser2 = (UserDTO) userDAO.getUser(1);
         productbatchDTO.setMadeBy(testUser2); //Produktionslederen indsættes som et bruger-objekt.
         productbatchDTO.setName("Sildenafil"); //Produktets navn indsættes.
@@ -69,15 +65,20 @@ public class ProductBatchDAOTest {
         productbatchDTO.setProducedBy(testUser_4); //Laboranten, som producerer produktet, indsættes.
         productbatchDTO.setBatchState(IProductBatchDTO.State.ORDERED); //Stadiet indsættes som ENUM. Det kan være enten ORDERED, UNDER_PRODUCTION eller COMPLETED.
 
-        productBatchDAO.createProductbatch(productbatchDTO);
 
-        productBatchDAO.initiateProduction(productbatchDTO, testUser_2);
+        productBatchDAO.createProductbatch(productbatchDTO);
+        */
+        IProductBatchDTO productbatchDTO = productBatchDAO.getProductbatch(1);
+        System.out.println(productbatchDTO.getMadeBy());
+        productBatchDAO.initiateProduction(productbatchDTO, testUser_1);
+
+        /*
 
         productbatchDTO.setName("Amfetamin");
 
         productBatchDAO.produceProductBatch(productbatchDTO, testUser_4);
 
-        System.out.println("Read product succesful:" + productBatchDAO.getProductbatch(1).toString());
+        System.out.println("Read product succesful:" + productBatchDAO.getProductbatch(1).toString());*/
     }
 
 
@@ -108,314 +109,5 @@ public class ProductBatchDAOTest {
         commodityBatch.setOrderDate(LocalDate.now().toString());
 
         commoditybatchDAO.createCommodityBatch(commodityBatch);
-    }
-
-    @Test
-    public void createRecipe() throws DALException {
-        IRecipeDTO recipeDTO = new RecipeDTO();
-        recipeDTO.setRecipeId(1);
-        recipeDTO.setName("Norethisteron/estrogen");
-        recipeDTO.setMadeBy(userDAO.getUser(10));
-        recipeDTO.setIngredientsList(ingredientListDAO.getIngredientList(recipeDTO));
-
-        List<IIngredientDTO> ingredients = new ArrayList<>();
-        IngredientDTO ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(1);
-        ingredientDTO.setName("estradiol");
-        ingredientDTO.setType("active");
-        ingredientDTO.setAmount(1);
-        ingredients.add(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(2);
-        ingredientDTO.setName("norethisteronacetat");
-        ingredientDTO.setType("active");
-        ingredientDTO.setAmount(0.5);
-        ingredients.add(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(3);
-        ingredientDTO.setName("opovidon");
-        ingredientDTO.setType("helper");
-        ingredientDTO.setAmount(50);
-        ingredients.add(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(4);
-        ingredientDTO.setName("laktosemonohydrat");
-        ingredientDTO.setType("helper");
-        ingredientDTO.setAmount(10);
-        ingredients.add(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(5);
-        ingredientDTO.setName("magnesiumstearat");
-        ingredientDTO.setType("helper");
-        ingredientDTO.setAmount(15);
-        ingredients.add(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(6);
-        ingredientDTO.setName("majsstivelse");
-        ingredientDTO.setType("helper");
-        ingredientDTO.setAmount(120);
-        ingredients.add(ingredientDTO);
-
-        recipeDTO.setIngredientsList(ingredients);
-        recipeDAO.createRecipe(recipeDTO);
-    }
-
-    @Test
-    public void createIngredientList() throws DALException {
-        RecipeDTO recipeDTO = new RecipeDTO();
-        recipeDTO.setName("norethisteron/estrogen");
-        recipeDTO.setRecipeId(2);
-        recipeDTO.setMadeBy(userDAO.getUser(10));
-        List<IIngredientDTO> ingredients = new ArrayList<>();
-
-        IngredientDTO ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(1);
-        ingredientDTO.setName("estradiol");
-        ingredientDTO.setType("active");
-        ingredientDTO.setAmount(1);
-        ingredients.add(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(2);
-        ingredientDTO.setName("norethisteronacetat");
-        ingredientDTO.setType("active");
-        ingredientDTO.setAmount(0.5);
-        ingredients.add(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(3);
-        ingredientDTO.setName("opovidon");
-        ingredientDTO.setType("helper");
-        ingredientDTO.setAmount(50);
-        ingredients.add(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(4);
-        ingredientDTO.setName("laktosemonohydrat");
-        ingredientDTO.setType("helper");
-        ingredientDTO.setAmount(10);
-        ingredients.add(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(5);
-        ingredientDTO.setName("magnesiumstearat");
-        ingredientDTO.setType("helper");
-        ingredientDTO.setAmount(15);
-        ingredients.add(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(6);
-        ingredientDTO.setName("majsstivelse");
-        ingredientDTO.setType("helper");
-        ingredientDTO.setAmount(120);
-        ingredients.add(ingredientDTO);
-
-        recipeDTO.setIngredientsList(ingredients);
-        ingredientListDAO.createIngredientList(recipeDTO, 1);
-    }
-
-    @Test
-    public void getIngredientList() throws DALException {
-        RecipeDTO recipeDTO = new RecipeDTO();
-        recipeDTO.setRecipeId(2);
-        List<IIngredientDTO> ingredients = ingredientListDAO.getIngredientList(recipeDTO);
-
-        System.out.println(ingredients);
-    }
-
-    @Test
-    public void createIngredient() throws DALException {
-        List<IngredientDTO> ingredients = new ArrayList<>();
-
-        IngredientDTO ingredientDTO = new IngredientDTO();
-        ingredientDTO.setName("estradiol");
-        ingredientDTO.setType("active");
-        ingredientDTO.setIngredientId(1);
-        ingredientDTO.setAmount(1);
-        ingredientDTO.setMinAmountMG(100000);
-        ingredients.add(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setName("norethisteronacetat");
-        ingredientDTO.setType("active");
-        ingredientDTO.setIngredientId(2);
-        ingredientDTO.setAmount(0.5);
-        ingredients.add(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setName("opovidon");
-        ingredientDTO.setType("helper");
-        ingredientDTO.setIngredientId(3);
-        ingredientDTO.setAmount(50);
-        ingredients.add(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setName("laktosemonohydrat");
-        ingredientDTO.setType("helper");
-        ingredientDTO.setIngredientId(4);
-        ingredientDTO.setAmount(10);
-        ingredients.add(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setName("magnesiumstearat");
-        ingredientDTO.setType("helper");
-        ingredientDTO.setIngredientId(5);
-        ingredientDTO.setAmount(15);
-        ingredients.add(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setName("majsstivelse");
-        ingredientDTO.setType("helper");
-        ingredientDTO.setIngredientId(6);
-        ingredientDTO.setAmount(120);
-        ingredients.add(ingredientDTO);
-
-        for (IngredientDTO ingredient : ingredients) {
-            ingredientDAO.createIngredient(ingredient);
-        }
-    }
-
-    @Test
-    public void testItAll() throws DALException {
-
-        /**
-         * Alt slettes
-         */
-
-        connectionDAO.deleteTables();
-
-
-        /**
-         * Brugerne oprettes
-         */
-        IUserDTO admin = userDAO.getUser(1);
-        IUserDTO testUser_2 = new UserDTO();
-        testUser_2.setUserId(2);
-        testUser_2.setUserName("Pelle Hansen");
-        testUser_2.setIni("PH");
-        ArrayList<String> roles2 = new ArrayList();
-        roles2.add("admin");
-        roles2.add("productionleader");
-        testUser_2.setRoles(roles2);
-        testUser_2.setIsActive(true);
-        userDAO.createUser(admin, testUser_2);
-
-        UserDTO testUser_3 = new UserDTO();
-        testUser_3.setUserId(3);
-        testUser_3.setUserName("Puk Larsen");
-        testUser_3.setIni("PL");
-        testUser_3.addRole("farmaceut");
-        testUser_3.setAdmin(userDAO.getUser(2));
-        testUser_3.setIsActive(true);
-        userDAO.createUser(admin, testUser_3);
-        /**
-         * Ingredienser og opskrift oprettes
-         */
-        IRecipeDTO recipeDTO = new RecipeDTO();
-        recipeDTO.setRecipeId(2);
-        recipeDTO.setName("Norethisteron/estrogen");
-        recipeDTO.setMadeBy(userDAO.getUser(3));
-
-        List<IIngredientDTO> ingredients = new ArrayList<>();
-        IngredientDTO ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(1);
-        ingredientDTO.setName("estradiol");
-        ingredientDTO.setType("active");
-        ingredientDTO.setAmount(1);
-        ingredients.add(ingredientDTO);
-        ingredientDAO.createIngredient(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(2);
-        ingredientDTO.setName("norethisteronacetat");
-        ingredientDTO.setType("active");
-        ingredientDTO.setAmount(0.5);
-        ingredients.add(ingredientDTO);
-        ingredientDAO.createIngredient(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(3);
-        ingredientDTO.setName("opovidon");
-        ingredientDTO.setType("helper");
-        ingredientDTO.setAmount(50);
-        ingredients.add(ingredientDTO);
-        ingredientDAO.createIngredient(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(4);
-        ingredientDTO.setName("laktosemonohydrat");
-        ingredientDTO.setType("helper");
-        ingredientDTO.setAmount(10);
-        ingredients.add(ingredientDTO);
-        ingredientDAO.createIngredient(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(5);
-        ingredientDTO.setName("magnesiumstearat");
-        ingredientDTO.setType("helper");
-        ingredientDTO.setAmount(15);
-        ingredients.add(ingredientDTO);
-        ingredientDAO.createIngredient(ingredientDTO);
-
-        ingredientDTO = new IngredientDTO();
-        ingredientDTO.setIngredientId(6);
-        ingredientDTO.setName("majsstivelse");
-        ingredientDTO.setType("helper");
-        ingredientDTO.setAmount(120);
-        ingredients.add(ingredientDTO);
-        ingredientDAO.createIngredient(ingredientDTO);
-
-
-        recipeDTO.setIngredientsList(ingredients);
-        ingredientListDAO.createIngredientList(recipeDTO, 1);
-        recipeDAO.createRecipe(recipeDTO);
-
-        /**
-         * Liste over råvarer der skal bestilles
-         */
-        System.out.println("To be ordered: ");
-        List<IIngredientDTO> ingredientDTOS = ingredientDAO.getReorders();
-
-        for (IIngredientDTO ing : ingredientDTOS) {
-            System.out.println("" + (ingredientDTOS.indexOf(ing) + 1) + " " + ing);
-        }
-        /**
-         * Der bestilles et råvare batch
-         */
-        ICommodityBatchDTO commodityBatch = new CommodityBatchDTO();
-        IUserDTO testUser = userDAO.getUser(2);
-        commodityBatch.setOrderedBy(testUser);
-        commodityBatch.setBatchId(2);
-        commodityBatch.setAmountInKg(2.5);
-        commodityBatch.setIngredientDTO(ingredientDAO.getIngredient(2));
-        commodityBatch.setOrderDate(LocalDateTime.now().toString());
-
-        commoditybatchDAO.createCommodityBatch(commodityBatch);
-
-        /**
-         * Liste over råvarer der skal bestilles
-         */
-        System.out.println("To be ordered: ");
-        List<IIngredientDTO> ingredientDTOS2 = ingredientDAO.getReorders();
-
-        for (IIngredientDTO ing2 : ingredientDTOS2) {
-            System.out.println("" + (ingredientDTOS2.indexOf(ing2) + 1) + " " + ing2);
-        }
-
-        /**
-         * Der oprettes et produkt-batch
-         */
-        //todo få testUser_2 til at oprette et product-batch
-
-/*
-        recipeDAO.archiveRecipe(2, testUser_3);
-*/
-        createProduct();
-
     }
 }

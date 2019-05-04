@@ -329,17 +329,14 @@ public class DALTest {
         /**
          * Der oprettes et produkt-batch
          */
-        ProductBatchDTO productbatchDTO = new ProductBatchDTO();
+        IProductBatchDTO productbatchDTO = new ProductBatchDTO();
         UserDTO testUser2 = (UserDTO) userDAO.getUser(1);
         productbatchDTO.setMadeBy(testUser2); //Produktionslederen indsættes som et bruger-objekt.
         productbatchDTO.setName("Sildenafil"); //Produktets navn indsættes.
         productbatchDTO.setProductId(1); //Et unikt id vælges.
         productbatchDTO.setRecipe(2); //Id'et til opskriften, som produktet skal produceres ud fra, indsættes.
         //Produktionsdatoen indsættes i formatet java.sql.Date.
-        productbatchDTO.setProductionDate(new Date(System.currentTimeMillis()));
-        //Udløbsdatoen indsættes i formatet java.sql.Date.
-        productbatchDTO.setExpirationDate(new Date(System.currentTimeMillis()));
-        productbatchDTO.setVolume(10000); //Mængden af piller indsættes.
+               productbatchDTO.setVolume(10000); //Mængden af piller indsættes.
         //Råvare-batches tilknyttes. De skal have samme id, som den tilsvarende ingrediens i opskriften.
         productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(4));
         productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(12));
@@ -347,19 +344,16 @@ public class DALTest {
         productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(14));
         productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(15));
         productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(16));
-        //Laboranten, som producerer produktet, indsættes.
-        productbatchDTO.setProducedBy(testUser_4);
-
+        //Et produkt oprettes som en bestilling
         productBatchDAO.createProductbatch(productbatchDTO);
-        System.out.println(productBatchDAO.getProductbatch(1).toString());
-
+        System.out.println(productBatchDAO.getProductbatch(1).getBatchState());
+        //Et produktets status ændres til under produktion
         productBatchDAO.initiateProduction(productbatchDTO, testUser_2);
-        System.out.println(productBatchDAO.getProductbatch(1).toString());
-
-
-        productbatchDTO.setName("Amfetamin");
+        System.out.println(productBatchDAO.getProductbatch(1).getBatchState());
+        //Laboranten, som producerer produktet, indsættes og produktbatchen produceres færdigt
+        productbatchDTO.setProducedBy(testUser_4);
         productBatchDAO.produceProductBatch(productbatchDTO, testUser_4);
-        System.out.println(productBatchDAO.getProductbatch(1).toString());
+        System.out.println(productBatchDAO.getProductbatch(1).getBatchState());
 
         ingredientDTOS = ingredientDAO.getReorders();
         System.out.println(ingredientDTOS.size());
@@ -369,7 +363,6 @@ public class DALTest {
             System.out.println("" + (ingredientDTOS.indexOf(ing) + 1) + ": IngredientID: " + ing.getIngredientId()
                     + "-" + ing.getName());
         }
-
         /**
          * En opskrift opdateres
          */

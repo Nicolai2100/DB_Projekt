@@ -6,7 +6,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.jupiter.api.Test;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -149,5 +152,21 @@ public class UserDAOTest {
             e.printStackTrace();
             fail();
         }
+    }
+
+    @Test
+    void ss() {
+      /*  Calendar calendar = Calendar.getInstance();
+        System.out.println("Current Date = " + calendar.getTime());
+        // Add 8 months to current date
+        calendar.add(Calendar.MONTH, 8);
+        System.out.println("Updated Date = " + calendar.getTime());
+*/
+        Date now = (new Date(System.currentTimeMillis()));
+        System.out.println(now);
+        LocalDate ld = now.toLocalDate();
+        LocalDate expirationDate = ld.plusMonths(3);
+        java.sql.Date sqlExpirationDate = java.sql.Date.valueOf(expirationDate);
+        System.out.println(sqlExpirationDate);
     }
 }

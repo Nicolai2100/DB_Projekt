@@ -5,15 +5,15 @@ import dal.dto.*;
 import java.util.List;
 
 public interface IProductBatchDAO {
-    void createProductbatch(ProductBatchDTO productbatch) throws DALException;
+    void createProductbatch(IProductBatchDTO productbatch) throws DALException;
 
-    ProductBatchDTO getProductbatch(int productBatch) throws DALException;
+    ProductBatchDTO getProductbatch(int productBatchID) throws DALException;
 
-    void updateProductBatch(ProductBatchDTO productbatch, IUserDTO user) throws DALException;
+    void updateProductBatch(IProductBatchDTO productbatch, IUserDTO user) throws DALException;
 
-    void initiateProduction(ProductBatchDTO productbatch, IUserDTO user) throws DALException;
+    void initiateProduction(IProductBatchDTO productbatch, IUserDTO user) throws DALException;
 
-    void produceProductBatch(ProductBatchDTO productbatch, IUserDTO user) throws DALException;
+    void produceProductBatch(IProductBatchDTO productbatch, IUserDTO user) throws DALException;
 
     void createRelations(List<ICommodityBatchDTO> commodityBatchList, int productbatchId) throws DALException;
 }
