@@ -1,6 +1,9 @@
 package dal;
 
 import dal.dto.ICommodityBatchDTO;
+import dal.dto.IIngredientDTO;
+
+import java.util.List;
 
 public interface ICommodityBatchDAO {
 
@@ -10,7 +13,12 @@ public interface ICommodityBatchDAO {
 
     void updateCommodityBatch(ICommodityBatchDTO commodityBatch) throws DALException;
 
-/* todo slet
-    void deleteCommodityBatch(int commodityBatchId) throws DALException;
-*/
-}
+    void checkForResidue() throws DALException;
+
+    List<ICommodityBatchDTO> getAllCommodityBatchListNotResidue() throws DALException;
+
+    double getTotalCommodityAmountInKG(IIngredientDTO ingredient) throws DALException;
+
+    List<ICommodityBatchDTO> getCommodityBatchList(IIngredientDTO ingredient) throws DALException;
+
+    }

@@ -42,7 +42,7 @@ public class CommodityBatchDAOTest {
 
     @Test
     public void getAllCommodityBatch() throws DALException {
-       /* for (ICommodityBatchDTO comBat : commoditybatchDAO.getAllCommodityBatchList()) {
+       /* for (ICommodityBatchDTO comBat : commoditybatchDAO.getAllCommodityBatchListNotResidue()) {
             System.out.println(comBat);
         }*/
 

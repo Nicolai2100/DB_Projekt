@@ -111,6 +111,7 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
         }
     }
 
+    @Override
     public double getTotalCommodityAmountInKG(IIngredientDTO ingredient) throws DALException {
         double totalAmount = 0.0;
         String getTotComAmString = "SELECT sum(amountinkg) " +
@@ -130,10 +131,9 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
         return totalAmount;
     }
 
+    @Override
     public List<ICommodityBatchDTO> getCommodityBatchList(IIngredientDTO ingredient) throws DALException {
         List<ICommodityBatchDTO> commodityBatchList = new ArrayList<>();
-        //TODO skal det medregnes, hvis det er rest?
-        //TODO orderedby tages ikke med for det er wack
         String getComBatListString = "SELECT commoditybatchid, ingredientid, amountinkg, orderdate, residue " +
                 "FROM commoditybatch " +
                 "WHERE ingdientid = ? AND NOT residue=1";
@@ -157,7 +157,8 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
         return commodityBatchList;
     }
 
-    public List<ICommodityBatchDTO> getAllCommodityBatchList() throws DALException {
+    @Override
+    public List<ICommodityBatchDTO> getAllCommodityBatchListNotResidue() throws DALException {
         List<ICommodityBatchDTO> commodityBatchList = new ArrayList<>();
         String getAllComBat = "SELECT * FROM commoditybatch WHERE residue = 0;";
         try {
@@ -182,9 +183,10 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
         return commodityBatchList;
     }
 
+    @Override
     public void checkForResidue() throws DALException {
         try {
-            List<ICommodityBatchDTO> combats = getAllCommodityBatchList();
+            List<ICommodityBatchDTO> combats = getAllCommodityBatchListNotResidue();
 
             String setResidueString = "UPDATE commoditybatch SET residue = 1 WHERE " +
                     "commoditybatchid = ?;";
