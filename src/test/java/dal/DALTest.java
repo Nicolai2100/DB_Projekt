@@ -252,6 +252,10 @@ public class DALTest {
         }
         sildenafil_recipe.setIngredientsList(sildenafil_ingredients);
         norethisteron_recipe.setIngredientsList(norethisteron_ingredients);
+
+        //Når en opskrift er blevet oprettet kaldes en metode der opdaterer de forskellige ingrediensers
+        // minimums størrelse. Disse bruges af en trigger til at vurdere om en råvare skal markeres som
+        // "skal bestilles" - derfor opdateres opskrifterne med det samme de er blevet oprettet
         recipeDAO.createRecipe(sildenafil_recipe);
         recipeDAO.updateRecipe(recipeDAO.getActiveRecipe(sildenafil_recipe.getRecipeId()));
         recipeDAO.createRecipe(norethisteron_recipe);
@@ -267,7 +271,7 @@ public class DALTest {
                     + "-" + ing.getName());
         }
         /**
-         * Der bestilles et råvare batch
+         *Der bestilles et råvare batch
          */
         ICommodityBatchDTO commodityBatch = new CommodityBatchDTO();
         IUserDTO testUser = userDAO.getUser(1);
@@ -313,7 +317,7 @@ public class DALTest {
         commodityBatch.setOrderDate(LocalDateTime.now().toString());
         commoditybatchDAO.createCommodityBatch(commodityBatch);
         /**
-         * Liste over råvarer der skal bestilles
+         *Liste over råvarer der skal bestilles
          */
         ingredientDTOS = ingredientDAO.getReorders();
         assertTrue(ingredientDTOS.size() == 10);
@@ -323,7 +327,7 @@ public class DALTest {
                     + "-" + ing.getName());
         }
         /**
-         * Der oprettes et produkt-batch
+         *Der oprettes et produkt -batch
          */
         IProductBatchDTO productbatchDTO = new ProductBatchDTO();
         UserDTO testUser2 = (UserDTO) userDAO.getUser(1);
@@ -332,7 +336,7 @@ public class DALTest {
         productbatchDTO.setProductId(1); //Et unikt id vælges.
         productbatchDTO.setRecipe(2); //Id'et til opskriften, som produktet skal produceres ud fra, indsættes.
         //Produktionsdatoen indsættes i formatet java.sql.Date.
-               productbatchDTO.setVolume(10000); //Mængden af piller indsættes.
+        productbatchDTO.setVolume(10000); //Mængden af piller indsættes.
         //Råvare-batches tilknyttes. De skal have samme id, som den tilsvarende ingrediens i opskriften.
         productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(4));
         productbatchDTO.getCommodityBatches().add(commoditybatchDAO.getCommodityBatch(12));
@@ -369,14 +373,14 @@ public class DALTest {
                     + "-" + ing.getName());
         }
         /**
-         * En opskrift opdateres
+         *En opskrift opdateres
          */
         IRecipeDTO recipeDTO = recipeDAO.getActiveRecipe(3);
         recipeDTO.setName("Opdateret 2 " + recipeDTO.getName());
         recipeDTO.getIngredientsList().get(1).setMinAmountMG(0.002);
         recipeDAO.updateRecipe(recipeDTO);
         /**
-         * Liste over arkiverede opskrifter
+         *Liste over arkiverede opskrifter
          **/
         System.out.println("\nOld recipes: ");
         List<IRecipeDTO> oldRecipes = recipeDAO.getListOfOldRecipes();
@@ -385,7 +389,7 @@ public class DALTest {
         }
         assertTrue(oldRecipes.size() == 3);
         /**
-         * Hamstring af cellulose
+         *Hamstring af cellulose
          **/
         for (int i = 0; i < 3; i++) {
             ICommodityBatchDTO majsstivelse = new CommodityBatchDTO();
@@ -397,8 +401,8 @@ public class DALTest {
             commoditybatchDAO.createCommodityBatch(majsstivelse);
         }
         /**
-         * Liste over den resterende mængde af råvarer for hver ingrediens for opskriften sildenafil i kg
-         * som ikke er markeret som rest.
+         *Liste over den resterende mængde af råvarer for hver ingrediens for opskriften sildenafil i kg
+         *som ikke er markeret som rest.
          **/
         for (IIngredientDTO ing : sildenafil_ingredients
         ) {
