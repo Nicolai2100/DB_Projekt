@@ -78,7 +78,7 @@ public class ProductBatchDAOTest {
 
         productBatchDAO.produceProductBatch(productbatchDTO, testUser_4);
 
-        System.out.println("Read product succesful:" + productBatchDAO.getProductbatch(1).toString());
+        System.out.println("Read product succesfully:" + productBatchDAO.getProductbatch(1).toString());
     }
 
 

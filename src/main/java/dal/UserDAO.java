@@ -57,7 +57,7 @@ public class UserDAO implements IUserDAO {
 
     @Override
     public IUserDTO getUser(int userId) throws DALException {
-        String selectString = "SELECT * FROM user NATURAL JOIN userrole WHERE userid = ?;";
+        String selectString = "SELECT * FROM user NATURAL JOIN userrole WHERE user_id = ?;";
         boolean empty = true;
         IUserDTO returnUser = new UserDTO();
         try {
@@ -141,7 +141,7 @@ public class UserDAO implements IUserDAO {
         if (!admin.getIsActive()) {
             throw new DALException("Admin is not active");
         }
-        String updateUserString = "UPDATE user SET name = ?, ini = ?, active = ? WHERE userid = ?; ";
+        String updateUserString = "UPDATE user SET name = ?, initials = ?, active_status = ? WHERE user_id = ?; ";
         try {
             conn.setAutoCommit(false);
             IUserDTO returnUser = getUser(user.getUserId());
@@ -181,7 +181,7 @@ public class UserDAO implements IUserDAO {
             throw new DALException("Admin is not active");
         }
         int result;
-        String inactivateString = "UPDATE user SET active = 0 WHERE userid = ? ";
+        String inactivateString = "UPDATE user SET active_status = 0 WHERE user_id = ? ";
         try {
             PreparedStatement psmtInactivateUser = conn.prepareStatement(inactivateString);
             psmtInactivateUser.setInt(1, userId);
@@ -223,7 +223,7 @@ public class UserDAO implements IUserDAO {
      */
     private void roleTransAct(IUserDTO user) throws DALException {
         List<String> newUserRoles = user.getRoles();
-        String deleteRoleString = "DELETE FROM userrole WHERE userid = ?;";
+        String deleteRoleString = "DELETE FROM userrole WHERE user_id = ?;";
         String insertRoleString = "INSERT INTO userrole VALUES(?,?);";
         try {
             PreparedStatement deleteRolesFromDB = conn.prepareStatement(deleteRoleString);

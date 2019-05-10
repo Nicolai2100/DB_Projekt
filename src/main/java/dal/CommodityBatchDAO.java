@@ -49,10 +49,10 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
         IUserDTO userDTO = new UserDTO();
         String selectComBatch = "SELECT * FROM commoditybatch " +
                 "LEFT JOIN ingredient " +
-                "ON ingredient.ingredientid = commoditybatch.ingredientid " +
+                "ON ingredient.ingredient_id = commoditybatch.ingredient_id " +
                 "LEFT JOIN user " +
-                "ON orderedby = userid " +
-                "WHERE commoditybatchid = ?;";
+                "ON orderer_id = user_id " +
+                "WHERE commoditybatch_id = ?;";
         try {
             PreparedStatement pstmtSelectCommodityBatch = conn.prepareStatement(selectComBatch);
             pstmtSelectCommodityBatch.setInt(1, commodityBatchId);
@@ -82,8 +82,8 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
     @Override
     public void updateCommodityBatch(ICommodityBatchDTO commodityBatch) throws DALException {
         String updateComBatchString = "UPDATE commoditybatch " +
-                "SET commoditybatchid=?, ingredientid=?, orderedby=?, amountinkg=?, orderdate=?, residue=? " +
-                "WHERE commoditybatchid=?";
+                "SET commoditybatch_id=?, ingredient_id=?, orderer_id=?, amount_kg=?, order_date=?, residue_status=? " +
+                "WHERE commoditybatch_id=?";
         try {
             conn.setAutoCommit(false);
             PreparedStatement preparedStatement = conn.prepareStatement(updateComBatchString);
@@ -118,9 +118,9 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
     public double getTotalCommodityAmountInKG(IIngredientDTO ingredient) throws DALException {
         double totalAmount;
         //TODO skal det medregnes, hvis det er rest?
-        String getTotComAmString = "SELECT sum(amountinkg) " +
+        String getTotComAmString = "SELECT sum(amount_kg) " +
                 "FROM commoditybatch " +
-                "WHERE ingredientid=? AND NOT residue=1";
+                "WHERE ingredient_id=? AND NOT residue_status=1";
         try {
             PreparedStatement preparedStatement = conn.prepareStatement(getTotComAmString);
             preparedStatement.setInt(1, ingredient.getIngredientId());
@@ -136,9 +136,9 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
         List<ICommodityBatchDTO> commodityBatchList = new ArrayList<>();
         //TODO skal det medregnes, hvis det er rest?
         //TODO orderedby tages ikke med for det er wack
-        String getComBatListString = "SELECT commoditybatchid, ingredientid, amountinkg, orderdate, residue " +
+        String getComBatListString = "SELECT commoditybatch_id, ingredient_id, amount_kg, order_date, residue_status " +
                 "FROM commoditybatch " +
-                "WHERE ingdientid = ? AND NOT residue=1";
+                "WHERE ingredient_id = ? AND NOT residue_status=1";
         try {
             PreparedStatement preparedStatement = conn.prepareStatement(getComBatListString);
             preparedStatement.setInt(1, ingredient.getIngredientId());
@@ -161,7 +161,7 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
 
     public List<ICommodityBatchDTO> getAllCommodityBatchList() throws DALException {
         List<ICommodityBatchDTO> commodityBatchList = new ArrayList<>();
-        String getAllComBat = "SELECT * FROM commoditybatch WHERE residue = 0;";
+        String getAllComBat = "SELECT * FROM commoditybatch WHERE residue_status = 0;";
         try {
             PreparedStatement preparedStatement = conn.prepareStatement(getAllComBat);
             ResultSet resultSet = preparedStatement.executeQuery();

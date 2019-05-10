@@ -33,88 +33,92 @@ public class ConnectionDAO implements IConnectionDAO {
             conn.setAutoCommit(false);
             PreparedStatement createTableUser = conn.prepareStatement(
                     "CREATE TABLE IF NOT EXISTS user " +
-                            "(userid INT, " +
+                            "(user_id INT, " +
                             "name VARCHAR(30) NOT NULL, " +
-                            "ini VARCHAR(5)," +
-                            "active BIT, " +
-                            "admin INT NULL, " +
-                            "PRIMARY KEY (userid), " +
-                            "FOREIGN KEY (admin) " +
-                            "REFERENCES user (userid)" +
+                            "initials VARCHAR(5)," +
+                            "active_status BIT, " +
+                            "administrator_id INT NULL, " +
+                            "PRIMARY KEY (user_id), " +
+                            "FOREIGN KEY (administrator_id) " +
+                            "REFERENCES user (user_id)" +
                             "ON DELETE CASCADE);");
 
             PreparedStatement createTableUserRole = conn.prepareStatement(
                     "CREATE TABLE IF NOT EXISTS userrole " +
-                            "(userid int, " +
+                            "(user_id int, " +
                             "role VARCHAR(30), " +
-                            "PRIMARY KEY (userid, role), " +
-                            "FOREIGN KEY (userid) REFERENCES user (userid) " +
+                            "PRIMARY KEY (user_id, role), " +
+                            "FOREIGN KEY (user_id) REFERENCES user (user_id) " +
                             "ON DELETE CASCADE);");
 
             PreparedStatement createTableingredient = conn.prepareStatement(
                     "CREATE TABLE IF NOT EXISTS ingredient " +
-                            "(ingredientid INT, " +
+                            "(ingredient_id INT, " +
                             "name VARCHAR(50), " +
                             "type VARCHAR(15), " +
-                            "minamountinmg INT, " +
-                            "reorder BIT, " +
-                            "PRIMARY KEY (ingredientid));");
+                            "min_amount_mg INT, " +
+                            "reorder_status BIT, " +
+                            "PRIMARY KEY (ingredient_id));");
 
             PreparedStatement createTableingredientlist = conn.prepareStatement(
                     "CREATE TABLE IF NOT EXISTS ingredientlist " +
-                            "(ingredientlistid INT, " +
-                            "version INT, " +
-                            "ingredientid INT, " +
-                            "amountmg FLOAT, " +
-                            "PRIMARY KEY (ingredientlistid, version, ingredientid), " +
-                            "FOREIGN KEY (ingredientid) " +
-                            "REFERENCES ingredient (ingredientid));");
+                            "(ingredientlist_id INT, " +
+                            "version_id INT, " +
+                            "ingredient_id INT, " +
+                            "amount_mg FLOAT, " +
+                            "PRIMARY KEY (ingredientlist_id, version_id, ingredient_id), " +
+                            "FOREIGN KEY (ingredient_id) " +
+                            "REFERENCES ingredient (ingredient_id));");
 
             PreparedStatement createTableRecipe = conn.prepareStatement(
                     "CREATE TABLE IF NOT EXISTS recipe " +
-                            "(recipeid INT, " +
-                            "version INT, " +
+                            "(recipe_id INT, " +
+                            "version_id INT, " +
                             "name VARCHAR(50), " +
-                            "madeby INT, " +
-                            "ingredientlistid INT, " +
+                            "creator_id INT, " +
+                            "ingredientlist_id INT, " +
                             "in_use BIT, " +
                             "last_used_date DATETIME, " +
-                            "minbatchsize int, " +
-                            "PRIMARY KEY (recipeid, version), " +
-                            "FOREIGN KEY (ingredientlistid) " +
-                            "REFERENCES ingredientlist (ingredientlistid), " +
-                            "FOREIGN KEY (madeby) " +
-                            "REFERENCES user (userid));");
+                            "min_batch_size int, " +
+                            "PRIMARY KEY (recipe_id, version_id), " +
+                            "FOREIGN KEY (ingredientlist_id) " +
+                            "REFERENCES ingredientlist (ingredientlist_id), " +
+                            "FOREIGN KEY (creator_id) " +
+                            "REFERENCES user (user_id));");
 
             PreparedStatement createTableCommodityBatch = conn.prepareStatement(
                     "CREATE TABLE if NOT EXISTS commoditybatch " +
-                            "(commoditybatchid INT, " +
-                            "ingredientid INT, " +
-                            "orderedby INT, " +
-                            "amountinkg FLOAT, " +
-                            "orderdate VARCHAR(50), " +
-                            "residue BIT, " +
-                            "PRIMARY KEY (commoditybatchid), " +
-                            "FOREIGN KEY (orderedby) " +
-                            "REFERENCES user (userid), " +
-                            "FOREIGN KEY (ingredientid) " +
-                            "REFERENCES ingredient(ingredientid));");
+                            "(commoditybatch_id INT, " +
+                            "ingredient_id INT, " +
+                            "orderer_id INT, " +
+                            "amount_kg FLOAT, " +
+                            "order_date VARCHAR(50), " +
+                            "residue_status BIT, " +
+                            "PRIMARY KEY (commoditybatch_id), " +
+                            "FOREIGN KEY (orderer_id) " +
+                            "REFERENCES user (user_id), " +
+                            "FOREIGN KEY (ingredient_id) " +
+                            "REFERENCES ingredient(ingredient_id));");
 
             PreparedStatement createTableProductBatch = conn.prepareStatement(
                     "CREATE TABLE IF NOT EXISTS productbatch " +
-                            "(productbatchid INT, " +
+                            "(productbatch_id INT, " +
                             "name VARCHAR(50) NOT NULL, " +
-                            "madeby INT, " +
-                            "recipe INT, " +
-                            "recipeversion INT, " +
+                            "producer_id INT, " +
+                            "recipe_id INT, " +
+                            "recipe_version INT, " +
                             "production_date DATE, " +
                             "volume INT, " +
                             "expiration_date DATE, " +
                             "batch_state VARCHAR(20), " +
-                            "producedby INT, " +
-                            "PRIMARY KEY (productbatchid), " +
-                            "FOREIGN KEY (recipe) " +
-                            "REFERENCES recipe (recipeid));");
+                            "orderer_id INT, " +
+                            "PRIMARY KEY (productbatch_id), " +
+                            "FOREIGN KEY (recipe_id) " +
+                            "REFERENCES recipe (recipe_id)," +
+                            "FOREIGN KEY(orderer_id)" +
+                            "REFERENCES user (user_id)"+
+                            "FOREIGN KEY (producer_id)" +
+                            "REFERENCES user (user_id)");
 
             PreparedStatement createTableProductbatchCommodityRelationship = conn.prepareStatement(
                     "CREATE TABLE IF NOT EXISTS productbatch_commodity_relationship " +
@@ -122,10 +126,10 @@ public class ConnectionDAO implements IConnectionDAO {
                             "commodity_batch_id INT, " +
                             "PRIMARY KEY (product_batch_id, commodity_batch_id), " +
                             "FOREIGN KEY (product_batch_id) " +
-                            "REFERENCES productbatch(productbatchid)" +
+                            "REFERENCES productbatch(productbatch_id)" +
                             "ON DELETE CASCADE, " +
                             "FOREIGN KEY (commodity_batch_id) " +
-                            "REFERENCES commoditybatch(commoditybatchid) " +
+                            "REFERENCES commoditybatch(commoditybatch_id) " +
                             "ON DELETE CASCADE);");
 
             //rækkefølgen er vigtig!
@@ -156,6 +160,8 @@ public class ConnectionDAO implements IConnectionDAO {
     @Override
     public void deleteTables() throws DALException {
         try {
+            PreparedStatement pstmtRemoveConstraints = conn.prepareStatement("SET FOREIGN_KEY_CHECKS=0;");
+            PreparedStatement pstmtReplaceConstraints = conn.prepareStatement("SET FOREIGN_KEY_CHECKS=1;");
             PreparedStatement pstmtDeleteProductbatchCommodityRelation = conn.prepareStatement("delete from productbatch_commodity_relationship;");
             PreparedStatement pstmtDeleteCommodityBatch = conn.prepareStatement("delete from commoditybatch;");
             PreparedStatement pstmtDeleteProductbatch = conn.prepareStatement("delete from productbatch;");
@@ -163,6 +169,7 @@ public class ConnectionDAO implements IConnectionDAO {
             PreparedStatement pstmtDeleteIngredientLists = conn.prepareStatement("delete from ingredientlist;");
             PreparedStatement pstmtDeleteIngredients = conn.prepareStatement("delete from ingredient;");
             PreparedStatement pstmtDeleteUsers = conn.prepareStatement("delete from user;");
+            pstmtRemoveConstraints.execute();
             pstmtDeleteProductbatchCommodityRelation.execute();
             pstmtDeleteProductbatch.execute();
             pstmtDeleteCommodityBatch.execute();
@@ -171,6 +178,7 @@ public class ConnectionDAO implements IConnectionDAO {
             pstmtDeleteIngredients.execute();
             deleteUsers();
             pstmtDeleteUsers.execute();
+            pstmtReplaceConstraints.execute();
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DALException("An error occurred in the database at ConnectionDAO.");
@@ -207,17 +215,17 @@ public class ConnectionDAO implements IConnectionDAO {
                             "FOR EACH ROW BEGIN " +
                             "DECLARE needamount float; " +
                             "DECLARE haveamount float; " +
-                            "SET needamount = (select minamountinmg from ingredient " +
-                            "    where ingredient.ingredientid = new.ingredientid); " +
-                            "SET haveamount = (select max(amountinkg) * 1000000 from commoditybatch " +
-                            "    join ingredient on ingredient.ingredientid = commoditybatch.ingredientid " +
-                            "    where commoditybatch.residue = 0 and new.ingredientid = ingredient.ingredientid); " +
+                            "SET needamount = (select min_amount_mg from ingredient " +
+                            "    where ingredient.ingredient_id = new.ingredient_id); " +
+                            "SET haveamount = (select max(amount_kg) * 1000000 from commoditybatch " +
+                            "    join ingredient on ingredient.ingredient_id = commoditybatch.ingredient_id " +
+                            "    where commoditybatch.residue = 0 and new.ingredient_id = ingredient.ingredient_id); " +
                             "IF needamount > haveamount THEN " +
-                            "UPDATE ingredient SET ingredient.reorder = 1 " +
-                            "WHERE new.ingredientid = ingredient.ingredientid; " +
+                            "UPDATE ingredient SET ingredient.reorder_status = 1 " +
+                            "WHERE new.ingredient_id = ingredient.ingredient_id; " +
                             "ELSE " +
-                            "UPDATE ingredient SET ingredient.reorder = 0 " +
-                            "WHERE new.ingredientid =  ingredient.ingredientid; " +
+                            "UPDATE ingredient SET ingredient.reorder_status = 0 " +
+                            "WHERE new.ingredient_id =  ingredient.ingredient_id; " +
                             "END IF; " +
                             "END;";
             PreparedStatement pstmtCreateTriggerReorder = conn.prepareStatement(createTrigReorderString);
@@ -235,17 +243,17 @@ public class ConnectionDAO implements IConnectionDAO {
                             "FOR EACH ROW BEGIN " +
                             "DECLARE needamount float; " +
                             "DECLARE haveamount float; " +
-                            "SET needamount = (select minamountinmg from ingredient " +
-                            "    where ingredient.ingredientid = new.ingredientid); " +
-                            "SET haveamount = (select max(amountinkg) * 1000000 from commoditybatch " +
-                            "    join ingredient on ingredient.ingredientid = commoditybatch.ingredientid " +
-                            "    where commoditybatch.residue = 0 and new.ingredientid = ingredient.ingredientid); " +
+                            "SET needamount = (select min_amount_mg from ingredient " +
+                            "    where ingredient.ingredient_id = new.ingredient_id); " +
+                            "SET haveamount = (select max(amount_kg) * 1000000 from commoditybatch " +
+                            "    join ingredient on ingredient.ingredient_id = commoditybatch.ingredient_id " +
+                            "    where commoditybatch.residue_status = 0 and new.ingredient_id = ingredient.ingredient_id); " +
                             "IF needamount > haveamount THEN " +
                             "UPDATE ingredient SET ingredient.reorder = 1 " +
-                            "WHERE new.ingredientid = ingredient.ingredientid; " +
+                            "WHERE new.ingredient_id = ingredient.ingredient_id; " +
                             "ELSE " +
-                            "UPDATE ingredient SET ingredient.reorder = 0 " +
-                            "WHERE new.ingredientid =  ingredient.ingredientid; " +
+                            "UPDATE ingredient SET ingredient.reorder_status = 0 " +
+                            "WHERE new.ingredient_id =  ingredient.ingredient_id; " +
                             "END IF; " +
                             "END;";
             PreparedStatement pstmtCreateTriggerReorder = conn.prepareStatement(createTrigReorderString);
@@ -258,6 +266,8 @@ public class ConnectionDAO implements IConnectionDAO {
 
     public void dropAllTables(int deleteTable) throws DALException {
         try {
+            PreparedStatement pstmtRemoveConstraints = conn.prepareStatement("SET FOREIGN_KEY_CHECKS=0;");
+            PreparedStatement pstmtReplaceConstraints = conn.prepareStatement("SET FOREIGN_KEY_CHECKS=1;");
             PreparedStatement dropTableUser = conn.prepareStatement(
                     "DROP table IF EXISTS user;");
             PreparedStatement dropTableUserRole = conn.prepareStatement(
@@ -276,6 +286,7 @@ public class ConnectionDAO implements IConnectionDAO {
                     "DROP TABLE IF EXISTS productbatch_commodity_relationship;");
 
             if (deleteTable == 0) {
+                pstmtRemoveConstraints.execute();
                 dropTableProductbatchCommodityRelation.execute();
                 dropTableProductbatch.execute();
                 dropTableCommodityBatch.execute();
@@ -284,6 +295,7 @@ public class ConnectionDAO implements IConnectionDAO {
                 dropTableIngredient.execute();
                 dropTableUserRole.execute();
                 dropTableUser.execute();
+                pstmtReplaceConstraints.execute();
             }
         } catch (SQLException e) {
             throw new DALException("An error occurred in the database at ConnectionDAO.");

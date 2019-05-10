@@ -21,7 +21,7 @@ public class IngredientListDAO implements IIngredientListDAO {
 
     @Override
     public void createIngredientList(IRecipeDTO recipeDTO, int version) throws DALException {
-        String insertIngList = "INSERT INTO ingredientlist(ingredientlistid, version, ingredientid, amountmg) " +
+        String insertIngList = "INSERT INTO ingredientlist(ingredientlist_id, version_id, ingredient_id, amount_mg) " +
                 "VALUES(?,?,?,?);";
         try {
             conn.setAutoCommit(false);
@@ -43,8 +43,8 @@ public class IngredientListDAO implements IIngredientListDAO {
     @Override
     public List<IIngredientDTO> getIngredientList(IRecipeDTO recipeDTO) throws DALException {
         List<IIngredientDTO> ingredientList = new ArrayList<>();
-        String getMaxVersionInt = "SELECT MAX(version) FROM ingredientlist WHERE ingredientlistid = ?";
-        String getIngListString = "SELECT * FROM ingredientlist WHERE ingredientlistid = ? AND version = ?;";
+        String getMaxVersionInt = "SELECT MAX(version_id) FROM ingredientlist WHERE ingredientlist_id = ?";
+        String getIngListString = "SELECT * FROM ingredientlist WHERE ingredientlist_id = ? AND version_id = ?;";
         try {
             PreparedStatement pstmtGetMaxIngVersion = conn.prepareStatement(getMaxVersionInt);
             pstmtGetMaxIngVersion.setInt(1, recipeDTO.getRecipeId());
