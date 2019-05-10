@@ -37,12 +37,6 @@ public class DALTest {
     }
 
     @Test
-    public void name() throws DALException {
-        connectionDAO.dropAllTables(0);
-        connectionDAO.initializeDataBase();
-    }
-
-    @Test
     public void testItAll() throws DALException {
         /**
          * Alt slettes
