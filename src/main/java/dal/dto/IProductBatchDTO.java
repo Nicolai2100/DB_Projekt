@@ -13,9 +13,9 @@ public interface IProductBatchDTO {
 
     void setName(String name);
 
-    int getRecipe();
+    IRecipeDTO getRecipe();
 
-    void setRecipe(int recipe);
+    void setRecipe(IRecipeDTO recipe);
 
     List<ICommodityBatchDTO> getCommodityBatches();
 

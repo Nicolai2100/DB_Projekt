@@ -32,7 +32,7 @@ public class RecipeDAO implements IRecipeDAO {
             version = recipeDTO.getVersion();
         }
         String insertRecipeString = "INSERT INTO recipe (recipeid, version, name, madeby, " +
-                "ingredientlistid, in_use, minbatchsize) VALUES(?,?,?,?,?,?,?)";
+                "ingredientlistid, in_use, minbatchsize, expiration) VALUES(?,?,?,?,?,?,?,?)";
         try {
             conn.setAutoCommit(false);
             PreparedStatement pstmtInsertRecipe = conn.prepareStatement(insertRecipeString);
@@ -43,6 +43,7 @@ public class RecipeDAO implements IRecipeDAO {
             pstmtInsertRecipe.setInt(5, recipeDTO.getRecipeId());
             pstmtInsertRecipe.setBoolean(6, true);
             pstmtInsertRecipe.setInt(7, recipeDTO.getMinBatchSize());
+            pstmtInsertRecipe.setInt(8,recipeDTO.getExpirationInMonths());
 
             for (IIngredientDTO ing: recipeDTO.getIngredientsList()) {
                 ingredientListDAO.createIngredientList(recipeDTO.getRecipeId(), recipeDTO.getVersion(),ing);
@@ -81,6 +82,31 @@ public class RecipeDAO implements IRecipeDAO {
                 recipeDTO.setMadeBy(userDAO.getUser(rs.getInt(4)));
                 recipeDTO.setIngredientsList(ingredientListDAO.getIngredientList(recipeDTO));
                 recipeDTO.setMinBatchSize(rs.getInt(8));
+                recipeDTO.setExpirationInMonths(rs.getInt(9));
+            }
+        } catch (SQLException e) {
+            throw new DALException("An error occurred in the database at RecipeDAO.");
+        }
+        return recipeDTO;
+    }
+
+    @Override
+    public IRecipeDTO getRecipeFromVersionNumber(int recipeId, int version) throws DALException {
+        IRecipeDTO recipeDTO = new RecipeDTO();
+        String getRecipeString = "SELECT * FROM recipe WHERE recipeid = ? AND version= ?;";
+        try {
+            PreparedStatement pstmtGetRecipe = conn.prepareStatement(getRecipeString);
+            pstmtGetRecipe.setInt(1, recipeId);
+            pstmtGetRecipe.setInt(2, version);
+            ResultSet rs = pstmtGetRecipe.executeQuery();
+            while (rs.next()) {
+                recipeDTO.setRecipeId(recipeId);
+                recipeDTO.setVersion(rs.getInt(version));
+                recipeDTO.setName(rs.getString(3));
+                recipeDTO.setMadeBy(userDAO.getUser(rs.getInt(4)));
+                recipeDTO.setIngredientsList(ingredientListDAO.getIngredientList(recipeDTO));
+                recipeDTO.setMinBatchSize(rs.getInt(8));
+                recipeDTO.setExpirationInMonths(rs.getInt(9));
             }
         } catch (SQLException e) {
             throw new DALException("An error occurred in the database at RecipeDAO.");
@@ -102,6 +128,7 @@ public class RecipeDAO implements IRecipeDAO {
                 recipeDTO.setMadeBy(userDAO.getUser(rs.getInt(4)));
                 recipeDTO.setIngredientsList(ingredientListDAO.getIngredientList(recipeDTO));
                 recipeDTO.setMinBatchSize(rs.getInt(8));
+                recipeDTO.setExpirationInMonths(rs.getInt(9));
                 activeRecipes.add(recipeDTO);
             }
         } catch (SQLException e) {
@@ -177,6 +204,7 @@ public class RecipeDAO implements IRecipeDAO {
                 recipeDTO.setIngredientsList(ingredientListDAO.getIngredientList(recipeDTO));
                 recipeDTO.setExpired(rs.getTimestamp(7));
                 recipeDTO.setMinBatchSize(rs.getInt(8));
+                recipeDTO.setExpirationInMonths(rs.getInt(9));
                 oldRecipes.add(recipeDTO);
             }
         } catch (SQLException e) {
@@ -213,6 +241,7 @@ public class RecipeDAO implements IRecipeDAO {
         }
     }
 
+    //Metoden er erstattet af en trigger
     public void checkReorder() throws DALException {
         Map<IIngredientDTO, Double> maxMinAmountValues = new HashMap<>();
         List<IIngredientDTO> ingredientsToBeReordered = new ArrayList<>();

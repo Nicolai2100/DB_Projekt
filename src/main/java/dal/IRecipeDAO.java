@@ -16,4 +16,6 @@ public interface IRecipeDAO {
 
     List<IRecipeDTO> getListOfOldRecipes() throws DALException;
 
+    IRecipeDTO getRecipeFromVersionNumber(int recipeId, int version) throws DALException;
+
     }

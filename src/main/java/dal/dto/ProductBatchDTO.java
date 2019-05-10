@@ -8,7 +8,7 @@ public class ProductBatchDTO implements IProductBatchDTO {
 
     private int productId;
     private String name;
-    private int recipe;
+    private IRecipeDTO recipe;
     private List<ICommodityBatchDTO> commodityBatches;
     private IUserDTO madeBy;
     private IUserDTO producedBy;
@@ -38,11 +38,11 @@ public class ProductBatchDTO implements IProductBatchDTO {
         this.name = name;
     }
 
-    public int getRecipe() {
+    public IRecipeDTO getRecipe() {
         return recipe;
     }
 
-    public void setRecipe(int recipe) {
+    public void setRecipe(IRecipeDTO recipe) {
         this.recipe = recipe;
     }
 

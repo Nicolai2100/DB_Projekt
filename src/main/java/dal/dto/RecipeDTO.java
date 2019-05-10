@@ -1,6 +1,5 @@
 package dal.dto;
 
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -12,6 +11,7 @@ public class RecipeDTO implements IRecipeDTO {
     private List<IIngredientDTO> ingredientsList;
     private Timestamp expired;
     private int minBatchSize;
+    private int expirationInMonths;
 
     public RecipeDTO() {
         ingredientsList = new ArrayList<>();
@@ -104,5 +104,15 @@ public class RecipeDTO implements IRecipeDTO {
     @Override
     public void setExpired(Timestamp expired) {
         this.expired = expired;
+    }
+
+    @Override
+    public int getExpirationInMonths() {
+        return expirationInMonths;
+    }
+
+    @Override
+    public void setExpirationInMonths(int expirationInMonths) {
+        this.expirationInMonths = expirationInMonths;
     }
 }

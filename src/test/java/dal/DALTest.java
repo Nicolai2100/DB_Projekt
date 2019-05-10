@@ -37,6 +37,12 @@ public class DALTest {
     }
 
     @Test
+    public void name() throws DALException {
+        connectionDAO.dropAllTables(0);
+        connectionDAO.initializeDataBase();
+    }
+
+    @Test
     public void testItAll() throws DALException {
         /**
          * Alt slettes
@@ -85,6 +91,7 @@ public class DALTest {
         norethisteron_recipe.setMinBatchSize(10000);
         norethisteron_recipe.setName("Norethisteron/estrogen");
         norethisteron_recipe.setMadeBy(userDAO.getUser(2));
+        norethisteron_recipe.setExpirationInMonths(36);
         List<IIngredientDTO> norethisteron_ingredients = new ArrayList<>();
 
         IRecipeDTO sildenafil_recipe = new RecipeDTO();
@@ -92,6 +99,7 @@ public class DALTest {
         sildenafil_recipe.setMinBatchSize(11000);
         sildenafil_recipe.setName("sildenafil");
         sildenafil_recipe.setMadeBy(userDAO.getUser(2));
+        sildenafil_recipe.setExpirationInMonths(30);
         List<IIngredientDTO> sildenafil_ingredients = new ArrayList<>();
 
         IngredientDTO ingredientDTO = new IngredientDTO();
@@ -334,7 +342,7 @@ public class DALTest {
         productbatchDTO.setMadeBy(testUser2); //Produktionslederen indsættes som et bruger-objekt.
         productbatchDTO.setName("Sildenafil"); //Produktets navn indsættes.
         productbatchDTO.setProductId(1); //Et unikt id vælges.
-        productbatchDTO.setRecipe(2); //Id'et til opskriften, som produktet skal produceres ud fra, indsættes.
+        productbatchDTO.setRecipe(recipeDAO.getActiveRecipe(2)); //Id'et til opskriften, som produktet skal produceres ud fra, indsættes.
         //Produktionsdatoen indsættes i formatet java.sql.Date.
         productbatchDTO.setVolume(10000); //Mængden af piller indsættes.
         //Råvare-batches tilknyttes. De skal have samme id, som den tilsvarende ingrediens i opskriften.

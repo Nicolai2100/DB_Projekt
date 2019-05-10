@@ -80,6 +80,7 @@ public class ConnectionDAO implements IConnectionDAO {
                             "in_use BIT, " +
                             "last_used_date DATETIME, " +
                             "minbatchsize int, " +
+                            "expiration int, " +
                             "PRIMARY KEY (recipeid, version), " +
                             "FOREIGN KEY (ingredientlistid) " +
                             "REFERENCES ingredientlist (ingredientlistid), " +

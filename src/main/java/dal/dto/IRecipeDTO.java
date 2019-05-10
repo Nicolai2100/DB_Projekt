@@ -33,4 +33,8 @@ public interface IRecipeDTO {
 
     void setExpired(Timestamp expired);
 
+    int getExpirationInMonths();
+
+    void setExpirationInMonths(int expirationInMonths);
+
 }
