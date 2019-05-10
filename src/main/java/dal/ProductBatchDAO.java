@@ -25,6 +25,9 @@ public class ProductBatchDAO implements IProductBatchDAO {
         if (!productbatch.getMadeBy().getRoles().contains("productionleader") || !productbatch.getMadeBy().getIsActive()) {
             throw new DALException("User not authorized to proceed!");
         }
+        if (productbatch.getVolume() < productbatch.getRecipe().getMinBatchSize()){
+            throw new DALException("Productbatch size is too small!");
+        }
         //Stadiet indsættes som ENUM. Det kan være enten ORDERED, UNDER_PRODUCTION eller COMPLETED.
         productbatch.setBatchState(IProductBatchDTO.State.ORDERED);
         String selectVersionString = "SELECT version from recipe where recipeid = ? AND in_use = 1";
