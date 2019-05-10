@@ -100,20 +100,6 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
             throw new DALException("An error occurred in the database at CommodityBatchDAO.");
         }
     }
-/*    @Override todo slet
-    public void deleteCommodityBatch(int commodityBatchId) throws DALException {
-        String deleteComBatString = "DELETE FROM commoditybatch WHERE commoditybatchid=?";
-        try {
-            conn.setAutoCommit(false);
-            PreparedStatement preparedStatement = conn.prepareStatement(deleteComBatString);
-            preparedStatement.setInt(1, commodityBatchId);
-            preparedStatement.executeUpdate();
-            conn.commit();
-            conn.setAutoCommit(true);
-        } catch (SQLException e) {
-            throw new DALException("An error occurred in the database at CommodityBatchDAO.");
-        }
-    }*/
 
     public double getTotalCommodityAmountInKG(IIngredientDTO ingredient) throws DALException {
         double totalAmount;
@@ -145,11 +131,11 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 ICommodityBatchDTO batch = new CommodityBatchDTO();
-                batch.setBatchId(resultSet.getInt("commoditybatchid"));
+                batch.setBatchId(resultSet.getInt("commoditybatch_id"));
                 batch.setIngredientDTO(ingredient);
-                batch.setAmountInKg(resultSet.getInt("amountinkg"));
-                batch.setOrderDate(resultSet.getString("orderdate"));
-                batch.setResidue(resultSet.getBoolean("residue"));
+                batch.setAmountInKg(resultSet.getInt("amount_kg"));
+                batch.setOrderDate(resultSet.getString("order_date"));
+                batch.setResidue(resultSet.getBoolean("residue_status"));
                 commodityBatchList.add(batch);
             }
         } catch (SQLException e) {

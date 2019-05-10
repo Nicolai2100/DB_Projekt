@@ -103,7 +103,7 @@ public class IngredientDAO implements IIngredientDAO {
             preparedStatement.setInt(1, ingredient.getIngredientId());
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                totalAmount += resultSet.getDouble("amountinkg");
+                totalAmount += resultSet.getDouble("amount_kg");
             }
         } catch (Exception e) {
             throw new DALException("An error occurred in the database at IngredientDAO.");
