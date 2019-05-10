@@ -101,7 +101,7 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
             preparedStatement.setInt(7, commodityBatch.getBatchId());
             preparedStatement.executeUpdate();
 
-/*
+/*          afløst af trigger
             recipeDAO.checkReorder();
 */
             conn.commit();
