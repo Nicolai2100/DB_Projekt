@@ -226,9 +226,15 @@ public class RecipeDAO implements IRecipeDAO {
                     "WHERE ingredientid = ?";
             PreparedStatement preparedStatementAmounts = conn.prepareStatement(minAmountsString);
             ResultSet resultSet = preparedStatementAmounts.executeQuery();
+            PreparedStatement preparedStatementNewMin = conn.prepareStatement(updateIngString);
+
             while (resultSet.next()) {
-                if (resultSet.getDouble("amount") > resultSet.getDouble("minamountinmg")) {
-                    PreparedStatement preparedStatementNewMin = conn.prepareStatement(updateIngString);
+                if (resultSet.getDouble("minamountinmg") == 0){
+                    preparedStatementNewMin.setInt(1, resultSet.getInt("amount"));
+                    preparedStatementNewMin.setInt(2, resultSet.getInt("ingredientid"));
+                    preparedStatementNewMin.executeUpdate();
+                }
+                else if (resultSet.getDouble("amount") < resultSet.getDouble("minamountinmg")) {
                     preparedStatementNewMin.setInt(1, resultSet.getInt("amount"));
                     preparedStatementNewMin.setInt(2, resultSet.getInt("ingredientid"));
                     preparedStatementNewMin.executeUpdate();

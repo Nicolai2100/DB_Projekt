@@ -416,7 +416,7 @@ public class DALTest {
         }
 
         ingredientDTOS = ingredientDAO.getReorders();
-        assertTrue(ingredientDTOS.size() == 11);
+        assertTrue(ingredientDTOS.size() == 12);
         System.out.println("\n" + ingredientDTOS.size() + " commodities to be ordered: ");
         for (IIngredientDTO ing : ingredientDTOS) {
             System.out.println("" + (ingredientDTOS.indexOf(ing) + 1) + ": IngredientID: " + ing.getIngredientId()
