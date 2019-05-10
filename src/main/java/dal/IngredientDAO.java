@@ -38,7 +38,7 @@ public class IngredientDAO implements IIngredientDAO {
     @Override
     public IIngredientDTO getIngredient(int ingredientId) throws DALException {
         IIngredientDTO ingredientDTO = new IngredientDTO();
-        String getIngString = "SELECT * FROM ingredient WHERE ingredientid = ?;";
+        String getIngString = "SELECT * FROM ingredient WHERE ingredient_id = ?;";
         try {
             PreparedStatement pstmtGetIngredient = conn.prepareStatement(getIngString);
             pstmtGetIngredient.setInt(1, ingredientId);
@@ -58,7 +58,7 @@ public class IngredientDAO implements IIngredientDAO {
     @Override
     public List<IIngredientDTO> getReorders() throws DALException {
         List<IIngredientDTO> toBeOrdered = new ArrayList<>();
-        String getReorderString = "SELECT * FROM ingredient WHERE reorder = 1;";
+        String getReorderString = "SELECT * FROM ingredient WHERE reorder_status = 1;";
         try {
             PreparedStatement pstmtGetReorder = conn.prepareStatement(getReorderString);
             ResultSet rs = pstmtGetReorder.executeQuery();
@@ -77,7 +77,7 @@ public class IngredientDAO implements IIngredientDAO {
 
     @Override
     public void setReorder(List<IIngredientDTO> ingList) throws DALException {
-        String getReorderString = "UPDATE ingredient SET reorder = 1 WHERE ingredientid = ?;";
+        String getReorderString = "UPDATE ingredient SET reorder_status = 1 WHERE ingredient_id = ?;";
         try {
             PreparedStatement pstmtGetReorder = conn.prepareStatement(getReorderString);
 
@@ -98,7 +98,7 @@ public class IngredientDAO implements IIngredientDAO {
     public double getTotalAmount(IIngredientDTO ingredient) throws DALException {
         double totalAmount = 0;
         try {
-            String totalAmountString = "SELECT amountinkg FROM commoditybatch WHERE ingredientid=? AND residue = 0";
+            String totalAmountString = "SELECT amount_kg FROM commoditybatch WHERE ingredient_id=? AND residue_status = 0";
             PreparedStatement preparedStatement = conn.prepareStatement(totalAmountString);
             preparedStatement.setInt(1, ingredient.getIngredientId());
             ResultSet resultSet = preparedStatement.executeQuery();
