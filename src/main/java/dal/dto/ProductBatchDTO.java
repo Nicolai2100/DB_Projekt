@@ -10,7 +10,7 @@ public class ProductBatchDTO implements IProductBatchDTO {
     private String name;
     private IRecipeDTO recipe;
     private List<ICommodityBatchDTO> commodityBatches;
-    private IUserDTO madeBy;
+    private IUserDTO orderedBy;
     private IUserDTO producedBy;
     private Date productionDate;
     private Date expirationDate;
@@ -85,12 +85,12 @@ public class ProductBatchDTO implements IProductBatchDTO {
         this.commodityBatches = commodityBatches;
     }
 
-    public IUserDTO getMadeBy() {
-        return madeBy;
+    public IUserDTO getOrderedBy() {
+        return orderedBy;
     }
 
-    public void setMadeBy(IUserDTO madeBy) {
-        this.madeBy = madeBy;
+    public void setOrderedBy(IUserDTO orderedBy) {
+        this.orderedBy = orderedBy;
     }
 
     @Override
@@ -115,6 +115,6 @@ public class ProductBatchDTO implements IProductBatchDTO {
 
     @Override
     public String toString() {
-        return "Product [productId=" + productId + ", type=" + name + ", productbatches=" + commodityBatches + ", made by: " + madeBy + "]";
+        return "Product [productId=" + productId + ", type=" + name + " volume: " + volume + ", \nproductbatches=" + commodityBatches + ", \nordered by: " + orderedBy + ", \nproduced by: " + producedBy + "]";
     }
 }

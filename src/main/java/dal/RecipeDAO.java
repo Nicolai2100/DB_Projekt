@@ -31,8 +31,8 @@ public class RecipeDAO implements IRecipeDAO {
         } else {
             version = recipeDTO.getVersion();
         }
-        String insertRecipeString = "INSERT INTO recipe (recipeid, version, name, madeby, " +
-                "ingredientlistid, in_use, minbatchsize, expiration) VALUES(?,?,?,?,?,?,?,?)";
+        String insertRecipeString = "INSERT INTO recipe (recipe_id, version_id, name, creator_id, " +
+                "ingredientlist_id, in_use, min_batch_size, expiration) VALUES(?,?,?,?,?,?,?,?)";
         try {
             conn.setAutoCommit(false);
             PreparedStatement pstmtInsertRecipe = conn.prepareStatement(insertRecipeString);
@@ -43,10 +43,10 @@ public class RecipeDAO implements IRecipeDAO {
             pstmtInsertRecipe.setInt(5, recipeDTO.getRecipeId());
             pstmtInsertRecipe.setBoolean(6, true);
             pstmtInsertRecipe.setInt(7, recipeDTO.getMinBatchSize());
-            pstmtInsertRecipe.setInt(8,recipeDTO.getExpirationInMonths());
+            pstmtInsertRecipe.setInt(8, recipeDTO.getExpirationInMonths());
 
-            for (IIngredientDTO ing: recipeDTO.getIngredientsList()) {
-                ingredientListDAO.createIngredientList(recipeDTO.getRecipeId(), recipeDTO.getVersion(),ing);
+            for (IIngredientDTO ing : recipeDTO.getIngredientsList()) {
+                ingredientListDAO.createIngredientList(recipeDTO.getRecipeId(), recipeDTO.getVersion(), ing);
             }
 
             int result = pstmtInsertRecipe.executeUpdate();
@@ -70,7 +70,7 @@ public class RecipeDAO implements IRecipeDAO {
     @Override
     public IRecipeDTO getActiveRecipe(int recipeId) throws DALException {
         IRecipeDTO recipeDTO = new RecipeDTO();
-        String getRecipeString = "SELECT * FROM recipe WHERE recipeid = ? AND in_use = 1;";
+        String getRecipeString = "SELECT * FROM recipe WHERE recipe_id = ? AND in_use = 1;";
         try {
             PreparedStatement pstmtGetRecipe = conn.prepareStatement(getRecipeString);
             pstmtGetRecipe.setInt(1, recipeId);
@@ -93,7 +93,7 @@ public class RecipeDAO implements IRecipeDAO {
     @Override
     public IRecipeDTO getRecipeFromVersionNumber(int recipeId, int version) throws DALException {
         IRecipeDTO recipeDTO = new RecipeDTO();
-        String getRecipeString = "SELECT * FROM recipe WHERE recipeid = ? AND version= ?;";
+        String getRecipeString = "SELECT * FROM recipe WHERE recipe_id = ? AND version_id = ?;";
         try {
             PreparedStatement pstmtGetRecipe = conn.prepareStatement(getRecipeString);
             pstmtGetRecipe.setInt(1, recipeId);
@@ -144,7 +144,7 @@ public class RecipeDAO implements IRecipeDAO {
         if (!userDTO.getRoles().contains("farmaceut") || !userDTO.getIsActive()) {
             throw new DALException("User not authorized to proceed!");
         }
-        String updateRecipeString = "UPDATE recipe SET in_use = ?, last_used_date = ? WHERE recipeid = ? and version = ?;";
+        String updateRecipeString = "UPDATE recipe SET in_use = ?, last_used_date = ? WHERE recipe_id = ? and version_id = ?;";
         try {
             conn.setAutoCommit(false);
             int oldVersionInt = recipeDTO.getVersion();
@@ -172,7 +172,7 @@ public class RecipeDAO implements IRecipeDAO {
             throw new DALException("User not authorized to proceed!");
         }
         try {
-            String deleteRecipeString = "UPDATE recipe SET in_use = 0 WHERE recipeid = ? AND in_use = 1;";
+            String deleteRecipeString = "UPDATE recipe SET in_use = 0 WHERE recipe_id = ? AND in_use = 1;";
             PreparedStatement pstmtDeleteRecipe = conn.prepareStatement(deleteRecipeString);
             pstmtDeleteRecipe.setInt(1, recipeId);
             int result = pstmtDeleteRecipe.executeUpdate();
@@ -217,32 +217,34 @@ public class RecipeDAO implements IRecipeDAO {
         try {
             conn.setAutoCommit(false);
             //Dette query returnerer ingredientid, mindste mængde forekommende(ingrediens) og minimumamount
-            String minAmountsString = "SELECT ingredientlist.ingredientid, min(amountmg*minbatchsize) AS amount, minamountinmg " +
-                    "FROM ingredientlist JOIN recipe ON ingredientlist.ingredientlistid = recipe.ingredientlistid " +
-                    "JOIN ingredient ON ingredient.ingredientid = ingredientlist.ingredientid WHERE in_use = 1 " +
-                    "GROUP BY ingredientid ASC;";
+            String minAmountsString = "SELECT ingredientlist.ingredient_id, min(amount_mg*min_batch_size) AS amount, min_amount_mg " +
+                    "FROM ingredientlist JOIN recipe ON ingredientlist.ingredientlist_id = recipe.ingredientlist_id " +
+                    "JOIN ingredient ON ingredient.ingredient_id = ingredientlist.ingredient_id WHERE in_use = 1 " +
+                    "GROUP BY ingredient_id ASC;";
             String updateIngString = "UPDATE ingredient " +
-                    "SET minamountinmg = ? " +
-                    "WHERE ingredientid = ?";
+                    "SET min_amount_mg = ? " +
+                    "WHERE ingredient_id = ?";
             PreparedStatement preparedStatementAmounts = conn.prepareStatement(minAmountsString);
             ResultSet resultSet = preparedStatementAmounts.executeQuery();
             PreparedStatement preparedStatementNewMin = conn.prepareStatement(updateIngString);
 
-            while (resultSet.next()) {
-                if (resultSet.getDouble("minamountinmg") == 0){
+            while (true) {
+                if (!resultSet.next()) break;
+
+                if (resultSet.getDouble("min_amount_mg") == 0) {
                     preparedStatementNewMin.setInt(1, resultSet.getInt("amount"));
-                    preparedStatementNewMin.setInt(2, resultSet.getInt("ingredientid"));
+                    preparedStatementNewMin.setInt(2, resultSet.getInt("ingredient_id"));
                     preparedStatementNewMin.executeUpdate();
-                }
-                else if (resultSet.getDouble("amount") < resultSet.getDouble("minamountinmg")) {
-                    preparedStatementNewMin.setInt(1, resultSet.getInt("amount"));
-                    preparedStatementNewMin.setInt(2, resultSet.getInt("ingredientid"));
-                    preparedStatementNewMin.executeUpdate();
+                } else if (resultSet.getDouble("amount") < resultSet.getDouble("min_amount_mg")) {
+                    if (resultSet.getDouble("amount") > resultSet.getDouble("min_amount_mg")) {
+                        preparedStatementNewMin.setInt(1, resultSet.getInt("amount"));
+                        preparedStatementNewMin.setInt(2, resultSet.getInt("ingredient_id"));
+                        preparedStatementNewMin.executeUpdate();
+                    }
                 }
             }
             conn.commit();
         } catch (SQLException e) {
-            e.printStackTrace();
             throw new DALException("An error occurred in the database at RecipeDAO.");
         }
     }
@@ -279,7 +281,7 @@ public class RecipeDAO implements IRecipeDAO {
                 if (resultSet.next()) {
                     totalAmount = resultSet.getDouble(1);
                 }
-                System.out.println(ing.getMinAmountMG()*2 +" and " + totalAmount * 1000000);
+                System.out.println(ing.getMinAmountMG() * 2 + " and " + totalAmount * 1000000);
                 if (ing.getMinAmountMG() * 2 > totalAmount * 1000000)
                     ingredientsToBeReordered.add(ing);
                 it.remove(); // avoids a ConcurrentModificationException

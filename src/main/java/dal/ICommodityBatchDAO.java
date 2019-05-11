@@ -12,11 +12,7 @@ public interface ICommodityBatchDAO {
     ICommodityBatchDTO getCommodityBatch(int commodityBatchId) throws DALException;
 
     void updateCommodityBatch(ICommodityBatchDTO commodityBatch) throws DALException;
-
-    void checkForResidue() throws DALException;
-
-    List<ICommodityBatchDTO> getAllCommodityBatchListNotResidue() throws DALException;
-
+    
     double getTotalCommodityAmountInKG(IIngredientDTO ingredient) throws DALException;
 
     List<ICommodityBatchDTO> getCommodityBatchList(IIngredientDTO ingredient) throws DALException;

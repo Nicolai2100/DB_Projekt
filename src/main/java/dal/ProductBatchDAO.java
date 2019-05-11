@@ -22,15 +22,15 @@ public class ProductBatchDAO implements IProductBatchDAO {
 
     @Override
     public void createProductbatch(IProductBatchDTO productbatch) throws DALException {
-        if (!productbatch.getMadeBy().getRoles().contains("productionleader") || !productbatch.getMadeBy().getIsActive()) {
+        if (!productbatch.getOrderedBy().getRoles().contains("productionleader") || !productbatch.getOrderedBy().getIsActive()) {
             throw new DALException("User not authorized to proceed!");
         }
+        String selectVersionString = "SELECT version_id from recipe where recipe_id = ? AND in_use = 1";
         if (productbatch.getVolume() < productbatch.getRecipe().getMinBatchSize()){
             throw new DALException("Productbatch size is too small!");
         }
         //Stadiet indsættes som ENUM. Det kan være enten ORDERED, UNDER_PRODUCTION eller COMPLETED.
         productbatch.setBatchState(IProductBatchDTO.State.ORDERED);
-        String selectVersionString = "SELECT version from recipe where recipeid = ? AND in_use = 1";
         String insertString = "INSERT INTO productbatch VALUES(?,?,?,?,?,?,?,?,?,?)";
         try {
             conn.setAutoCommit(false);
@@ -44,7 +44,7 @@ public class ProductBatchDAO implements IProductBatchDAO {
             PreparedStatement pstmtInsertProduct = conn.prepareStatement(insertString);
             pstmtInsertProduct.setInt(1, productbatch.getProductId());
             pstmtInsertProduct.setString(2, productbatch.getName());
-            pstmtInsertProduct.setInt(3, productbatch.getMadeBy().getUserId());
+            pstmtInsertProduct.setInt(10, productbatch.getOrderedBy().getUserId());
             pstmtInsertProduct.setInt(4, productbatch.getRecipe().getRecipeId());
             pstmtInsertProduct.setInt(5, versionNum);
             pstmtInsertProduct.setDate(6, productbatch.getProductionDate());
@@ -52,9 +52,9 @@ public class ProductBatchDAO implements IProductBatchDAO {
             pstmtInsertProduct.setDate(8, productbatch.getExpirationDate());
             pstmtInsertProduct.setString(9, productbatch.getBatchState());
             if (productbatch.getProducedBy() == null) {
-                pstmtInsertProduct.setNull(10, Types.INTEGER);
+                pstmtInsertProduct.setNull(3, Types.INTEGER);
             } else {
-                pstmtInsertProduct.setInt(10, productbatch.getProducedBy().getUserId());
+                pstmtInsertProduct.setInt(3, productbatch.getProducedBy().getUserId());
             }
 
             int result = pstmtInsertProduct.executeUpdate();
@@ -74,9 +74,9 @@ public class ProductBatchDAO implements IProductBatchDAO {
     public ProductBatchDTO getProductbatch(int productBatchID) throws DALException {
         ProductBatchDTO productbatchDTO = new ProductBatchDTO();
         String getProdBatchString =
-                "SELECT productbatchid, name, madeby, recipe, production_date, volume, expiration_date, " +
+                "SELECT productbatch_id, name, orderer_id, producer_id, recipe_id, production_date, volume, expiration_date, " +
                         "batch_state, commodity_batch_id FROM productbatch " +
-                        "NATURAL JOIN productbatch_commodity_relationship WHERE productbatchid = ?;";
+                        "NATURAL JOIN productbatch_commodity_relationship WHERE productbatch_id = ?;";
         try {
             PreparedStatement pstmtSelectProductBatch = conn.prepareStatement(getProdBatchString);
             pstmtSelectProductBatch.setInt(1, productBatchID);
@@ -86,10 +86,11 @@ public class ProductBatchDAO implements IProductBatchDAO {
                 if (i < 1) {
                     productbatchDTO.setProductId(productBatchID);
                     productbatchDTO.setName(rs.getString("name"));
-                    int recipeID = rs.getInt("recipe");
-                    int recipeVersion = rs.getInt("recipeversion");
+                    int recipeID = rs.getInt("recipe_id");
+                    int recipeVersion = rs.getInt("recipe_version");
                     productbatchDTO.setRecipe(recipeDAO.getRecipeFromVersionNumber(recipeID,recipeVersion));
-                    productbatchDTO.setMadeBy(userDAO.getUser(rs.getInt("madeby")));
+                    productbatchDTO.setOrderedBy(userDAO.getUser(rs.getInt("orderer_id")));
+                    productbatchDTO.setProducedBy(userDAO.getUser(rs.getInt("producer_id")));
                     productbatchDTO.setProductionDate(rs.getDate("production_date"));
                     productbatchDTO.setExpirationDate(rs.getDate("expiration_date"));
                     productbatchDTO.setVolume(rs.getInt("volume"));
@@ -110,18 +111,21 @@ public class ProductBatchDAO implements IProductBatchDAO {
             throw new DALException("User not authorized to proceed!");
         }
         String delString = "DELETE FROM productbatch_commodity_relationship WHERE product_batch_id = ?";
-        String updateProcString = "UPDATE productbatch SET name = ?, madeby = ?, recipe = ?, recipeversion = ?, " +
-                "production_date = ?, volume = ?, expiration_date = ?, batch_state = ?, producedby = ? " +
-                "WHERE productbatchid = ?";
+        String updateProcString = "UPDATE productbatch SET name = ?, producer_id = ?, recipe_id = ?, recipe_version = ?, " +
+                "production_date = ?, volume = ?, expiration_date = ?, batch_state = ?, orderer_id = ? " +
+                "WHERE productbatch_id = ?";
         try {
             conn.setAutoCommit(false);
             PreparedStatement pstmtDeleteRelations = conn.prepareStatement(delString);
             pstmtDeleteRelations.setInt(1, productbatch.getProductId());
             pstmtDeleteRelations.executeUpdate();
-
             PreparedStatement pstmtUpdateProduct = conn.prepareStatement(updateProcString);
             pstmtUpdateProduct.setString(1, productbatch.getName());
-            pstmtUpdateProduct.setInt(2, productbatch.getMadeBy().getUserId());
+            if (productbatch.getProducedBy() == null) {
+                pstmtUpdateProduct.setInt(2, Types.INTEGER);
+            } else {
+                pstmtUpdateProduct.setInt(2, productbatch.getProducedBy().getUserId());
+            }
             pstmtUpdateProduct.setInt(3, productbatch.getRecipe().getRecipeId());
             pstmtUpdateProduct.setInt(4,productbatch.getRecipe().getVersion());
             if (productbatch.getProductionDate() == null) {
@@ -129,7 +133,6 @@ public class ProductBatchDAO implements IProductBatchDAO {
             } else {
                 pstmtUpdateProduct.setDate(5, productbatch.getProductionDate());
             }
-            pstmtUpdateProduct.setDate(5, productbatch.getProductionDate());
             pstmtUpdateProduct.setInt(6, productbatch.getVolume());
             if (productbatch.getExpirationDate() == null) {
                 pstmtUpdateProduct.setNull(7, java.sql.Types.DATE);
@@ -137,17 +140,13 @@ public class ProductBatchDAO implements IProductBatchDAO {
                 pstmtUpdateProduct.setDate(7, productbatch.getExpirationDate());
             }
             pstmtUpdateProduct.setString(8, productbatch.getBatchState());
-            if (productbatch.getProducedBy() == null) {
-                pstmtUpdateProduct.setInt(9, 0);
-            } else {
-                pstmtUpdateProduct.setInt(9, productbatch.getProducedBy().getUserId());
-            }
+            pstmtUpdateProduct.setInt(9, productbatch.getOrderedBy().getUserId());
             pstmtUpdateProduct.setInt(10, productbatch.getProductId());
-
             pstmtUpdateProduct.executeUpdate();
             createRelations(productbatch.getCommodityBatches(), productbatch.getProductId());
             conn.commit();
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new DALException("An error occurred in the database at ProductBatchDAO.");
         }
     }
@@ -253,17 +252,17 @@ public class ProductBatchDAO implements IProductBatchDAO {
                 IProductBatchDTO productBatchDTO = new ProductBatchDTO();
                 productBatchDTO.setProductId(resultSet.getInt(1));
                 productBatchDTO.setName(resultSet.getString(2));
-                productBatchDTO.setMadeBy(userDAO.getUser(resultSet.getInt(3)));
+                productBatchDTO.setOrderedBy(userDAO.getUser(resultSet.getInt(10)));
 
-                int recipeID = resultSet.getInt("recipe");
-                int recipeVersion = resultSet.getInt("recipeversion");
+                int recipeID = resultSet.getInt(4);
+                int recipeVersion = resultSet.getInt(5);
                 productBatchDTO.setRecipe(recipeDAO.getRecipeFromVersionNumber(recipeID,recipeVersion));
 
                 productBatchDTO.setProductionDate(resultSet.getDate(6));
                 productBatchDTO.setVolume(resultSet.getInt(7));
                 productBatchDTO.setExpirationDate(resultSet.getDate(8));
                 productBatchDTO.setBatchState(IProductBatchDTO.State.valueOf(resultSet.getString(9)));
-                productBatchDTO.setProducedBy(userDAO.getUser(resultSet.getInt(10)));
+                productBatchDTO.setProducedBy(userDAO.getUser(resultSet.getInt(3)));
                 products.add(productBatchDTO);
             }
         } catch (SQLException e) {

@@ -3,18 +3,17 @@ package dal;
 import dal.dto.*;
 
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CommodityBatchDAO implements ICommodityBatchDAO {
     private UserDAO userDAO;
     private IngredientDAO ingredientDAO;
     private Connection conn;
-    private RecipeDAO recipeDAO;
 
-    public CommodityBatchDAO(UserDAO userDAO, IngredientDAO ingredientDAO, RecipeDAO recipeDAO) throws DALException {
+    public CommodityBatchDAO(UserDAO userDAO, IngredientDAO ingredientDAO) throws DALException {
         this.userDAO = userDAO;
         this.ingredientDAO = ingredientDAO;
-        this.recipeDAO = recipeDAO;
         this.conn = ConnectionDAO.getConnection();
     }
 
@@ -35,10 +34,6 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
             pstmtInsertCommodityBatch.setString(5, commodityBatch.getOrderDate());
             pstmtInsertCommodityBatch.setBoolean(6, false);
             pstmtInsertCommodityBatch.executeUpdate();
-
-/*
-            recipeDAO.checkReorder();
-*/
             conn.commit();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -54,10 +49,10 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
         IUserDTO userDTO = new UserDTO();
         String selectComBatch = "SELECT * FROM commoditybatch " +
                 "LEFT JOIN ingredient " +
-                "ON ingredient.ingredientid = commoditybatch.ingredientid " +
+                "ON ingredient.ingredient_id = commoditybatch.ingredient_id " +
                 "LEFT JOIN user " +
-                "ON orderedby = userid " +
-                "WHERE commoditybatchid = ?;";
+                "ON orderer_id = user_id " +
+                "WHERE commoditybatch_id = ?;";
         try {
             PreparedStatement pstmtSelectCommodityBatch = conn.prepareStatement(selectComBatch);
             pstmtSelectCommodityBatch.setInt(1, commodityBatchId);
@@ -87,8 +82,8 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
     @Override
     public void updateCommodityBatch(ICommodityBatchDTO commodityBatch) throws DALException {
         String updateComBatchString = "UPDATE commoditybatch " +
-                "SET commoditybatchid=?, ingredientid=?, orderedby=?, amountinkg=?, orderdate=?, residue=? " +
-                "WHERE commoditybatchid=?";
+                "SET commoditybatch_id=?, ingredient_id=?, orderer_id=?, amount_kg=?, order_date=?, residue_status=? " +
+                "WHERE commoditybatch_id=?";
         try {
             conn.setAutoCommit(false);
             PreparedStatement preparedStatement = conn.prepareStatement(updateComBatchString);
@@ -100,54 +95,46 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
             preparedStatement.setBoolean(6, commodityBatch.isResidue());
             preparedStatement.setInt(7, commodityBatch.getBatchId());
             preparedStatement.executeUpdate();
-
-/*          afløst af trigger
-            recipeDAO.checkReorder();
-*/
             conn.commit();
         } catch (SQLException e) {
-            e.printStackTrace();
             throw new DALException("An error occurred in the database at CommodityBatchDAO.");
         }
     }
 
-    @Override
     public double getTotalCommodityAmountInKG(IIngredientDTO ingredient) throws DALException {
         double totalAmount = 0.0;
-        String getTotComAmString = "SELECT sum(amountinkg) " +
+        String getTotComAmString = "SELECT sum(amount_kg) " +
                 "FROM commoditybatch " +
-                "WHERE ingredientid = ? AND residue=0";
+                "WHERE ingredient_id = ? AND NOT residue_status = 1";
         try {
             PreparedStatement preparedStatement = conn.prepareStatement(getTotComAmString);
             preparedStatement.setInt(1, ingredient.getIngredientId());
             ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()){
+            if (resultSet.next()) {
                 totalAmount = resultSet.getDouble(1);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
             throw new DALException("An error occurred in the database at CommodityBatchDAO.");
         }
         return totalAmount;
     }
 
-    @Override
     public List<ICommodityBatchDTO> getCommodityBatchList(IIngredientDTO ingredient) throws DALException {
         List<ICommodityBatchDTO> commodityBatchList = new ArrayList<>();
         String getComBatListString = "SELECT commoditybatchid, ingredientid, amountinkg, orderdate, residue " +
                 "FROM commoditybatch " +
-                "WHERE ingdientid = ? AND NOT residue=1";
+                "WHERE ingredient_id = ? AND NOT residue_status=1";
         try {
             PreparedStatement preparedStatement = conn.prepareStatement(getComBatListString);
             preparedStatement.setInt(1, ingredient.getIngredientId());
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 ICommodityBatchDTO batch = new CommodityBatchDTO();
-                batch.setBatchId(resultSet.getInt("commoditybatchid"));
+                batch.setBatchId(resultSet.getInt("commoditybatch_id"));
                 batch.setIngredientDTO(ingredient);
-                batch.setAmountInKg(resultSet.getInt("amountinkg"));
-                batch.setOrderDate(resultSet.getString("orderdate"));
-                batch.setResidue(resultSet.getBoolean("residue"));
+                batch.setAmountInKg(resultSet.getInt("amount_kg"));
+                batch.setOrderDate(resultSet.getString("order_date"));
+                batch.setResidue(resultSet.getBoolean("residue_status"));
                 commodityBatchList.add(batch);
             }
         } catch (SQLException e) {
@@ -157,10 +144,9 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
         return commodityBatchList;
     }
 
-    @Override
-    public List<ICommodityBatchDTO> getAllCommodityBatchListNotResidue() throws DALException {
+    public List<ICommodityBatchDTO> getAllCommodityBatchList() throws DALException {
         List<ICommodityBatchDTO> commodityBatchList = new ArrayList<>();
-        String getAllComBat = "SELECT * FROM commoditybatch WHERE residue = 0;";
+        String getAllComBat = "SELECT * FROM commoditybatch WHERE residue_status = 0;";
         try {
             PreparedStatement preparedStatement = conn.prepareStatement(getAllComBat);
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -183,17 +169,17 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
         return commodityBatchList;
     }
 
-    @Override
+    //@Override
     public void checkForResidue() throws DALException {
         try {
-            List<ICommodityBatchDTO> combats = getAllCommodityBatchListNotResidue();
+            List<ICommodityBatchDTO> combats = getAllCommodityBatchList();
 
             String setResidueString = "UPDATE commoditybatch SET residue = 1 WHERE " +
                     "commoditybatchid = ?;";
             PreparedStatement pstmtSetResidue = conn.prepareStatement(setResidueString);
 
             for (ICommodityBatchDTO combat : combats) {
-                if (combat.getAmountInKg()*1000000 < combat.getIngredientDTO().getMinAmountMG()) {
+                if (combat.getAmountInKg() * 1000000 < combat.getIngredientDTO().getMinAmountMG()) {
                     pstmtSetResidue.setInt(1, combat.getBatchId());
                     pstmtSetResidue.executeUpdate();
                 }

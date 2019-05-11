@@ -33,9 +33,9 @@ public interface IProductBatchDTO {
 
     void setExpirationDate(Date expirationDate);
 
-    IUserDTO getMadeBy();
+    IUserDTO getOrderedBy();
 
-    void setMadeBy(IUserDTO madeBy);
+    void setOrderedBy(IUserDTO orderedBy);
 
     IUserDTO getProducedBy();
 

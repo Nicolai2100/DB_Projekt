@@ -27,13 +27,19 @@ public class DALTest {
         ingredientDAO = new IngredientDAO();
         ingredientListDAO = new IngredientListDAO(ingredientDAO);
         recipeDAO = new RecipeDAO(ingredientDAO, ingredientListDAO, userDAO);
-        commoditybatchDAO = new CommodityBatchDAO(userDAO, ingredientDAO, recipeDAO);
+        commoditybatchDAO = new CommodityBatchDAO(userDAO, ingredientDAO);
         productBatchDAO = new ProductBatchDAO(recipeDAO, commoditybatchDAO, userDAO);
     }
 
     @After
     public void close() throws DALException {
         connectionDAO.closeConn();
+    }
+
+    @Test
+    public void name() throws DALException {
+        //connectionDAO.dropAllTables(0);
+        connectionDAO.initializeDataBase();
     }
 
     @Test
@@ -332,8 +338,8 @@ public class DALTest {
          *Der oprettes et produkt -batch
          */
         IProductBatchDTO productbatchDTO = new ProductBatchDTO();
-        UserDTO testUser2 = (UserDTO) userDAO.getUser(1);
-        productbatchDTO.setMadeBy(testUser2); //Produktionslederen indsættes som et bruger-objekt.
+        IUserDTO testUser2 = userDAO.getUser(1);
+        productbatchDTO.setOrderedBy(testUser2); //Produktionslederen indsættes som et bruger-objekt.
         productbatchDTO.setName("Sildenafil"); //Produktets navn indsættes.
         productbatchDTO.setProductId(1); //Et unikt id vælges.
         productbatchDTO.setRecipe(recipeDAO.getActiveRecipe(2)); //Id'et til opskriften, som produktet skal produceres ud fra, indsættes.
@@ -352,7 +358,6 @@ public class DALTest {
         List<IProductBatchDTO> orderedProducts = productBatchDAO.getProductsOrdered();
         System.out.println(orderedProducts);
         assertTrue(orderedProducts.size() == 1);
-
         //Et produktets status ændres til under produktion
         productBatchDAO.initiateProduction(productbatchDTO, testUser_2);
         List<IProductBatchDTO> underProductionProducts = productBatchDAO.getProductsUnderProduction();
