@@ -177,8 +177,8 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
         try {
             List<ICommodityBatchDTO> combats = getAllCommodityBatchList();
 
-            String setResidueString = "UPDATE commoditybatch SET residue = 1 WHERE " +
-                    "commoditybatchid = ?;";
+            String setResidueString = "UPDATE commoditybatch SET residue_status = 1 WHERE " +
+                    "commoditybatch_id = ?;";
             PreparedStatement pstmtSetResidue = conn.prepareStatement(setResidueString);
 
             for (ICommodityBatchDTO combat : combats) {
