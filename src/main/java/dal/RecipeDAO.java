@@ -255,9 +255,9 @@ public class RecipeDAO implements IRecipeDAO {
         List<IIngredientDTO> ingredientsToBeReordered = new ArrayList<>();
         List<IRecipeDTO> recipes = getAllActiveRecipes();
 
-        String getTotComAmString = "SELECT sum(amountinkg) " +
+        String getTotComAmString = "SELECT sum(amount_kg) " +
                 "FROM commoditybatch " +
-                "WHERE ingredientid = ? AND residue=0";
+                "WHERE ingredient_id = ? AND residue_status=0";
         try {
             PreparedStatement pstmtGetTotAm = conn.prepareStatement(getTotComAmString);
 
