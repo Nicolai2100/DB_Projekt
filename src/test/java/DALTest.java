@@ -30,6 +30,12 @@ public class DALTest {
         productBatchDAO = new ProductBatchDAO(recipeDAO, commoditybatchDAO, userDAO);
     }
 
+    @Test
+    public void name() throws DALException {
+       // connectionDAO.dropAllTables(0);
+        connectionDAO.initializeDataBase();
+    }
+
     @After
     public void close() throws DALException {
         connectionDAO.closeConn();
