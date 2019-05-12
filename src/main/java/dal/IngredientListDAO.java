@@ -24,9 +24,7 @@ public class IngredientListDAO implements IIngredientListDAO {
         String insertIngList = "INSERT INTO ingredientlist(ingredientlist_id, version_id, ingredient_id, amount_mg) " +
                 "VALUES(?,?,?,?);";
         try {
-/*
             conn.setAutoCommit(false);
-*/
             PreparedStatement pstmtInsertIngredientList = conn.prepareStatement(insertIngList);
             for (IIngredientDTO ingredient : recipeDTO.getIngredientsList()) {
                 pstmtInsertIngredientList.setInt(1, recipeDTO.getRecipeId());
@@ -35,31 +33,12 @@ public class IngredientListDAO implements IIngredientListDAO {
                 pstmtInsertIngredientList.setDouble(4, ingredient.getAmount());
                 pstmtInsertIngredientList.executeUpdate();
             }
-/*
             conn.commit();
-*/
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DALException("An error occurred in the database at IngredientListDAO.");
         }
     }
-
-    public void createIngredientList(int recipeDTOID, int version, IIngredientDTO ingredientDTO) throws DALException {
-        String insertIngList = "INSERT INTO ingredientlist(ingredientlist_id, version_id, ingredient_id, amount_mg) " +
-                "VALUES(?,?,?,?);";
-        try {
-            PreparedStatement pstmtInsertIngredientList = conn.prepareStatement(insertIngList);
-                pstmtInsertIngredientList.setInt(1, recipeDTOID);
-                pstmtInsertIngredientList.setInt(2, version);
-                pstmtInsertIngredientList.setInt(3, ingredientDTO.getIngredientId());
-                pstmtInsertIngredientList.setDouble(4, ingredientDTO.getAmount());
-                pstmtInsertIngredientList.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new DALException("An error occurred in the database at IngredientListDAO.");
-        }
-    }
-
 
     @Override
     public List<IIngredientDTO> getIngredientList(IRecipeDTO recipeDTO) throws DALException {

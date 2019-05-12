@@ -37,12 +37,6 @@ public class DALTest {
     }
 
     @Test
-    public void name() throws DALException {
-        //connectionDAO.dropAllTables(0);
-        connectionDAO.initializeDataBase();
-    }
-
-    @Test
     public void testItAll() throws DALException {
         /**
          * Alt slettes
@@ -359,11 +353,10 @@ public class DALTest {
         System.out.println(orderedProducts);
         assertTrue(orderedProducts.size() == 1);
         //Et produktets status ændres til under produktion
-        productBatchDAO.initiateProduction(productbatchDTO, testUser_2);
+        productBatchDAO.initiateProduction(productbatchDTO, testUser_4);
         List<IProductBatchDTO> underProductionProducts = productBatchDAO.getProductsUnderProduction();
         System.out.println(underProductionProducts);
         assertTrue(underProductionProducts.size() == 1);
-
 
         //Laboranten, som producerer produktet, indsættes og produktbatchen produceres færdigt
         productbatchDTO.setProducedBy(testUser_4);

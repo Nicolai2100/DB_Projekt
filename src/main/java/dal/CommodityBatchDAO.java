@@ -101,6 +101,7 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
         }
     }
 
+    @Override
     public double getTotalCommodityAmountInKG(IIngredientDTO ingredient) throws DALException {
         double totalAmount = 0.0;
         String getTotComAmString = "SELECT sum(amount_kg) " +
@@ -119,6 +120,7 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
         return totalAmount;
     }
 
+    @Override
     public List<ICommodityBatchDTO> getCommodityBatchList(IIngredientDTO ingredient) throws DALException {
         List<ICommodityBatchDTO> commodityBatchList = new ArrayList<>();
         String getComBatListString = "SELECT commoditybatchid, ingredientid, amountinkg, orderdate, residue " +
@@ -144,6 +146,7 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
         return commodityBatchList;
     }
 
+    @Override
     public List<ICommodityBatchDTO> getAllCommodityBatchList() throws DALException {
         List<ICommodityBatchDTO> commodityBatchList = new ArrayList<>();
         String getAllComBat = "SELECT * FROM commoditybatch WHERE residue_status = 0;";
@@ -169,7 +172,7 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
         return commodityBatchList;
     }
 
-    //@Override
+    @Override
     public void checkForResidue() throws DALException {
         try {
             List<ICommodityBatchDTO> combats = getAllCommodityBatchList();

@@ -9,7 +9,7 @@ public interface IProductBatchDAO {
 
     ProductBatchDTO getProductbatch(int productBatchID) throws DALException;
 
-    void updateProductBatch(IProductBatchDTO productbatch, IUserDTO user) throws DALException;
+    void updateProductBatch(IProductBatchDTO productbatch) throws DALException;
 
     void initiateProduction(IProductBatchDTO productbatch, IUserDTO user) throws DALException;
 

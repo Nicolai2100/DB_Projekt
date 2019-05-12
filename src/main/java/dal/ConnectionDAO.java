@@ -105,14 +105,14 @@ public class ConnectionDAO implements IConnectionDAO {
                     "CREATE TABLE IF NOT EXISTS productbatch " +
                             "(productbatch_id INT, " +
                             "name VARCHAR(50) NOT NULL, " +
-                            "producer_id INT, " +
                             "recipe_id INT, " +
                             "recipe_version INT, " +
-                            "production_date DATE, " +
                             "volume INT, " +
+                            "production_date DATE, " +
                             "expiration_date DATE, " +
                             "batch_state VARCHAR(20), " +
                             "orderer_id INT, " +
+                            "producer_id INT, " +
                             "PRIMARY KEY (productbatch_id), " +
                             "FOREIGN KEY (recipe_id) " +
                             "REFERENCES recipe (recipe_id), " +
@@ -204,7 +204,6 @@ public class ConnectionDAO implements IConnectionDAO {
         }
     }
 
-    //@Override
     public void createTriggers() throws DALException {
         createTriggerReorderInsertCom();
         createTriggerReorderUpdateCom();

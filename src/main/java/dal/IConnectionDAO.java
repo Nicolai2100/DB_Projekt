@@ -8,4 +8,5 @@ public interface IConnectionDAO {
     void deleteTables() throws DALException;
 
     void deleteUsers() throws DALException;
+
 }
