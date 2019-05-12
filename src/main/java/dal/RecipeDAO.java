@@ -45,9 +45,7 @@ public class RecipeDAO implements IRecipeDAO {
             pstmtInsertRecipe.setInt(7, recipeDTO.getMinBatchSize());
             pstmtInsertRecipe.setInt(8, recipeDTO.getExpirationInMonths());
 
-            for (IIngredientDTO ing : recipeDTO.getIngredientsList()) {
-                ingredientListDAO.createIngredientList(recipeDTO.getRecipeId(), recipeDTO.getVersion(), ing);
-            }
+            ingredientListDAO.createIngredientList(recipeDTO, version);
 
             int result = pstmtInsertRecipe.executeUpdate();
             conn.commit();
@@ -114,6 +112,7 @@ public class RecipeDAO implements IRecipeDAO {
         return recipeDTO;
     }
 
+    @Override
     public List<IRecipeDTO> getAllActiveRecipes() throws DALException {
         List<IRecipeDTO> activeRecipes = new ArrayList<>();
         String getRecipeString = "SELECT * FROM recipe WHERE in_use = 1;";
@@ -181,7 +180,7 @@ public class RecipeDAO implements IRecipeDAO {
             } else {
                 System.out.println("The recipe with id: " + recipeId + " was successfully archived.");
             }
-            //updateMinAmounts();
+            updateMinAmounts();
 
         } catch (SQLException e) {
             throw new DALException("An error occurred in the database at RecipeDAO.");

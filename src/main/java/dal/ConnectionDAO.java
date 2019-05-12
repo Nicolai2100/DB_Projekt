@@ -204,7 +204,6 @@ public class ConnectionDAO implements IConnectionDAO {
         }
     }
 
-    //@Override
     public void createTriggers() throws DALException {
         createTriggerReorderInsertCom();
         createTriggerReorderUpdateCom();

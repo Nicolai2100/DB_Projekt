@@ -1,7 +1,6 @@
 package dal;
 
 import dal.dto.IIngredientDTO;
-import dal.dto.IRecipeDTO;
 import dal.dto.IngredientDTO;
 
 import java.sql.Connection;
@@ -90,11 +89,7 @@ public class IngredientDAO implements IIngredientDAO {
             throw new DALException("An error occurred in the database at IngredientDAO.");
         }
     }
-    /**
-     * Finds the total remaining amount af a given ingredient.
-     * @param ingredient the given ingredient.
-     * @return the total remaining amount across productbatches in kg
-     */
+
     @Override
     public double getTotalAmount(IIngredientDTO ingredient) throws DALException {
         double totalAmount = 0;
