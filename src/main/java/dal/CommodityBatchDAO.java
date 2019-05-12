@@ -169,7 +169,6 @@ public class CommodityBatchDAO implements ICommodityBatchDAO {
         return commodityBatchList;
     }
 
-    //@Override
     public void checkForResidue() throws DALException {
         try {
             List<ICommodityBatchDTO> combats = getAllCommodityBatchList();
