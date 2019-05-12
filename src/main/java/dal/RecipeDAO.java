@@ -32,7 +32,7 @@ public class RecipeDAO implements IRecipeDAO {
             version = recipeDTO.getVersion();
         }
         String insertRecipeString = "INSERT INTO recipe (recipe_id, version_id, name, creator_id, " +
-                "ingredientlist_id, in_use, min_batch_size, expiration) VALUES(?,?,?,?,?,?,?,?)";
+                "ingredientlist_id, in_use, min_batch_size, shelf_life_months) VALUES(?,?,?,?,?,?,?,?)";
         try {
             conn.setAutoCommit(false);
             PreparedStatement pstmtInsertRecipe = conn.prepareStatement(insertRecipeString);
