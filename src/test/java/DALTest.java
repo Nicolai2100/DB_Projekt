@@ -1,5 +1,4 @@
-package dal;
-
+import dal.*;
 import dal.dto.*;
 import org.junit.After;
 import org.junit.Before;
@@ -77,6 +76,8 @@ public class DALTest {
         testUser_4.setAdmin(userDAO.getUser(2));
         testUser_4.setIsActive(true);
         userDAO.createUser(testUser_1, testUser_4);
+
+        assertEquals(4, userDAO.getUserList().size());
         /**
          * Ingredienser og opskrift oprettes
          */
@@ -328,8 +329,19 @@ public class DALTest {
             System.out.println("" + (ingredientDTOS.indexOf(ing) + 1) + ": IngredientID: " + ing.getIngredientId()
                     + "-" + ing.getName());
         }
+
         /**
-         *Der oprettes et produkt -batch
+         *Liste over mængden af råvarer for hver ingrediens af opskriften norethisteron i kg
+         *som ikke er markeret som rest.
+         **/
+        for (IIngredientDTO ing : norethisteron_ingredients
+        ) {
+            double amountOnStock = commoditybatchDAO.getTotalCommodityAmountInKG(ing);
+            assertTrue(amountOnStock > 0);
+        }
+
+        /**
+         * Der oprettes et produkt -batch
          */
         IProductBatchDTO productbatchDTO = new ProductBatchDTO();
         IUserDTO testUser2 = userDAO.getUser(1);
@@ -392,13 +404,13 @@ public class DALTest {
          *Hamstring af cellulose
          **/
         for (int i = 0; i < 3; i++) {
-            ICommodityBatchDTO majsstivelse = new CommodityBatchDTO();
-            majsstivelse.setOrderedBy(testUser);
-            majsstivelse.setBatchId(50 + i);
-            majsstivelse.setAmountInKg(2.5);
-            majsstivelse.setIngredientDTO(ingredientDAO.getIngredient(3));
-            majsstivelse.setOrderDate(LocalDateTime.now().toString());
-            commoditybatchDAO.createCommodityBatch(majsstivelse);
+            ICommodityBatchDTO cellulose = new CommodityBatchDTO();
+            cellulose.setOrderedBy(testUser);
+            cellulose.setBatchId(50 + i);
+            cellulose.setAmountInKg(2.5);
+            cellulose.setIngredientDTO(ingredientDAO.getIngredient(3));
+            cellulose.setOrderDate(LocalDateTime.now().toString());
+            commoditybatchDAO.createCommodityBatch(cellulose);
         }
         /**
          *Liste over den resterende mængde af råvarer for hver ingrediens for opskriften sildenafil i kg
