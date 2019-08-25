@@ -15,10 +15,26 @@ public class ConnectionDAO implements IConnectionDAO {
     public static Connection getConnection() throws DALException {
         try {
             if (conn == null || conn.isClosed()) {
+/*
                 String dataBase = "jdbc:mysql://ec2-52-30-211-3.eu-west-1.compute.amazonaws.com/jekala";
                 String user = "jekala";
                 String password = "d0czCtqcu5015NhwwP5zl";
-                conn = DriverManager.getConnection(dataBase, user, password);
+*/
+
+                String dataBase = "jdbc:mysql://";
+                String host= "localhost:3306/db_project?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC ";
+                String user = "root";
+                String password = "";
+
+               // jdbc:mysql://localhost/db?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+
+/*
+                Connection con=DriverManager.getConnection(
+                        "jdbc:mysql://localhost:3306/sonoo","root","root")
+*/
+
+
+                conn = DriverManager.getConnection(dataBase+host, user, password);
             }
         } catch (SQLException e) {
             e.printStackTrace();

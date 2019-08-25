@@ -31,7 +31,7 @@ public class DALTest {
     }
 
     @Test
-    public void name() throws DALException {
+    public void setupDB() throws DALException {
        // connectionDAO.dropAllTables(0);
         connectionDAO.initializeDataBase();
     }
@@ -432,6 +432,8 @@ public class DALTest {
         }
 
         ingredientDTOS = ingredientDAO.getReorders();
+        System.out.println(ingredientDTOS.size());
+
         assertTrue(ingredientDTOS.size() == 12);
         System.out.println("\n" + ingredientDTOS.size() + " commodities to be ordered: ");
         for (IIngredientDTO ing : ingredientDTOS) {
